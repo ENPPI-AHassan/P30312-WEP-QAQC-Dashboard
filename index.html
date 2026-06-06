@@ -1,0 +1,2683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P30312 — Weekly QA/QC Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-serif;min-width:900px;overflow-x:auto}
+#app{padding-bottom:48px;overflow-x:auto}
+.hdr{background:#181b28;border-bottom:1px solid #2d3348;padding:10px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.hdr-title{font-size:15px;font-weight:700;letter-spacing:.02em;color:#f1f0e8}
+.hdr-sub{font-size:10px;color:#7a809a;margin-top:2px}
+.date-row{display:flex;align-items:center;gap:8px}
+.d-inp{background:#252a3a;border:1px solid #2d3348;border-radius:5px;color:#f1f0e8;padding:4px 8px;font-size:12px;font-family:monospace;outline:none}
+.d-inp:disabled{opacity:.4;cursor:not-allowed}
+.filter-tag{font-size:10px;color:#f59e0b;background:#2a2010;padding:2px 8px;border-radius:4px;white-space:nowrap;border:1px solid rgba(245,158,11,.3)}
+.filter-tag.live{background:#0f2420;color:#14b8a6;border:1px solid rgba(20,184,166,.3)}
+.hdr-divider{width:1px;height:24px;background:#2d3348;margin:0 4px}
+.hdr-user{display:flex;align-items:center;gap:8px}
+.hdr-uname{font-size:11px;color:#7a809a;font-family:monospace}
+.hdr-btn{background:#252a3a;border:1px solid #2d3348;border-radius:5px;color:#f1f0e8;font-size:11px;padding:4px 10px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.hdr-btn:hover{border-color:#f59e0b;color:#f59e0b}
+.hdr-btn.danger:hover{border-color:#f43f5e;color:#f43f5e}
+.hdr-btn.mgmt{border-color:rgba(245,158,11,.4);color:#f59e0b}
+.hdr-btn.mgmt:hover{background:rgba(245,158,11,.08);border-color:#f59e0b}
+.btn-x{background:none;border:none;cursor:pointer;color:#7a809a;padding:0;font-size:16px;line-height:1;margin-left:auto}
+.btn-x:hover{color:#f1f0e8}
+.upl-bar{background:#181b28;border-bottom:1px solid #2d3348;padding:8px 20px 10px}
+.upl-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-bottom:6px}
+.upl-slot{border:1px dashed #2d3348;border-radius:6px;padding:7px 10px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:2px;min-width:0}
+.upl-slot:hover,.upl-slot.drag{border-color:#f59e0b;background:rgba(245,158,11,.06)}
+.upl-slot.loaded{border-color:rgba(20,184,166,.4);background:#0a2020;border-style:solid;cursor:default}
+.upl-slot.loaded:hover{border-color:rgba(20,184,166,.6);background:#0d2828}
+.upl-slot.unsaved{border-color:rgba(245,158,11,.5);background:#231e0a;border-style:solid;cursor:default}
+.upl-slot.unsaved:hover{border-color:rgba(245,158,11,.75);background:#2a2510}
+.upl-slot.err{border-color:rgba(244,63,94,.4);background:#200a10}
+.upl-slot-top{display:flex;align-items:center;gap:5px}
+.upl-slot-icon{font-size:13px;flex-shrink:0}
+.upl-slot-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#7a809a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upl-slot.loaded .upl-slot-lbl{color:#14b8a6}
+.upl-slot-fn{font-size:9px;color:#4a5068;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:18px}
+.upl-slot.loaded .upl-slot-fn{color:#14b8a6;opacity:.7}
+.upl-slot-cnt{font-size:9px;color:#f59e0b;padding-left:18px;font-family:monospace}
+.upl-err-row{display:flex;gap:10px;flex-wrap:wrap}
+.upl-err-item{font-size:10px;color:#f43f5e}
+.viewer-bar{background:#181b28;border-bottom:1px solid #252a3a;padding:5px 20px;font-size:10px;color:#4a5068;display:flex;align-items:center;gap:8px}
+.row{padding:0 20px;margin-top:10px;display:grid;gap:10px;align-items:stretch}
+.r-rfi{grid-template-columns:1fr 220px 1fr}
+.r-ndt{grid-template-columns:1fr 1fr}
+.r-fjc{grid-template-columns:1fr 1fr 1.2fr}
+.r-prog{grid-template-columns:1fr 260px 1.6fr}
+.r-sor{grid-template-columns:260px 1fr}
+.combo{display:flex;flex-direction:column;gap:10px;min-width:0}
+.combo>.card{flex:1}
+.card{background:#252a3a;border:1px solid #2d3348;border-radius:8px;padding:12px 14px}
+.slbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a809a;margin-bottom:8px}
+.tbl{width:100%;border-collapse:collapse}
+th.th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#7a809a;padding:5px 8px;border-bottom:1px solid #2d3348;white-space:nowrap;text-align:center}
+td.td{font-size:11px;padding:4px 8px;border-bottom:1px solid rgba(45,51,72,.5);font-family:monospace;white-space:nowrap;text-align:center}
+td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:600;font-family:monospace;text-align:center}
+.tr-alt{background:rgba(255,255,255,.02)}
+.tr-tot{background:rgba(255,255,255,.04)}
+.tl{text-align:left!important}.tr{text-align:right!important}
+.ox{overflow-x:auto}
+.cb{color:#f59e0b}.clb{color:#fbbf24}.cg{color:#14b8a6}
+.cr{color:#f43f5e}.ca{color:#fb923c}.cm{color:#7a809a}
+.cp{color:#a78bfa}.cs1{color:#f59e0b}.cs2{color:#a78bfa}.cs3{color:#14b8a6}
+.kpi-card{background:#252a3a;border:1px solid #2d3348;border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;min-height:90px;transition:box-shadow .25s,border-color .25s;cursor:default}
+.kpi-card:hover{box-shadow:var(--kpi-glow,0 0 0 2px #2d3348)}
+.kpi-card[data-status="good"]{--kpi-glow:0 0 12px 2px rgba(20,184,166,.55)}
+.kpi-card[data-status="bad"]{--kpi-glow:0 0 12px 2px rgba(244,63,94,.55)}
+.kpi-card[data-status="warn"]{--kpi-glow:0 0 12px 2px rgba(245,158,11,.55)}
+.kpi-card[data-status="good"]:hover{border-color:rgba(20,184,166,.45)}
+.kpi-card[data-status="bad"]:hover{border-color:rgba(244,63,94,.45)}
+.kpi-card[data-status="warn"]:hover{border-color:rgba(245,158,11,.45)}
+.kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a809a;text-align:left}
+.kpi-val{font-size:32px;font-weight:800;line-height:1;font-family:monospace;text-align:center;flex:1;display:flex;align-items:center;justify-content:center}
+.kpi-goal{font-size:10px;color:#7a809a;text-align:center;margin-top:2px}
+.kpi-stack{display:flex;flex-direction:column;gap:10px}
+.kpi-inline{display:grid;gap:8px;margin-top:10px;border-top:1px solid #2d3348;padding-top:10px}
+.kpi-inline .kpi-card{border-radius:6px;padding:10px 12px;min-height:75px}
+.kpi-inline .kpi-val{font-size:26px}
+.bdg-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bdg{border:1px solid #2d3348;border-radius:8px;padding:10px 14px;border-left-width:3px;display:flex;flex-direction:column;justify-content:space-between;min-height:80px}
+.bdg-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;text-align:left}
+.bdg-pct{font-size:32px;font-weight:800;font-family:monospace;line-height:1;text-align:center;flex:1;display:flex;align-items:center;justify-content:center}
+.bdg-cnt{font-size:11px;color:#7a809a;text-align:center}
+.prog-row{margin-bottom:10px}
+.prog-meta{display:flex;justify-content:space-between;margin-bottom:3px;font-size:10px}
+.prog-track{background:#1e2130;border-radius:4px;height:20px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.ch-wrap{position:relative;width:100%}
+.footer{text-align:center;margin-top:20px;font-size:10px;color:#4a5068;padding:0 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+#loginOverlay{position:fixed;inset:0;background:#1e2130;z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(245,158,11,.07) 0%,transparent 70%)}
+.login-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(45,51,72,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(45,51,72,.3) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.login-card{position:relative;z-index:1;background:#252a3a;border:1px solid #2d3348;border-radius:12px;padding:36px 40px;width:380px;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.login-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#b45309,#f59e0b);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.login-proj{font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;text-transform:uppercase}
+.login-name{font-size:13px;color:#7a809a;margin-top:1px}
+.login-title{font-size:20px;font-weight:700;margin-bottom:6px;color:#f1f0e8}
+.login-sub{font-size:12px;color:#7a809a;margin-bottom:28px}
+.login-field{margin-bottom:16px}
+.login-lbl{font-size:11px;font-weight:600;color:#7a809a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
+.login-inp{width:100%;background:#1e2130;border:1px solid #2d3348;border-radius:6px;color:#f1f0e8;padding:9px 12px;font-size:13px;font-family:monospace;outline:none;transition:border-color .2s}
+.login-inp:focus{border-color:#f59e0b}
+.login-inp::placeholder{color:#4a5068}
+.login-btn{width:100%;background:linear-gradient(135deg,#b45309,#f59e0b);border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;padding:10px;cursor:pointer;transition:opacity .2s;margin-top:4px}
+.login-btn:hover{opacity:.88}
+.login-btn:disabled{opacity:.45;cursor:not-allowed}
+.login-err{background:#2d1018;border:1px solid rgba(244,63,94,.3);border-radius:6px;padding:8px 12px;font-size:12px;color:#f43f5e;margin-top:12px;display:none}
+.login-err.show{display:block}
+.login-first-cred{background:#1a200f;border:1px solid rgba(20,184,166,.2);border-radius:6px;padding:10px 14px;margin-bottom:24px;font-size:11px;color:#7a809a}
+.login-first-cred b{color:#14b8a6}
+.login-cred-row{display:flex;justify-content:space-between;margin-top:4px}
+.login-spin{display:inline-block;animation:spin 1s linear infinite;margin-right:6px}
+#userMgmtModal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8888;display:none;align-items:center;justify-content:center}
+#userMgmtModal.open{display:flex}
+.umg-card{background:#252a3a;border:1px solid #2d3348;border-radius:12px;width:580px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.umg-hdr{padding:18px 22px 14px;border-bottom:1px solid #2d3348;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.umg-title{font-size:14px;font-weight:700;color:#f1f0e8}
+.umg-sub{font-size:10px;color:#7a809a;margin-top:2px}
+.umg-body{padding:18px 22px;overflow-y:auto;flex:1}
+.umg-section{margin-bottom:22px}
+.umg-slbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a809a;margin-bottom:10px}
+.umg-user-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#1e2130;border:1px solid #252a3a;border-radius:6px;margin-bottom:6px}
+.umg-avatar{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.umg-uname{font-size:12px;font-weight:600;font-family:monospace;flex:1;color:#f1f0e8}
+.umg-disp{font-size:10px;color:#7a809a}
+.role-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:4px}
+.role-superadmin{background:#2a1f0a;color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+.role-admin{background:#0f2420;color:#14b8a6;border:1px solid rgba(20,184,166,.3)}
+.role-viewer{background:#252a3a;color:#7a809a;border:1px solid #2d3348}
+.umg-del{background:none;border:1px solid rgba(244,63,94,.3);border-radius:4px;color:#f43f5e;font-size:10px;padding:3px 8px;cursor:pointer;transition:all .2s}
+.umg-del:hover{background:rgba(244,63,94,.1)}
+.umg-add-form{background:#1e2130;border:1px solid #252a3a;border-radius:8px;padding:14px}
+.umg-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.umg-inp{width:100%;background:#252a3a;border:1px solid #2d3348;border-radius:5px;color:#f1f0e8;padding:7px 10px;font-size:12px;font-family:monospace;outline:none;transition:border-color .2s}
+.umg-inp:focus{border-color:#f59e0b}
+.umg-sel{width:100%;background:#252a3a;border:1px solid #2d3348;border-radius:5px;color:#f1f0e8;padding:7px 10px;font-size:12px;outline:none}
+.umg-add-btn{background:linear-gradient(135deg,#b45309,#f59e0b);border:none;border-radius:5px;color:#fff;font-size:12px;font-weight:600;padding:8px 16px;cursor:pointer;transition:opacity .2s}
+.umg-add-btn:hover{opacity:.85}
+.umg-msg{font-size:11px;margin-top:8px;padding:6px 10px;border-radius:5px;display:none}
+.umg-msg.ok{display:block;background:#0f2420;color:#14b8a6;border:1px solid rgba(20,184,166,.2)}
+.umg-msg.err{display:block;background:#2d1018;color:#f43f5e;border:1px solid rgba(244,63,94,.2)}
+#exportOptionsModal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8888;display:none;align-items:center;justify-content:center}
+#exportOptionsModal.open{display:flex}
+.exp-grp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.exp-chk{display:flex;align-items:center;gap:8px;font-size:12px;color:#f1f0e8;background:#1e2130;border:1px solid #252a3a;border-radius:6px;padding:8px 10px;cursor:pointer;transition:border-color .15s}
+.exp-chk:hover{border-color:#f59e0b66}
+.exp-chk input{accent-color:#f59e0b;cursor:pointer;width:14px;height:14px;flex-shrink:0}
+.exp-note{font-size:10px;color:#7a809a;margin-top:8px;line-height:1.5}
+.src-pill{font-size:9px;padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:600;vertical-align:middle}
+.src-live{background:#0f2420;color:#14b8a6;border:1px solid rgba(20,184,166,.3)}
+.src-default{background:#2a2010;color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+@media print{
+  .hdr{position:relative!important}
+  .upl-bar,.viewer-bar{display:none!important}
+  #loginOverlay,#userMgmtModal,#wrongFileModal{display:none!important}
+  body{min-width:unset!important}
+  .row{break-inside:avoid}
+  .card,.kpi-card{break-inside:avoid}
+}
+
+/* ── FREE CANVAS LAYOUT ── */
+#dashCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
+.cp{position:absolute;box-sizing:border-box;padding:4px}
+.cp>.card,.cp>.kpi-card{width:100%;height:100%;box-sizing:border-box;overflow:auto}
+#dashCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
+.cp.editable{cursor:default}.cp.editable:hover{z-index:100}
+.cp-drag{position:absolute;top:0;left:0;right:28px;height:24px;cursor:grab;z-index:20;
+  border-radius:8px 8px 0 0;display:flex;align-items:center;padding-left:8px;opacity:0;transition:opacity .2s}
+.cp-drag::before{content:'⠿⠿';font-size:11px;letter-spacing:3px;color:var(--accent,#f59e0b);opacity:.7}
+.cp.editable:hover .cp-drag{opacity:1}
+.cp-drag:active{cursor:grabbing}
+.cp-res{position:absolute;z-index:20;opacity:0;transition:opacity .15s}
+.cp.editable:hover .cp-res{opacity:.8}
+.cp-res.se{bottom:0;right:0;width:18px;height:18px;cursor:se-resize;
+  border-right:3px solid var(--accent,#f59e0b);border-bottom:3px solid var(--accent,#f59e0b);border-radius:0 0 6px 0}
+.cp-res.e{right:0;top:50%;transform:translateY(-50%);width:8px;height:40px;cursor:e-resize;
+  background:var(--accent,#f59e0b);border-radius:4px}
+.cp-res.s{bottom:0;left:50%;transform:translateX(-50%);height:8px;width:40px;cursor:s-resize;
+  background:var(--accent,#f59e0b);border-radius:4px}
+.cp.is-dragging{opacity:.45;z-index:200;pointer-events:none}
+.cp-clone{position:fixed;pointer-events:none;z-index:9999;opacity:.78;border-radius:8px;box-shadow:0 16px 48px rgba(0,0,0,.5)}
+.sg{position:fixed;z-index:9998;pointer-events:none;background:#378ADD;opacity:0;transition:opacity .08s}
+.sg.h{left:0;right:0;height:1px}.sg.v{top:0;bottom:0;width:1px}.sg.on{opacity:1}
+.canvas-mode-bar{display:none;padding:5px 20px;font-size:10px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;align-items:center;gap:12px;background:rgba(245,158,11,.08);
+  border-bottom:1px solid rgba(245,158,11,.2);color:#f59e0b}
+.canvas-mode-bar.on{display:flex}
+.cp-span-tip{position:absolute;top:2px;right:30px;font-size:9px;color:var(--accent,#f59e0b);
+  opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:none;
+  background:rgba(0,0,0,.5);padding:1px 5px;border-radius:3px}
+.cp.editable:hover .cp-span-tip{opacity:.9}
+@media print{.cp-drag,.cp-res,.sg,.canvas-mode-bar{display:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay">
+  <div class="login-bg"></div><div class="login-grid"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div><div class="login-proj">P30312 — PIPELINE PROJECT</div><div class="login-name">West to East Pipeline</div></div>
+    </div>
+    <div id="loginFirstCred" class="login-first-cred" style="display:none">
+      <div>&#9889; <b>First-time setup</b> — default Super Admin credentials:</div>
+      <div class="login-cred-row"><span>Username: <b>admin</b></span><span>Password: <b>Admin@2025!</b></span></div>
+      <div style="margin-top:4px;color:#484f58">Change your password after first login via User Management.</div>
+    </div>
+    <div class="login-title">QA/QC Dashboard</div>
+    <div class="login-sub">Sign in to access the dashboard</div>
+    <div class="login-field"><label class="login-lbl" for="loginUser">Username</label><input class="login-inp" id="loginUser" type="text" placeholder="Enter username" autocomplete="username"></div>
+    <div class="login-field"><label class="login-lbl" for="loginPass">Password</label><input class="login-inp" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password"></div>
+    <button class="login-btn" id="loginBtn" onclick="attemptLogin()">Sign In</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- USER MANAGEMENT MODAL -->
+<div id="userMgmtModal">
+  <div class="umg-card">
+    <div class="umg-hdr">
+      <div><div class="umg-title">User Management</div><div class="umg-sub">Only the Super Admin can create, modify, or delete users</div></div>
+      <button class="btn-x" onclick="closeUserMgmt()" style="font-size:20px">&#10005;</button>
+    </div>
+    <div class="umg-body">
+      <div class="umg-section"><div class="umg-slbl">Active Users</div><div id="umgUserList"></div></div>
+      <div class="umg-section">
+        <div class="umg-slbl">Add New User</div>
+        <div class="umg-add-form">
+          <div class="umg-form-grid">
+            <div><div class="umg-slbl" style="margin-bottom:5px">Username</div><input class="umg-inp" id="umgNewUser" type="text" placeholder="e.g. jsmith"></div>
+            <div><div class="umg-slbl" style="margin-bottom:5px">Display Name</div><input class="umg-inp" id="umgNewName" type="text" placeholder="e.g. John Smith"></div>
+            <div><div class="umg-slbl" style="margin-bottom:5px">Password</div><input class="umg-inp" id="umgNewPass" type="password" placeholder="Min 8 characters"></div>
+            <div><div class="umg-slbl" style="margin-bottom:5px">Role</div><select class="umg-sel" id="umgNewRole"><option value="admin">Admin (upload + manage)</option><option value="viewer" selected>Viewer (read-only)</option></select></div>
+          </div>
+          <button class="umg-add-btn" onclick="addUser()">+ Create User</button>
+          <div class="umg-msg" id="umgMsg"></div>
+        </div>
+      </div>
+      <div class="umg-section" id="umgChangePwSection">
+        <div class="umg-slbl">Change Your Password</div>
+        <div class="umg-add-form">
+          <div class="umg-form-grid">
+            <div><div class="umg-slbl" style="margin-bottom:5px">New Password</div><input class="umg-inp" id="umgNewPw" type="password" placeholder="Min 8 characters"></div>
+            <div><div class="umg-slbl" style="margin-bottom:5px">Confirm Password</div><input class="umg-inp" id="umgConfPw" type="password" placeholder="Repeat password"></div>
+          </div>
+          <button class="umg-add-btn" onclick="changeMyPassword()">Update Password</button>
+          <div class="umg-msg" id="umgPwMsg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WRONG FILE MODAL -->
+<div id="wrongFileModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;align-items:center;justify-content:center">
+  <div style="background:#161b22;border:1px solid #30363d;border-radius:12px;padding:28px 32px;max-width:460px;width:90%;box-shadow:0 24px 80px rgba(0,0,0,.7);text-align:center">
+    <div style="font-size:28px;margin-bottom:12px">⚠️</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:#e6edf3">Ooops! Wrong File.</div>
+    <div style="font-size:13px;color:#8b949e;line-height:1.7" id="wrongFileMsg"></div>
+    <button onclick="document.getElementById('wrongFileModal').style.display='none'"
+      style="margin-top:20px;background:linear-gradient(135deg,#1d6fa4,#388bfd);border:none;border-radius:6px;
+             color:#fff;font-size:13px;font-weight:600;padding:9px 28px;cursor:pointer">OK</button>
+  </div>
+</div>
+
+<!-- CUSTOM EXPORT OPTIONS MODAL -->
+<div id="exportOptionsModal">
+  <div class="umg-card" style="width:560px">
+    <div class="umg-hdr">
+      <div><div class="umg-title">Custom Export</div><div class="umg-sub">Choose datasets and a date range, then generate an Excel workbook</div></div>
+      <button class="btn-x" onclick="closeExportOptions()" style="font-size:20px">&#10005;</button>
+    </div>
+    <div class="umg-body">
+      <div class="umg-section">
+        <div class="umg-slbl">Choose Data Sets</div>
+        <div class="exp-grp">
+          <label class="exp-chk"><input type="checkbox" id="expRfiPeriod" checked> Period RFI Status</label>
+          <label class="exp-chk"><input type="checkbox" id="expRfiCumul" checked> Cumulative RFI Status</label>
+          <label class="exp-chk"><input type="checkbox" id="expNdtPeriod" checked> Period NDT (EPCM)</label>
+          <label class="exp-chk"><input type="checkbox" id="expNdtCumul" checked> Cumulative NDT (EPCM)</label>
+          <label class="exp-chk"><input type="checkbox" id="expFjcPeriod" checked> Period FJC Status</label>
+          <label class="exp-chk"><input type="checkbox" id="expFjcCumul" checked> Cumulative FJC Status</label>
+          <label class="exp-chk"><input type="checkbox" id="expWelders" checked> Welders</label>
+          <label class="exp-chk"><input type="checkbox" id="expSor" checked> Site Observations (SOR)</label>
+          <label class="exp-chk"><input type="checkbox" id="expNcr" checked> NCR Status</label>
+        </div>
+      </div>
+      <div class="umg-section">
+        <div class="umg-slbl">Date Range</div>
+        <div class="umg-form-grid">
+          <div><div class="umg-slbl" style="margin-bottom:5px">From</div><input class="umg-inp" id="expFrom" type="date"></div>
+          <div><div class="umg-slbl" style="margin-bottom:5px">To</div><input class="umg-inp" id="expTo" type="date"></div>
+        </div>
+        <div class="exp-note">Applies to <b>Period</b> data sets only — each will only include records within this range. <b>Cumulative</b> data sets always export the full available history regardless of this range.</div>
+      </div>
+      <button class="umg-add-btn" onclick="generateCustomExport()">📊 Generate Excel</button>
+      <div class="umg-msg" id="expMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SNAP GUIDES -->
+<div id="sgH" class="sg h"></div>
+<div id="sgV" class="sg v"></div>
+
+<!-- CANVAS MODE BAR -->
+<div id="canvasModeBar" class="canvas-mode-bar"></div>
+
+<div id="app">
+  <div id="dashCanvas"></div>
+</div>
+<!-- Single multi-file input for bulk upload -->
+<input type="file" id="fileMulti"  accept=".xlsx,.xls" multiple style="display:none">
+<!-- Single-file input for individual slot re-upload (data-key set dynamically) -->
+<input type="file" id="fileSingle" accept=".xlsx,.xls" style="display:none">
+
+<script>
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+// ── Compute default date slicer: last completed Sat→Fri week ──
+function defaultWeekDates(){
+  const today=new Date();
+  // Find most recently passed Friday (day 5)
+  const day=today.getUTCDay(); // 0=Sun,1=Mon,...,5=Fri,6=Sat
+  const daysToFri=day>=5?day-5:day+2; // days since last Friday
+  const fri=new Date(today);
+  fri.setUTCDate(today.getUTCDate()-daysToFri);
+  const sat=new Date(fri);
+  sat.setUTCDate(fri.getUTCDate()-6);
+  const fmt=d=>d.toISOString().slice(0,10);
+  return{start:fmt(sat),end:fmt(fri)};
+}
+
+const {start:_defStart,end:_defEnd}=defaultWeekDates();
+
+const ST = {
+  start: _defStart,
+  end:   _defEnd,
+  unsaved: false,   // true when data is in memory but not yet saved to Supabase
+  data: {
+    rfi:     null,
+    daily1:  null,
+    daily2:  null,
+    daily3:  null,
+    welders: null,
+    sor:     null,
+    ncr:     null,
+  },
+  files: {
+    rfi:'', daily1:'', daily2:'', daily3:'', welders:'', sor:'', ncr:''
+  },
+  errors: {},
+  processing: {}
+};
+
+const CHARTS = {};
+const fn = v => (v == null || v === '') ? '—' : Number(v).toLocaleString();
+const pct = (n,d) => d ? (n/d*100).toFixed(2)+'%' : '—';
+const sumK = (rows,keys) => keys.reduce((t,k)=>({...t,[k]:rows.reduce((s,r)=>s+(+r[k]||0),0)}),{});
+
+// ═══════════════════════════════════════════════════
+// DATE HELPERS
+// ═══════════════════════════════════════════════════
+function xlDateToISO(v){
+  if(!v) return null;
+  if(typeof v==='string'){
+    const s=v.trim();
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    if(/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(s)){
+      const d=new Date(s);
+      if(!isNaN(d)) return d.toISOString().slice(0,10);
+    }
+    return null;
+  }
+  if(v instanceof Date) return v.toISOString().slice(0,10);
+  if(typeof v==='number' && v>40000){
+    const d=new Date(Math.round((v-25569)*86400*1000));
+    return d.toISOString().slice(0,10);
+  }
+  return null;
+}
+
+function inPeriod(dateStr){
+  if(!dateStr) return false;
+  return dateStr >= ST.start && dateStr <= ST.end;
+}
+
+// ═══════════════════════════════════════════════════
+// EXCEL PARSERS
+// ═══════════════════════════════════════════════════
+const EXCL_STATUS = new Set(['SUPERSEDED','NOT IN USE']);
+
+function parseRFI(ab){
+  const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
+  const ws = wb.Sheets[wb.SheetNames.find(n=>n.toUpperCase().includes('RFI'))||wb.SheetNames[0]];
+  const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+  const records=[];
+  for(let i=1;i<raw.length;i++){
+    const r=raw[i]; if(!r||!r[0]) continue;
+    const status=(r[6]||'').toString().trim();
+    if(!status||EXCL_STATUS.has(status)) continue;
+    const dateStr=xlDateToISO(r[5]);
+    if(!dateStr) continue;
+    let ic=(r[1]||'').toString().trim();
+    if(ic.replace(/\s+/g,'').toUpperCase()==='GULFROCK') ic='GULFROCK';
+    if(ic.toUpperCase()==='BIN ASHEER') ic='BINASHEER';
+    const discipline=(r[3]||'').toString().trim();
+    if(!discipline) continue;
+    let section=(r[2]||'').toString().trim();
+    records.push({date:dateStr,discipline,section,ic,status});
+  }
+  return records;
+}
+
+// Parse one of the 3 Daily Pipeline files
+// Returns array of {date, welded, ndtRev, ndtAppr, ndtRescan, ndtRepair, fjcReleased, fjcTotal, fjcAccepted, fjcRepair, fjcBalance}
+// Using EPCM columns: cols 12-15 for NDT, cols 20-26 for FJC
+function parseDaily(ab){
+  const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+  const rows=[];
+  for(let i=3;i<raw.length;i++){   // skip 3 header rows (0,1,2)
+    const r=raw[i]; if(!r||!r[0]) continue;
+    const dateStr=xlDateToISO(r[0]);
+    if(!dateStr) continue;
+    const n=v=>(+v||0);
+    rows.push({
+      date:       dateStr,
+      welded:     n(r[3]),
+      ndtRev:     n(r[12]),
+      ndtAppr:    n(r[13]),
+      ndtRescan:  n(r[14]),
+      ndtRepair:  n(r[15]),
+      fjcReleased:n(r[20]),
+      fjcTotal:   n(r[23]),
+      fjcAccepted:n(r[24]),
+      fjcRepair:  n(r[25]),
+      fjcBalance: n(r[26]),
+    });
+  }
+  return rows;
+}
+
+// Get cumulative snapshot for a section (latest row on or before end date with data)
+function getDailySnapshot(rows, endDate){
+  if(!rows||!rows.length) return null;
+  const filtered = rows.filter(r=>r.date<=endDate && r.welded>0);
+  if(!filtered.length) return null;
+  return filtered[filtered.length-1];
+}
+
+// Get period delta for a section (latest row in [start,end] minus row just before start)
+function getDailyPeriod(rows, startDate, endDate){
+  if(!rows||!rows.length) return null;
+  const inPeriodRows = rows.filter(r=>r.date>=startDate && r.date<=endDate && r.welded>0);
+  if(!inPeriodRows.length) return null;
+  const last = inPeriodRows[inPeriodRows.length-1];
+  // row just before period start
+  const before = rows.filter(r=>r.date<startDate && r.welded>0);
+  const prev = before.length ? before[before.length-1] : {welded:0,ndtRev:0,ndtAppr:0,ndtRescan:0,ndtRepair:0,fjcReleased:0,fjcTotal:0,fjcAccepted:0,fjcRepair:0,fjcBalance:0};
+  return {
+    welded:     last.welded - prev.welded,
+    ndtRev:     last.ndtRev - prev.ndtRev,
+    ndtAppr:    last.ndtAppr - prev.ndtAppr,
+    ndtRescan:  last.ndtRescan - prev.ndtRescan,
+    ndtRepair:  last.ndtRepair - prev.ndtRepair,
+    fjcReleased:last.fjcReleased - prev.fjcReleased,
+    fjcTotal:   last.fjcTotal - prev.fjcTotal,
+    fjcAccepted:last.fjcAccepted - prev.fjcAccepted,
+    fjcRepair:  last.fjcRepair - prev.fjcRepair,
+    fjcBalance: last.fjcBalance - prev.fjcBalance,
+  };
+}
+
+function parseWelders(ab){
+  const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+  const welders=[];
+  for(let i=3;i<raw.length;i++){
+    const r=raw[i]; if(!r||!r[0]||!r[1]) continue;
+    const name=(r[0]||'').toString().trim();
+    const id=(r[1]||'').toString().trim();
+    const section=(r[2]||'').toString().trim();
+    if(!name||!id||id==='W.ID') continue;
+    // Cumulative: col7=welded,col8=aut,col9=repairs,col10=pct
+    const cumAut = +r[8]||0;
+    const cumRep = +r[9]||0;
+    const cumPct = cumAut>0 ? cumRep/cumAut*100 : 0;
+    // This week: col3=welded,col4=aut,col5=rep,col6=pct
+    const wkAut  = +r[4]||0;
+    const wkRep  = +r[5]||0;
+    const wkPct  = wkAut>0 ? wkRep/wkAut*100 : 0;
+    const remarks=(r[18]||'').toString().trim();
+    if(cumAut===0 && wkAut===0) continue;
+    welders.push({name,id,section,cumAut,cumRep,cumPct,wkAut,wkRep,wkPct,remarks});
+  }
+  return welders;
+}
+
+function parseSOR(ab){
+  const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+  const records=[];
+  for(let i=1;i<raw.length;i++){
+    const r=raw[i]; if(!r||!r[1]) continue;
+    const sorNo=(r[1]||'').toString().trim();
+    if(!sorNo) continue;
+    const dateStr=xlDateToISO(r[2]);
+    if(!dateStr) continue;
+    const status=(r[4]||'').toString().trim().toUpperCase();
+    let ic=(r[8]||'').toString().trim();
+    if(ic.toUpperCase()==='BIN ASHEER'||ic.toUpperCase()==='BINASHEER') ic='BINASHEER';
+    if(ic.replace(/\s+/g,'').toUpperCase()==='GULFROCK') ic='GULFROCK';
+    const km = parseFloat(r[11]);
+    const short=(r[10]||'').toString().trim()||sorNo;
+    records.push({sorNo,short,date:dateStr,status,ic,km:isNaN(km)?null:km,desc:(r[3]||'').toString().trim()});
+  }
+  return records;
+}
+
+function parseNCR(ab){
+  const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+  const records=[];
+  for(let i=1;i<raw.length;i++){
+    const r=raw[i]; if(!r||!r[1]) continue;
+    const ncrNo=(r[1]||'').toString().trim();
+    if(!ncrNo) continue;
+    const dateStr=xlDateToISO(r[2]);
+    if(!dateStr) continue;
+    const status=(r[4]||'').toString().trim().toUpperCase();
+    const raisedBy=(r[7]||'').toString().trim();
+    let againstName=(r[9]||'').toString().trim();
+    // Normalize
+    if(againstName.toUpperCase()==='BIN ASHEER') againstName='BINASHEER';
+    const targetClose=xlDateToISO(r[5]);
+    const actualClose=xlDateToISO(r[6]);
+    records.push({ncrNo,date:dateStr,status,raisedBy,againstName,targetClose,actualClose,desc:(r[3]||'').toString().slice(0,120)});
+  }
+  return records;
+}
+
+// ═══════════════════════════════════════════════════
+// AGGREGATION HELPERS
+// ═══════════════════════════════════════════════════
+function aggRFI(records){
+  const m={};
+  records.forEach(r=>{
+    if(!m[r.discipline]) m[r.discipline]={d:r.discipline,acc:0,accW:0,can:0,open:0,rej:0,total:0};
+    const e=m[r.discipline];
+    if(r.status==='ACC') e.acc++;
+    else if(r.status==='ACC W/COMM') e.accW++;
+    else if(r.status==='CAN') e.can++;
+    else if(r.status==='OPEN') e.open++;
+    else if(r.status==='REJ') e.rej++;
+    e.total++;
+  });
+  const rows=Object.values(m).sort((a,b)=>a.d.localeCompare(b.d));
+  const totals=sumK(rows,['acc','accW','can','open','rej','total']);
+  return{rows,totals};
+}
+
+function getRFIData(){
+  if(!ST.data.rfi){
+    return{period:null,cumulative:null,isDefault:true};
+  }
+  const periodRecs = ST.data.rfi.filter(r=>inPeriod(r.date));
+  return{
+    period:    aggRFI(periodRecs),
+    cumulative:aggRFI(ST.data.rfi),
+    isDefault: false
+  };
+}
+
+// NDT section row for table
+function mkNDTRow(secLabel, rows, start, end, cumulative){
+  if(!rows) return null;
+  const snap = cumulative ? getDailySnapshot(rows, end) : getDailyPeriod(rows, start, end);
+  if(!snap) return null;
+  const bl = snap.welded - snap.ndtRev;   // Welded but not yet scanned
+  return {s:secLabel, welded:snap.welded, rev:snap.ndtRev, appr:snap.ndtAppr, rescan:snap.ndtRescan, repair:snap.ndtRepair, bl:Math.max(0,bl)};
+}
+
+function mkFJCRow(secLabel, rows, start, end, cumulative){
+  if(!rows) return null;
+  const snap = cumulative ? getDailySnapshot(rows, end) : getDailyPeriod(rows, start, end);
+  if(!snap) return null;
+  return {s:secLabel, released:snap.fjcReleased, total:snap.fjcTotal, accepted:snap.fjcAccepted, repair:snap.fjcRepair, balance:snap.fjcBalance};
+}
+
+// ═══════════════════════════════════════════════════
+// HTML BUILDERS
+// ═══════════════════════════════════════════════════
+function pill(){ return ''; }
+
+function bRFITable(rows, totals, title, live){
+  if(!rows) return `<div class="card" style="display:flex;flex-direction:column;height:100%"><div class="slbl">${title}${pill(false)}</div><div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#484f58">Upload RFI Register to populate</div></div>`;
+  const trs=rows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
+    <td class="td tl">${r.d}</td>
+    <td class="td cb">${fn(r.acc)}</td><td class="td clb">${fn(r.accW)}</td>
+    <td class="td cm">${fn(r.can)}</td><td class="td ca">${fn(r.open)}</td>
+    <td class="td cr">${fn(r.rej)}</td><td class="td">${fn(r.total)}</td>
+  </tr>`).join('');
+  // Badges embedded at bottom
+  const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const t=totals.total||1;
+  const p=v=>Math.round(v/t*100);
+  const bd=[
+    {l:'ACC',       v:totals.acc,  c:s.cb,   bg:s.cb+'18'},
+    {l:'ACC W/COMM',v:totals.accW, c:s.clb,  bg:s.clb+'14'},
+    {l:'CAN',       v:totals.can,  c:s.muted, bg:s.muted+'14'},
+    {l:'REJ',       v:totals.rej,  c:s.bad,   bg:s.bad+'18'},
+  ];
+  const bdgHtml=bd.map(b=>`<div class="bdg" style="background:${b.bg};border-left-color:${b.c}">
+    <div class="bdg-lbl" style="color:${b.c}">${b.l}</div>
+    <div class="bdg-pct" style="color:${b.c}">${p(b.v)}%</div>
+    <div class="bdg-cnt">${fn(b.v)}</div>
+  </div>`).join('');
+  return`<div class="card" style="display:flex;flex-direction:column">
+    <div class="slbl">${title}${pill(live)}</div>
+    <div class="ox" style="flex:1"><table class="tbl"><thead><tr>
+      <th class="th tl">Discipline</th><th class="th">ACC</th><th class="th">ACC W/C</th>
+      <th class="th">CAN</th><th class="th">OPEN</th><th class="th">REJ</th><th class="th">Total</th>
+    </tr></thead><tbody>${trs}</tbody>
+    <tfoot><tr class="tr-tot"><td class="tf tl cm">Total</td>
+      <td class="tf cb">${fn(totals.acc)}</td><td class="tf clb">${fn(totals.accW)}</td>
+      <td class="tf cm">${fn(totals.can)}</td><td class="tf ca">${fn(totals.open)}</td>
+      <td class="tf cr">${fn(totals.rej)}</td><td class="tf">${fn(totals.total)}</td>
+    </tr></tfoot></table></div>
+    <div style="border-top:1px solid ${s.border};padding-top:10px;margin-top:10px">
+      <div class="slbl" style="margin-bottom:6px">Status Breakdown</div>
+      <div class="bdg-grid">${bdgHtml}</div>
+    </div>
+  </div>`;
+}
+
+function bRFIDonut(periodTotals, cumTotals, live){
+  if(!periodTotals&&!cumTotals) return`<div class="card" style="display:flex;align-items:center;justify-content:center"><span class="cm" style="font-size:11px">Upload RFI Register</span></div>`;
+  const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const donutColors=[s.cb, s.clb, s.muted, s.ca, s.bad];
+  const labels=['ACC','ACC W/COMM','CAN','OPEN','REJ'];
+  const sharedLegend=labels.map((l,i)=>`<span style="color:${donutColors[i]};white-space:nowrap">&#9632; ${l}</span>`).join('');
+  return`<div class="card" style="display:flex;flex-direction:column;gap:6px">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;border-bottom:1px solid ${s.border};padding-bottom:8px">
+      <div class="slbl" style="text-align:center;width:100%;margin-bottom:4px">Period RFI</div>
+      <div class="ch-wrap" style="height:160px;width:100%"><canvas id="donutPeriod"></canvas></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding-top:4px">
+      <div class="slbl" style="text-align:center;width:100%;margin-bottom:4px">Cumulative RFI</div>
+      <div class="ch-wrap" style="height:160px;width:100%"><canvas id="donutCumul"></canvas></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px 10px;font-size:9px;justify-content:center;padding-top:6px;border-top:1px solid ${s.border}">
+      ${sharedLegend}
+    </div>
+  </div>`;
+}
+
+function bNDTTable(secRows, title, live, kpis){
+  const totals = secRows ? sumK(secRows,['welded','rev','appr','rescan','repair','bl']) : null;
+  const sc=['cs1','cs2','cs3'];
+  const trs = secRows ? secRows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
+    <td class="td tl ${sc[i]||''}">${r.s}</td>
+    <td class="td">${fn(r.welded)}</td><td class="td">${fn(r.rev)}</td>
+    <td class="td cg">${fn(r.appr)}</td><td class="td cr">${fn(r.repair)}</td>
+    <td class="td ${r.bl>100?'cr':'ca'}">${fn(r.bl)}</td>
+  </tr>`).join('') : `<tr><td colspan="6" class="td tl cm" style="padding:16px">Upload Daily Pipeline files</td></tr>`;
+  // Build inline KPIs if provided
+  let kpiHtml='';
+  if(kpis&&kpis.length){
+    const cols=kpis.length===1?'1fr':'repeat('+kpis.length+',1fr)';
+    kpiHtml=`<div class="kpi-inline" style="grid-template-columns:${cols}">${kpis.map(k=>bKPIinline(k.label,k.value,k.goal,k.unit)).join('')}</div>`;
+  }
+  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}${pill(live)}</div>
+  <div class="ox"><table class="tbl"><thead><tr>
+    <th class="th tl">Section</th><th class="th">Welded</th><th class="th">EPCM Rev</th>
+    <th class="th">Accepted</th><th class="th">Repair</th><th class="th">Backlog</th>
+  </tr></thead><tbody>${trs}</tbody>
+  ${totals?`<tfoot><tr class="tr-tot"><td class="tf tl cm">Total</td>
+    <td class="tf">${fn(totals.welded)}</td><td class="tf">${fn(totals.rev)}</td>
+    <td class="tf cg">${fn(totals.appr)}</td><td class="tf cr">${fn(totals.repair)}</td>
+    <td class="tf ${totals.bl>200?'cr':'ca'}">${fn(totals.bl)}</td>
+  </tr></tfoot>`:''}
+  </table></div>${kpiHtml}</div>`;
+}
+
+function bKPI(label, value, goal, unit=''){
+  const blank=value==null||isNaN(value);
+  const over=!blank&&goal!=null&&value>goal;
+  const color=blank?'#8b949e':over?'#f85149':'#3fb950';
+  const status=blank?'warn':over?'bad':'good';
+  const diff=(!blank&&goal!=null)?+((value-goal)/goal*100).toFixed(1):null;
+  const valStr=blank?'—':`${typeof value==='number'?value.toFixed(value<10?2:1):value}${unit}`;
+  return`<div class="kpi-card" data-status="${status}">
+    <div class="kpi-lbl">${label}</div>
+    <div class="kpi-val" style="color:${color}">${valStr}</div>
+    ${goal!=null?`<div class="kpi-goal">Goal ≤ ${goal}${unit}${diff!=null?` <span style="color:${color}">(${diff>0?'+':''}${diff}%)</span>`:''}</div>`:'<div class="kpi-goal">&nbsp;</div>'}
+  </div>`;
+}
+
+function bKPIinline(label, value, goal, unit=''){
+  const blank=value==null||isNaN(value);
+  const over=!blank&&goal!=null&&value>goal;
+  const color=blank?'#8b949e':over?'#f85149':'#3fb950';
+  const status=blank?'warn':over?'bad':'good';
+  const diff=(!blank&&goal!=null)?+((value-goal)/goal*100).toFixed(1):null;
+  const valStr=blank?'—':`${typeof value==='number'?value.toFixed(value<10?2:1):value}${unit}`;
+  return`<div class="kpi-card" data-status="${status}">
+    <div class="kpi-lbl">${label}</div>
+    <div class="kpi-val" style="color:${color}">${valStr}</div>
+    ${goal!=null?`<div class="kpi-goal">Goal ≤ ${goal}${unit}${diff!=null?` <span style="color:${color}">(${diff>0?'+':''}${diff}%)</span>`:''}</div>`:'<div class="kpi-goal">&nbsp;</div>'}
+  </div>`;
+}
+
+function bFJCTable(secRows, title, live, kpis){
+  const totals = secRows ? sumK(secRows,['released','total','accepted','repair','balance']) : null;
+  const sc=['cs1','cs2','cs3'];
+  const trs = secRows ? secRows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
+    <td class="td tl ${sc[i]||''}">${r.s}</td>
+    <td class="td">${fn(r.released)}</td><td class="td">${fn(r.total)}</td>
+    <td class="td cg">${fn(r.accepted)}</td><td class="td cr">${fn(r.repair)}</td>
+    <td class="td ca">${fn(r.balance)}</td>
+  </tr>`).join('') : `<tr><td colspan="6" class="td tl cm" style="padding:16px">Upload Daily Pipeline files</td></tr>`;
+  let kpiHtml='';
+  if(kpis&&kpis.length){
+    const cols='repeat('+kpis.length+',1fr)';
+    kpiHtml=`<div class="kpi-inline" style="grid-template-columns:${cols}">${kpis.map(k=>bKPIinline(k.label,k.value,k.goal,k.unit)).join('')}</div>`;
+  }
+  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}${pill(live)}</div>
+  <div class="ox"><table class="tbl"><thead><tr>
+    <th class="th tl">Section</th><th class="th">Released</th><th class="th">Coated</th>
+    <th class="th">Accepted</th><th class="th">Repair</th><th class="th">Balance</th>
+  </tr></thead><tbody>${trs}</tbody>
+  ${totals?`<tfoot><tr class="tr-tot"><td class="tf tl cm">Total</td>
+    <td class="tf">${fn(totals.released)}</td><td class="tf">${fn(totals.total)}</td>
+    <td class="tf cg">${fn(totals.accepted)}</td><td class="tf cr">${fn(totals.repair)}</td>
+    <td class="tf ca">${fn(totals.balance)}</td>
+  </tr></tfoot>`:''}
+  </table></div>${kpiHtml}</div>`;
+}
+
+function bProgress(live){
+  const d1r = ST.data.daily1, d2r = ST.data.daily2, d3r = ST.data.daily3;
+  let totalJoints=42000, wTotal=0, fjcTotal=0;
+  if(d1r&&d2r&&d3r){
+    const s1=getDailySnapshot(d1r,ST.end),s2=getDailySnapshot(d2r,ST.end),s3=getDailySnapshot(d3r,ST.end);
+    wTotal=(s1?s1.welded:0)+(s2?s2.welded:0)+(s3?s3.welded:0);
+    fjcTotal=(s1?s1.fjcAccepted:0)+(s2?s2.fjcAccepted:0)+(s3?s3.fjcAccepted:0);
+  }
+  const wPct=Math.min(100,wTotal/totalJoints*100);
+  const fjcPct=Math.min(100,fjcTotal/totalJoints*100);
+  const bars=[
+    {l:'Total Joints',v:totalJoints,pct:100,   c:'#21262d'},
+    {l:'Welded',      v:wTotal,    pct:wPct,   c:'#388bfd'},
+    {l:'FJC Accepted',v:fjcTotal,  pct:fjcPct, c:'#a371f7'},
+  ];
+  return`<div class="card"><div class="slbl">Welding Progress${pill(live)}</div>
+  ${bars.map(b=>`<div class="prog-row">
+    <div class="prog-meta">
+      <span class="cm" style="text-transform:uppercase;letter-spacing:.06em;font-size:9px">${b.l}</span>
+      <span style="font-family:monospace;font-size:11px">${fn(b.v)} <span style="color:${b.c}">(${b.pct.toFixed(1)}%)</span></span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" style="width:${b.pct}%;background:${b.c}"></div></div>
+  </div>`).join('')}</div>`;
+}
+
+function bWelderChart(wData){
+  const welders = wData || [];
+  const over = welders.filter(w=>w.cumPct>3&&w.cumAut>0).sort((a,b)=>b.cumPct-a.cumPct);
+  if(!over.length) return`<div class="card" style="min-height:180px;display:flex;align-items:center;justify-content:center"><span class="cm" style="font-size:11px">No welders &gt; 3% repair rate</span></div>`;
+  const h=Math.max(180,over.length*26+80);
+  return`<div class="card"><div class="slbl">Welders &gt; 3% Repair Rate${pill(!!wData)}</div>
+    <div class="ch-wrap" style="height:${h}px"><canvas id="welderChart"></canvas></div>
+  </div>`;
+}
+
+function bSORTable(sorRecs, live){
+  let rows, totals;
+  if(sorRecs){
+    const filtered=sorRecs.filter(r=>inPeriod(r.date));
+    const m={};
+    filtered.forEach(r=>{
+      if(!m[r.ic]) m[r.ic]={ic:r.ic,closed:0,open:0,total:0};
+      if(r.status.includes('CLOSED')) m[r.ic].closed++; else m[r.ic].open++;
+      m[r.ic].total++;
+    });
+    rows=Object.values(m).sort((a,b)=>b.total-a.total);
+    totals=sumK(rows,['closed','open','total']);
+  } else {
+    rows=[]; totals={closed:0,open:0,total:0};
+  }
+  const trs=rows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
+    <td class="td tl">${r.ic}</td>
+    <td class="td cg">${fn(r.closed)}</td><td class="td ca">${fn(r.open)}</td><td class="td">${fn(r.total)}</td>
+  </tr>`).join('');
+  return`<div class="card" style="min-width:220px"><div class="slbl">Site Observations${pill(live)}</div>
+  <table class="tbl"><thead><tr>
+    <th class="th tl">IC</th><th class="th">Closed</th><th class="th">Open</th><th class="th">Total</th>
+  </tr></thead><tbody>${trs}</tbody>
+  <tfoot><tr class="tr-tot"><td class="tf tl cm">Total</td>
+    <td class="tf cg">${fn(totals.closed)}</td><td class="tf ca">${fn(totals.open)}</td><td class="tf">${fn(totals.total)}</td>
+  </tr></tfoot></table></div>`;
+}
+
+function bSORScatter(){
+  const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  return`<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="slbl" style="margin:0">SOR Distribution by KM</div>
+      <div style="display:flex;gap:12px;font-size:9px;color:${s.muted}">
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.good};margin-right:3px"></span>CLOSED</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.bad};margin-right:3px"></span>OPEN</span>
+      </div>
+    </div>
+    <div class="ch-wrap" style="height:260px"><canvas id="scatterChart"></canvas></div>
+  </div>`;
+}
+
+function bNCRTable(ncrRecs, live){
+  let rows, totals;
+  if(ncrRecs){
+    const filtered=ncrRecs.filter(r=>inPeriod(r.date));
+    const m={};
+    filtered.forEach(r=>{
+      if(!m[r.againstName]) m[r.againstName]={against:r.againstName,closed:0,open:0,total:0};
+      if(r.status.includes('CLOSED')) m[r.againstName].closed++; else m[r.againstName].open++;
+      m[r.againstName].total++;
+    });
+    rows=Object.values(m).sort((a,b)=>b.total-a.total);
+    totals=sumK(rows,['closed','open','total']);
+  } else {
+    rows=[]; totals={closed:0,open:0,total:0};
+  }
+  const trs=rows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
+    <td class="td tl">${r.against}</td>
+    <td class="td cg">${fn(r.closed)}</td><td class="td ca">${fn(r.open)}</td><td class="td">${fn(r.total)}</td>
+  </tr>`).join('');
+  return`<div class="card" style="min-width:220px"><div class="slbl">NCR Status${pill(live)}</div>
+  <table class="tbl"><thead><tr>
+    <th class="th tl">Against</th><th class="th">Closed</th><th class="th">Open</th><th class="th">Total</th>
+  </tr></thead><tbody>${trs}</tbody>
+  <tfoot><tr class="tr-tot"><td class="tf tl cm">Total</td>
+    <td class="tf cg">${fn(totals.closed)}</td><td class="tf ca">${fn(totals.open)}</td><td class="tf">${fn(totals.total)}</td>
+  </tr></tfoot></table></div>`;
+}
+
+function bNCRBar(ncrRecs, live){
+  const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  return`<div class="card" style="display:flex;flex-direction:column">
+    <div class="slbl">NCR by IC${pill(live)}</div>
+    <div class="ch-wrap" style="flex:1;min-height:160px"><canvas id="ncrBarChart"></canvas></div>
+    <div style="display:flex;gap:16px;margin-top:8px;font-size:9px;justify-content:center">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.cp};margin-right:4px;vertical-align:middle"></span>Total</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.good};margin-right:4px;vertical-align:middle"></span>Closed</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.bad};margin-right:4px;vertical-align:middle"></span>Open</span>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// UPLOAD BAR BUILDER
+// ═══════════════════════════════════════════════════
+const SLOT_DEFS=[
+  {key:'rfi',    icon:'📋', label:'RFI Register',   hint:'RFI_REG sheet'},
+  {key:'daily1', icon:'🔧', label:'Daily Sec-1',    hint:'Daily_SEC1 sheet'},
+  {key:'daily2', icon:'🔧', label:'Daily Sec-2',    hint:'Daily_SEC2 sheet'},
+  {key:'daily3', icon:'🔧', label:'Daily Sec-3',    hint:'Daily_SEC3 sheet'},
+  {key:'welders',icon:'👷', label:'Welders',         hint:'Weekly_WLDR_REP sheet'},
+  {key:'sor',    icon:'👁', label:'SOR Register',   hint:'SOR sheet'},
+  {key:'ncr',    icon:'⚠', label:'NCR Register',   hint:'NCR sheet'},
+];
+
+function bUploadBar(){
+  const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
+  if(isViewer) return '';
+
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const loadedCount=Object.values(ST.data).filter(v=>v!==null).length;
+  const totalCount=SLOT_DEFS.length;
+  const anyProcessing=Object.values(ST.processing).some(v=>v);
+
+  const slotHtml=SLOT_DEFS.map(s=>{
+    const loaded=ST.data[s.key]!==null;
+    const processing=ST.processing[s.key];
+    const errMsg=ST.errors[s.key];
+    const unsavedSlot=loaded&&ST.unsaved;
+    const isWrongFile=errMsg&&errMsg.startsWith('WRONG_FILE|');
+    const clz=`upl-slot${loaded?(unsavedSlot?' unsaved':' loaded'):''}${errMsg?' err':''}`;
+    const rowCount=loaded&&Array.isArray(ST.data[s.key])?fn(ST.data[s.key].length)+' rows':'';
+    const fname=ST.files[s.key]?ST.files[s.key].split('/').pop().split('\\').pop():'';
+    let errDisplay='', errTitle='';
+    if(isWrongFile){
+      const parts=errMsg.split('|');
+      const expected=parts[1]||''; const actual=(parts[2]||'').split('/').pop().split('\\').pop();
+      errDisplay=`Wrong file uploaded`;
+      errTitle=`Expected: ${expected} — Got: ${actual}`;
+    } else if(errMsg){
+      errDisplay=errMsg.slice(0,38);
+      errTitle=errMsg;
+    }
+    return`<div class="${clz}" id="slot_${s.key}" data-key="${s.key}"
+        title="${loaded?fname+(unsavedSlot?' — UNSAVED, press Save to publish':' — click to replace'):errTitle||'Click to upload individually'}">
+      <div class="upl-slot-top">
+        <span class="upl-slot-icon">${processing?'⟳':loaded?(unsavedSlot?'🟡':'✅'):errMsg?'❌':s.icon}</span>
+        <span class="upl-slot-lbl">${s.label}</span>
+      </div>
+      <div class="upl-slot-fn">${loaded?fname:s.hint}</div>
+      ${loaded?`<div class="upl-slot-cnt" style="${unsavedSlot?`color:${sc.warn}`:''}">${rowCount}${unsavedSlot?' · unsaved':''}</div>`:''}
+      ${errMsg?`<div class="upl-slot-cnt" style="color:${sc.bad}">${errDisplay}</div>`:''}
+    </div>`;
+  }).join('');
+
+  const errHtml=Object.entries(ST.errors).filter(([,v])=>v).map(([k,v])=>`<span class="upl-err-item">⚠ ${k}: ${v}</span>`).join('');
+  const hasRFI=!!ST.data.rfi;
+
+  return`<div class="upl-bar">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <!-- Upload All -->
+      <button id="btnUploadAll" onclick="document.getElementById('fileMulti').click()"
+        style="background:${sc.loginGrad};border:none;border-radius:6px;color:#fff;
+               font-size:12px;font-weight:600;padding:7px 16px;cursor:pointer;display:flex;align-items:center;gap:6px;
+               white-space:nowrap;${anyProcessing?'opacity:.5;pointer-events:none':''}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+        </svg>
+        ${anyProcessing?'⟳ Processing…':'Upload All Files'}
+      </button>
+      <!-- Save -->
+      <button id="btnSave" onclick="saveAllToDB()" ${!ST.unsaved?'disabled':''}
+        style="background:${ST.unsaved?`linear-gradient(135deg,${sc.good}99,${sc.good})`:sc.card};
+               border:1px solid ${ST.unsaved?sc.good+'66':sc.border};
+               border-radius:6px;color:${ST.unsaved?'#fff':sc.faint};font-size:12px;font-weight:600;
+               padding:7px 16px;cursor:${ST.unsaved?'pointer':'not-allowed'};white-space:nowrap;transition:all .2s">
+        💾 Save
+      </button>
+      <!-- Clear Files -->
+      <button id="btnClearFiles" onclick="clearAllFiles()" ${!loadedCount?'disabled':''}
+        style="background:${loadedCount?sc.bad+'22':sc.card};border:1px solid ${loadedCount?sc.bad+'55':sc.border};
+               border-radius:6px;color:${loadedCount?sc.bad:sc.faint};font-size:12px;font-weight:600;
+               padding:7px 16px;cursor:${loadedCount?'pointer':'not-allowed'};white-space:nowrap;transition:all .2s">
+        🗑 Clear Dashboard
+      </button>
+      <!-- Clear Period -->
+      <button onclick="clearPeriod()" ${!hasRFI?'disabled':''}
+        style="background:${sc.card};border:1px solid ${hasRFI?sc.border:sc.card};
+               border-radius:6px;color:${hasRFI?sc.muted:sc.faint};font-size:12px;font-weight:600;
+               padding:7px 16px;cursor:${hasRFI?'pointer':'not-allowed'};white-space:nowrap;transition:all .2s">
+        📅 Clear Period
+      </button>
+      <span style="font-size:10px;color:${sc.faint};margin-left:4px">Auto-detected by sheet name</span>
+      ${loadedCount>0?`<span style="font-size:10px;color:${ST.unsaved?sc.warn:sc.good};margin-left:auto">
+        ${ST.unsaved?'⚠ '+loadedCount+'/'+totalCount+' datasets loaded — unsaved':'✓ '+loadedCount+'/'+totalCount+' datasets saved'}</span>`:''}
+    </div>
+    <div class="upl-grid">${slotHtml}</div>
+    ${errHtml?`<div class="upl-err-row" style="margin-top:4px">${errHtml}</div>`:''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════
+function bHeader(){
+  const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const isAdmin=!isViewer; // superadmin + admin both get controls
+  const u=AUTH.currentUser||{};
+  const roleCls=isSA?'role-superadmin':u.role==='admin'?'role-admin':'role-viewer';
+  const roleLabel=isSA?'Super Admin':u.role==='admin'?'Admin':'Viewer';
+
+  // Format date as DD/MM/YYYY for display
+  const fmtDisp=d=>{if(!d)return'—';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;};
+
+  const dateSection = isAdmin
+    ? `<div class="date-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <input type="date" id="dStart" class="d-inp" value="${ST.start}" title="Period start date">
+        <span style="color:#484f58;font-size:12px">→</span>
+        <input type="date" id="dEnd"   class="d-inp" value="${ST.end}"   title="Period end date">
+        <span class="filter-tag live">Period filter active</span>
+      </div>`
+    : `<div style="font-size:11px;color:#8b949e;padding:4px 10px;background:#0d1117;border:1px solid #21262d;border-radius:6px">
+        Reporting Duration &nbsp;From: <span style="color:#e6edf3;font-family:monospace">${fmtDisp(ST.start)}</span>
+        &nbsp;To: <span style="color:#e6edf3;font-family:monospace">${fmtDisp(ST.end)}</span>
+      </div>`;
+
+  const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const schemeOpts=Object.entries(SCHEMES).map(([k,v])=>`
+    <button onclick="switchScheme('${k}')" style="width:100%;background:none;border:none;color:${k===CURRENT_SCHEME?s.accent:'inherit'};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s;font-weight:${k===CURRENT_SCHEME?'700':'400'}"
+      onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${v.accent};flex-shrink:0"></span>
+      ${v.name}${k===CURRENT_SCHEME?' ✓':''}
+    </button>`).join('');
+
+  return`<div class="hdr">
+    <div><div class="hdr-title">WEEKLY QA/QC DASHBOARD</div><div class="hdr-sub">P30312 — WEST TO EAST PIPELINE PROJECT</div></div>
+    ${dateSection}
+    <div class="hdr-divider"></div>
+    <div class="hdr-user">
+      <span class="hdr-uname">${u.displayName||u.username||''}</span>
+      <span class="role-badge ${roleCls}">${roleLabel}</span>
+
+      <!-- Scheme picker -->
+      <div style="position:relative" id="schemeDropWrap">
+        <button onclick="toggleSchemeDrop()" title="Color scheme"
+          style="background:${s.card};border:1px solid ${s.border};border-radius:5px;color:${s.accent};font-size:11px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .2s">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.accent}"></span>Theme
+        </button>
+        <div id="schemeDropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:${s.card};border:1px solid ${s.border};border-radius:8px;min-width:190px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden">
+          <div style="padding:6px 14px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${s.faint}">Color Scheme</div>
+          ${schemeOpts}
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div style="position:relative;display:inline-block" id="exportDropWrap">
+        <button onclick="toggleExportDrop()"
+          style="background:${s.card};border:1px solid ${s.border};border-radius:5px;color:${s.text};font-size:11px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .2s">
+          ⬇ Export
+        </button>
+        <div id="exportDrop" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:${s.card};border:1px solid ${s.border};border-radius:8px;min-width:230px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden">
+          <div style="padding:6px 0">
+            <div style="padding:4px 14px 2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${s.faint}">Excel</div>
+            <button onclick="exportExcel()" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
+              onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
+              📊 Export all datasets to Excel
+            </button>
+            <button onclick="openExportOptions()" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
+              onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
+              📋 Custom export… (choose data sets &amp; date range)
+            </button>
+            <div style="height:1px;background:${s.border};margin:4px 0"></div>
+            <div style="padding:4px 14px 2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${s.faint}">PDF</div>
+            <button onclick="exportPDF('current')" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
+              onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
+              🎨 PDF — Current theme
+            </button>
+            <button onclick="exportPDF('light')" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
+              onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
+              ☀️ PDF — Corporate Light (print-friendly)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      ${isSA?`<button class="hdr-btn mgmt" onclick="openUserMgmt()">⚙ Users</button>`:''}
+      ${isSA?`<button class="hdr-btn" id="btnEdit" onclick="toggleEditMode()" style="border-color:rgba(245,158,11,.3);color:#7a809a">⊹ Edit Layout</button>`:''}
+      <button class="hdr-btn danger" onclick="logout()">Sign Out</button>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// COMPUTE PANEL DATA
+// ═══════════════════════════════════════════════════
+function getNDTRows(cumulative){
+  const d1=ST.data.daily1, d2=ST.data.daily2, d3=ST.data.daily3;
+  if(!d1&&!d2&&!d3) return null;
+  const rows=[];
+  const get=(label,rows)=>cumulative?mkNDTRow(label,rows,null,ST.end,true):mkNDTRow(label,rows,ST.start,ST.end,false);
+  const r1=get('Section-1',d1), r2=get('Section-2',d2), r3=get('Section-3',d3);
+  if(r1) rows.push(r1); else rows.push({s:'Section-1',welded:0,rev:0,appr:0,rescan:0,repair:0,bl:0});
+  if(r2) rows.push(r2); else rows.push({s:'Section-2',welded:0,rev:0,appr:0,rescan:0,repair:0,bl:0});
+  if(r3) rows.push(r3); else rows.push({s:'Section-3',welded:0,rev:0,appr:0,rescan:0,repair:0,bl:0});
+  return rows;
+}
+
+function getFJCRows(cumulative){
+  const d1=ST.data.daily1, d2=ST.data.daily2, d3=ST.data.daily3;
+  if(!d1&&!d2&&!d3) return null;
+  const get=(label,rows)=>cumulative?mkFJCRow(label,rows,null,ST.end,true):mkFJCRow(label,rows,ST.start,ST.end,false);
+  const rows=[];
+  const r1=get('Section-1',d1), r2=get('Section-2',d2), r3=get('Section-3',d3);
+  if(r1) rows.push(r1); else rows.push({s:'Section-1',released:0,total:0,accepted:0,repair:0,balance:0});
+  if(r2) rows.push(r2); else rows.push({s:'Section-2',released:0,total:0,accepted:0,repair:0,balance:0});
+  if(r3) rows.push(r3); else rows.push({s:'Section-3',released:0,total:0,accepted:0,repair:0,balance:0});
+  return rows;
+}
+
+function countWorkingDays(rows){
+  // Count distinct dates in the dataset that are not Fridays (day 5)
+  const dates=new Set(rows.map(r=>r.date).filter(Boolean));
+  let count=0;
+  dates.forEach(d=>{
+    const day=new Date(d).getUTCDay(); // 0=Sun,1=Mon,...,5=Fri,6=Sat
+    if(day!==5) count++;
+  });
+  return count||1;
+}
+
+function getNDTKPIs(){
+  const cumNDT=getNDTRows(true);
+  if(!cumNDT) return{weldRepair:null,fjcRepair:null,ndtBacklog:null,ndtBacklogGoal:null};
+
+  // Welding repair rate = total repair / total reviewed * 100
+  const totalRev=cumNDT.reduce((s,r)=>s+r.rev,0);
+  const totalRep=cumNDT.reduce((s,r)=>s+r.repair,0);
+  const weldRepair=totalRev>0?totalRep/totalRev*100:null;
+
+  // FJC repair rate
+  const cumFJC=getFJCRows(true);
+  let fjcRepair=null;
+  if(cumFJC){
+    const fjcTotal=cumFJC.reduce((s,r)=>s+r.total,0);
+    const fjcRep=cumFJC.reduce((s,r)=>s+r.repair,0);
+    fjcRepair=fjcTotal>0?fjcRep/fjcTotal*100:null;
+  }
+
+  // NDT Backlog = welded - reviewed (per section, summed)
+  const ndtBacklog=cumNDT.reduce((s,r)=>s+r.bl,0);
+
+  // NDT Backlog Goal = 2 × daily average welded joints (excl. Fridays)
+  // Daily average = total cumulative welded across all 3 sections / working days
+  let ndtBacklogGoal=null;
+  const d1=ST.data.daily1, d2=ST.data.daily2, d3=ST.data.daily3;
+  if(d1||d2||d3){
+    const totalWelded=cumNDT.reduce((s,r)=>s+r.welded,0);
+    // Use the section with the most data rows for day count
+    const refRows=d1||d2||d3;
+    const workDays=countWorkingDays(refRows);
+    const dailyAvg=totalWelded/workDays;
+    ndtBacklogGoal=Math.round(dailyAvg*2);
+  }
+
+  return{weldRepair,fjcRepair,ndtBacklog,ndtBacklogGoal};
+}
+
+// Period KPIs — same three metrics but computed from period-filtered data only
+function getPeriodKPIs(){
+  const perNDT=getNDTRows(false);
+  if(!perNDT) return{weldRepair:null,fjcRepair:null,ndtBacklog:null,ndtBacklogGoal:null};
+
+  // Welding repair rate from period delta
+  const totalRev=perNDT.reduce((s,r)=>s+r.rev,0);
+  const totalRep=perNDT.reduce((s,r)=>s+r.repair,0);
+  const weldRepair=totalRev>0?totalRep/totalRev*100:null;
+
+  // FJC repair rate from period delta
+  const perFJC=getFJCRows(false);
+  let fjcRepair=null;
+  if(perFJC){
+    const fjcTotal=perFJC.reduce((s,r)=>s+r.total,0);
+    const fjcRep=perFJC.reduce((s,r)=>s+r.repair,0);
+    fjcRepair=fjcTotal>0?fjcRep/fjcTotal*100:null;
+  }
+
+  // NDT Backlog from period delta (welded - reviewed in period)
+  const ndtBacklog=perNDT.reduce((s,r)=>s+r.bl,0);
+
+  // Backlog goal — same formula (based on cumulative avg, goal doesn't change with period)
+  const cumNDT=getNDTRows(true);
+  let ndtBacklogGoal=null;
+  if(cumNDT){
+    const totalWelded=cumNDT.reduce((s,r)=>s+r.welded,0);
+    const refRows=ST.data.daily1||ST.data.daily2||ST.data.daily3;
+    if(refRows){
+      const workDays=countWorkingDays(refRows);
+      ndtBacklogGoal=Math.round(totalWelded/workDays*2);
+    }
+  }
+
+  return{weldRepair,fjcRepair,ndtBacklog,ndtBacklogGoal};
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+function render(){
+  Object.values(CHARTS).forEach(c=>{try{c.destroy();}catch(e){}});
+  Object.keys(CHARTS).forEach(k=>delete CHARTS[k]);
+
+  const rfiData=getRFIData();
+  const rfiLive=!rfiData.isDefault;
+  const ndtPeriod=getNDTRows(false);
+  const ndtCum=getNDTRows(true);
+  const fjcPeriod=getFJCRows(false);
+  const fjcCum=getFJCRows(true);
+  const dailyLive=!!(ST.data.daily1||ST.data.daily2||ST.data.daily3);
+  const {weldRepair,fjcRepair,ndtBacklog,ndtBacklogGoal}=getNDTKPIs();
+  const {weldRepair:pWeldRepair,fjcRepair:pFjcRepair,ndtBacklog:pNdtBacklog,ndtBacklogGoal:pNdtBacklogGoal}=getPeriodKPIs();
+  const welderData=ST.data.welders;
+  const sorRecs=ST.data.sor;
+  const ncrRecs=ST.data.ncr;
+
+  // Use FJC defaults if no daily data
+  const fjcPeriodRows = fjcPeriod;
+  const fjcCumRows = fjcCum;
+
+  // Build all panel HTML strings
+  const PANELS_HTML = {
+    rfiPeriod:   bRFITable(rfiData.period?.rows||null, rfiData.period?.totals||null, 'Period RFI Status', rfiLive),
+    rfiDonut:    bRFIDonut(rfiData.period?.totals||null, rfiData.cumulative?.totals||null, rfiLive),
+    rfiCumul:    bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive),
+    ndtPeriod:   bNDTTable(ndtPeriod, 'Period NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:pWeldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:pNdtBacklog,goal:pNdtBacklogGoal,unit:''}]),
+    ndtCumul:    bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:weldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:ndtBacklog,goal:ndtBacklogGoal,unit:''}]),
+    fjcPeriod:   bFJCTable(fjcPeriodRows, 'Period FJC Status', dailyLive, [{label:'FJC Repair Rate',value:pFjcRepair,goal:1,unit:'%'}]),
+    fjcCumul:    bFJCTable(fjcCumRows, 'Cumulative FJC Status', dailyLive, [{label:'FJC Repair Rate',value:fjcRepair,goal:1,unit:'%'}]),
+    welders:     bWelderChart(welderData),
+    progress:    bProgress(dailyLive),
+    ncrTable:    bNCRTable(ncrRecs, !!ncrRecs),
+    ncrBar:      bNCRBar(ncrRecs, !!ncrRecs),
+    sorTable:    bSORTable(sorRecs, !!sorRecs),
+    sorScatter:  bSORScatter(),
+  };
+
+  // Render header + upload bar into app
+  document.getElementById('app').innerHTML=`
+    ${bHeader()}
+    ${bUploadBar()}
+    <div id="dashCanvas"></div>
+    <div class="footer" style="position:relative;z-index:1;padding:8px 20px;text-align:center;font-size:10px;color:#4a5068">
+      P30312 · RFI: ${rfiLive?fn(ST.data.rfi.length)+' live':'default'} · Daily: ${dailyLive?'live':'default'} · Welders: ${welderData?fn(welderData.length)+' live':'default'} · SOR: ${sorRecs?fn(sorRecs.length)+' live':'default'} · NCR: ${ncrRecs?fn(ncrRecs.length)+' live':'default'}
+    </div>
+  `;
+
+  // Inject canvas mode bar
+  const modeBar=document.getElementById('canvasModeBar');
+  const appEl=document.getElementById('app');
+  if(modeBar && appEl) appEl.insertBefore(modeBar, appEl.firstChild);
+
+  // Render canvas panels
+  renderCanvas(PANELS_HTML);
+  initCharts(rfiData, welderData, sorRecs, ncrRecs);
+  bindEvents();
+  // Re-apply edit mode if active
+  if(EDIT_MODE) activateEditMode();
+}
+
+// ═══════════════════════════════════════════════════
+// CHART INIT
+// ═══════════════════════════════════════════════════
+function initCharts(rfiData, welderData, sorRecs, ncrRecs){
+  Chart.defaults.color='#7a809a';
+  Chart.defaults.font.family='system-ui,-apple-system,sans-serif';
+
+  // RFI Donuts — Period (top) and Cumulative (bottom)
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  Chart.defaults.color=sc.muted;
+  function makeDonut(canvasId, totals){
+    const el=document.getElementById(canvasId);
+    if(!el||!totals) return null;
+    const data=[totals.acc,totals.accW,totals.can,totals.open,totals.rej];
+    const colors=[sc.cb, sc.clb, sc.muted, sc.ca, sc.bad];
+    return new Chart(el,{type:'doughnut',data:{labels:['ACC','ACC W/COMM','CAN','OPEN','REJ'],datasets:[{data,backgroundColor:colors,borderColor:sc.card,borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fn(ctx.raw)}`}}},cutout:'65%'}});
+  }
+  CHARTS.donutPeriod = makeDonut('donutPeriod', rfiData.period?.totals||null);
+  CHARTS.donutCumul  = makeDonut('donutCumul',  rfiData.cumulative?.totals||null);
+
+  // Welder bar chart
+  const welderEl=document.getElementById('welderChart');
+  if(welderEl){
+    const wList=(welderData||[]).filter(w=>w.cumPct>3&&w.cumAut>0).sort((a,b)=>b.cumPct-a.cumPct);
+    if(wList.length){
+      const labels=wList.map(w=>w.id);
+      const vals=wList.map(w=>+w.cumPct.toFixed(2));
+      const colors=vals.map(v=>v>10?sc.bad:v>5?sc.warn:sc.accent);
+      CHARTS.welder=new Chart(welderEl,{type:'bar',
+        data:{labels,datasets:[{label:'Cumul. Repair %',data:vals,backgroundColor:colors,borderRadius:3}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.toFixed(2)}%`}}},
+          scales:{x:{grid:{color:sc.chartGrid},ticks:{color:sc.muted,callback:v=>v+'%'},title:{display:true,text:'Repair Rate %',color:sc.muted}},
+            y:{grid:{display:false},ticks:{color:sc.text,font:{size:10}}}},
+          annotation:{annotations:{goal:{type:'line',xMin:3,xMax:3,borderColor:sc.bad,borderWidth:1,borderDash:[4,4]}}}}}); 
+    }
+  }
+
+  // SOR Scatter — jitter Y for same-KM points, rich tooltip with short name
+  const scatterEl=document.getElementById('scatterChart');
+  if(scatterEl){
+    const sorData = sorRecs ? sorRecs.filter(r=>inPeriod(r.date)).map(r=>({...r,km:r.km===null||r.km===undefined?0:r.km})) : [];
+
+    const closedPts=[], openPts=[];
+    const jitterStep=0.4;
+    const kmCount={};
+
+    if(sorData.length){
+      sorData.forEach(r=>{
+        const km=r.km;
+        if(!kmCount[km]) kmCount[km]=0;
+        const idx=kmCount[km]++;
+        // Alternate above/below 3.0 baseline with wider spread
+        const y=3.0+(idx%2===0?1:-1)*Math.ceil(idx/2)*jitterStep;
+        const pt={x:km, y:+y.toFixed(2), sorNo:r.short||r.sorNo||'—', status:r.status||''};
+        if(r.status&&r.status.includes('CLOSED')) closedPts.push(pt);
+        else openPts.push(pt);
+      });
+    }
+
+    CHARTS.scatter=new Chart(scatterEl,{type:'scatter',
+      data:{datasets:[
+        {label:'CLOSED',data:closedPts,backgroundColor:sc.good+'bb',pointRadius:6,pointHoverRadius:9,pointHoverBackgroundColor:sc.good},
+        {label:'OPEN',  data:openPts,  backgroundColor:sc.bad+'cc',  pointRadius:6,pointHoverRadius:9,pointHoverBackgroundColor:sc.bad},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              title:()=>'',
+              label:ctx=>{
+                const pt=ctx.raw;
+                return[`${pt.sorNo}`,`KM: ${pt.x}`,`Status: ${pt.status||ctx.dataset.label}`];
+              }
+            },
+            backgroundColor:sc.card,borderColor:sc.border,borderWidth:1,
+            bodyColor:sc.text,padding:10,displayColors:false
+          }
+        },
+        scales:{
+          x:{grid:{color:sc.chartGrid},ticks:{color:sc.muted},
+             title:{display:true,text:'Pipeline KM',color:sc.muted,font:{size:10}},
+             min:0,max:500},
+          y:{grid:{display:false},display:false,min:0,max:6}
+        }
+      }
+    });
+  }
+
+  // NCR Grouped Bar Chart — Total (blue) + Closed (green) + Open (red) per IC
+  const ncrBarEl=document.getElementById('ncrBarChart');
+  if(ncrBarEl){
+    let rows;
+    if(ncrRecs){
+      const filtered=ncrRecs.filter(r=>inPeriod(r.date));
+      const m={};
+      filtered.forEach(r=>{
+        if(!m[r.againstName]) m[r.againstName]={closed:0,open:0};
+        if(r.status.includes('CLOSED')) m[r.againstName].closed++; else m[r.againstName].open++;
+      });
+      rows=Object.entries(m).sort((a,b)=>(b[1].closed+b[1].open)-(a[1].closed+a[1].open));
+    } else {
+      rows=[];
+    }
+    const labels    = rows.map(([ic])=>ic);
+    const closedVals= rows.map(([,v])=>v.closed);
+    const openVals  = rows.map(([,v])=>v.open);
+    const totalVals = rows.map(([,v])=>v.closed+v.open);
+    CHARTS.ncrBar=new Chart(ncrBarEl,{type:'bar',
+      data:{labels,datasets:[
+        {label:'Total',  data:totalVals,  backgroundColor:sc.cp+'bb',  borderRadius:3,borderSkipped:false},
+        {label:'Closed', data:closedVals, backgroundColor:sc.good+'cc', borderRadius:3,borderSkipped:false},
+        {label:'Open',   data:openVals,   backgroundColor:sc.bad+'cc',  borderRadius:3,borderSkipped:false},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw}`},
+            backgroundColor:sc.card,borderColor:sc.border,borderWidth:1,
+            bodyColor:sc.text,padding:8,displayColors:true}
+        },
+        scales:{
+          x:{grid:{display:false},ticks:{color:sc.text,font:{size:10}}},
+          y:{grid:{color:sc.chartGrid},ticks:{color:sc.muted,stepSize:1},beginAtZero:true}
+        }
+      }
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// ADMIN ACTIONS — Save, Clear Files, Clear Period
+// ═══════════════════════════════════════════════════
+
+async function saveAllToDB(){
+  const btn=document.getElementById('btnSave');
+  if(btn){btn.disabled=true;btn.textContent='⟳ Saving…';}
+  try{
+    const keys=Object.keys(ST.data).filter(k=>ST.data[k]!==null);
+    if(!keys.length){alert('No data loaded to save.');if(btn){btn.disabled=false;btn.textContent='💾 Save';}return;}
+    await Promise.all(keys.map(k=>saveDataToDB(k,ST.data[k],ST.files[k]||k)));
+    ST.unsaved=false;
+    render();
+  }catch(e){
+    alert('Save failed: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='💾 Save';}
+  }
+}
+
+async function clearAllFiles(){
+  if(!confirm('Clear the entire dashboard? This will remove all uploaded data for all users.')) return;
+  const btn=document.getElementById('btnClearFiles');
+  if(btn){btn.disabled=true;btn.textContent='⟳ Clearing…';}
+  try{
+    const tables=['rfi_records','daily_sec1','daily_sec2','daily_sec3','welder_records','sor_records','ncr_records'];
+    await Promise.all(tables.map(t=>sbDelete(t)));
+    // Reset all state
+    Object.keys(ST.data).forEach(k=>ST.data[k]=null);
+    Object.keys(ST.files).forEach(k=>ST.files[k]='');
+    Object.keys(ST.errors).forEach(k=>ST.errors[k]='');
+    Object.keys(ST.processing).forEach(k=>ST.processing[k]=false);
+    ST.unsaved=false;
+    ST._dateSet=false;
+    render();
+  }catch(e){
+    alert('Clear failed: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='🗑 Clear Dashboard';}
+  }
+}
+
+function clearPeriod(){
+  // Set slicer to full RFI date range
+  if(!ST.data.rfi||!ST.data.rfi.length){alert('Load the RFI Register first.');return;}
+  const dates=ST.data.rfi.map(r=>r.date).filter(Boolean).sort();
+  ST.start=dates[0];
+  ST.end=dates[dates.length-1];
+  render();
+}
+// Maps an Excel file to its dashboard key by inspecting sheet names
+// ═══════════════════════════════════════════════════
+function detectKey(wb){
+  const names = wb.SheetNames.map(n=>n.toUpperCase());
+  if(names.some(n=>n.includes('RFI_REG')||n==='RFI_REG')) return 'rfi';
+  if(names.some(n=>n==='DAILY_SEC1'||n.includes('SEC1'))) return 'daily1';
+  if(names.some(n=>n==='DAILY_SEC2'||n.includes('SEC2'))) return 'daily2';
+  if(names.some(n=>n==='DAILY_SEC3'||n.includes('SEC3'))) return 'daily3';
+  if(names.some(n=>n.includes('WLDR')||n.includes('WELDER'))) return 'welders';
+  if(names.some(n=>n==='SOR'||n.includes('SOR'))) return 'sor';
+  if(names.some(n=>n==='NCR'||n.includes('NCR'))) return 'ncr';
+  return null;
+}
+
+// ═══════════════════════════════════════════════════
+// EVENT BINDING
+// ═══════════════════════════════════════════════════
+function bindEvents(){
+  const ds=document.getElementById('dStart');
+  const de=document.getElementById('dEnd');
+  if(ds) ds.addEventListener('change',e=>{ST.start=e.target.value;render();});
+  if(de) de.addEventListener('change',e=>{ST.end=e.target.value;render();});
+
+  const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
+  if(isViewer) return;
+
+  // ── Multi-file bulk upload ──
+  const multiInput=document.getElementById('fileMulti');
+  if(multiInput){
+    multiInput.onchange=async e=>{
+      const files=Array.from(e.target.files||[]);
+      multiInput.value='';
+      if(!files.length) return;
+      // Process all files in parallel
+      await Promise.all(files.map(f=>handleFile(null,f)));
+    };
+  }
+
+  // ── Single-file input for individual slot re-upload ──
+  const singleInput=document.getElementById('fileSingle');
+  if(singleInput){
+    singleInput.onchange=async e=>{
+      const file=e.target.files[0];
+      const key=singleInput.dataset.key||null;
+      singleInput.value='';
+      if(file) await handleFile(key,file);
+    };
+  }
+
+  // ── Individual slot click → single re-upload with wrong-file detection ──
+  const keyToExpected={
+    rfi:'RFI Register (RFI_REG sheet)',
+    daily1:'Daily Section-1 (Daily_SEC1 sheet)',
+    daily2:'Daily Section-2 (Daily_SEC2 sheet)',
+    daily3:'Daily Section-3 (Daily_SEC3 sheet)',
+    welders:'Welders Performance (Weekly_WLDR_REP sheet)',
+    sor:'SOR Register (SOR sheet)',
+    ncr:'NCR Register (NCR sheet)',
+  };
+  SLOT_DEFS.forEach(s=>{
+    const slot=document.getElementById(`slot_${s.key}`);
+    if(slot){
+      slot.addEventListener('click',()=>{
+        const si=document.getElementById('fileSingle');
+        if(si){ si.dataset.key=s.key; si.click(); }
+      });
+      slot.addEventListener('dragover',e=>{e.preventDefault();slot.classList.add('drag');});
+      slot.addEventListener('dragleave',()=>slot.classList.remove('drag'));
+      slot.addEventListener('drop',e=>{
+        e.preventDefault();slot.classList.remove('drag');
+        const f=e.dataTransfer.files[0];
+        if(f) handleFile(s.key,f);
+      });
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// FILE HANDLER
+// key = forced key (individual slot drop) OR null (auto-detect for bulk)
+// ═══════════════════════════════════════════════════
+async function handleFile(forcedKey, file){
+  // Pre-read workbook to detect key if not forced
+  let key=forcedKey;
+  let ab;
+  try{ ab=await file.arrayBuffer(); }
+  catch(e){ console.warn('Could not read file',file.name,e); return; }
+
+  if(!key){
+    const wb=XLSX.read(new Uint8Array(ab),{type:'array',bookSheets:true});
+    key=detectKey(wb);
+    if(!key){
+      // Show unrecognised warning without disrupting other files
+      ST.errors['?'+(file.name)]='Unrecognised: '+file.name;
+      render(); return;
+    }
+  } else {
+    // Validate the uploaded file matches the intended slot
+    const wb=XLSX.read(new Uint8Array(ab),{type:'array',bookSheets:true});
+    const detected=detectKey(wb);
+    if(detected && detected!==forcedKey){
+      const expNames={rfi:'RFI Register',daily1:'Daily Section-1',daily2:'Daily Section-2',
+        daily3:'Daily Section-3',welders:'Welders Performance',sor:'SOR Register',ncr:'NCR Register'};
+      const expectedName=expNames[forcedKey]||forcedKey;
+      const actualName=file.name.split('/').pop().split('\\').pop();
+      ST.errors[forcedKey]=`WRONG_FILE|${expectedName}|${actualName}`;
+      // Show modal
+      const msg=document.getElementById('wrongFileMsg');
+      if(msg) msg.innerHTML=`Please upload <span style="color:#3fb950;font-weight:600">"${expectedName}"</span><br>Instead, you tried to upload <span style="color:#f85149;font-weight:600">"${actualName}"</span>`;
+      const modal=document.getElementById('wrongFileModal');
+      if(modal) modal.style.display='flex';
+      render(); return;
+    }
+  }
+
+  ST.errors[key]='';
+  ST.processing[key]=true;
+  ST.files[key]=file.name;
+  render();
+
+  try{
+    let parsed;
+    if(key==='rfi')      parsed=parseRFI(ab);
+    else if(key==='daily1') parsed=parseDaily(ab);
+    else if(key==='daily2') parsed=parseDaily(ab);
+    else if(key==='daily3') parsed=parseDaily(ab);
+    else if(key==='welders') parsed=parseWelders(ab);
+    else if(key==='sor')    parsed=parseSOR(ab);
+    else if(key==='ncr')    parsed=parseNCR(ab);
+
+    if(!parsed||!parsed.length) throw new Error('No valid records found. Check file format.');
+
+    ST.data[key]=parsed;
+    ST.processing[key]=false;
+    ST.unsaved=true;   // data in memory — not yet pushed to Supabase
+    render();
+  }catch(e){
+    ST.errors[key]=e.message;
+    ST.data[key]=null;
+    ST.processing[key]=false;
+    render();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════════════════════
+const SB_URL  = 'https://oaapcnkxtilspgyterzk.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hYXBjbmt4dGlsc3BneXRlcnprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzgyNTYsImV4cCI6MjA5NjA1NDI1Nn0.fpsy5we0YsOmV9Vh1x_2P2cteHsa3jE2rT7zxUhWrQw';
+const SB_HDR  = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+// ── Low-level REST helpers ──────────────────────────
+async function sbSelectAll(table, params=''){
+  // Paginate through ALL rows — bypasses Supabase's default 1000-row cap
+  const PAGE=1000;
+  let all=[], offset=0;
+  while(true){
+    const url=`${SB_URL}/rest/v1/${table}?${params}${params?'&':''}offset=${offset}&limit=${PAGE}`;
+    const r=await fetch(url,{headers:{...SB_HDR,'Prefer':'count=exact'}});
+    if(!r.ok) throw new Error(`DB read failed (${table}): ${r.status}`);
+    const page=await r.json();
+    if(!Array.isArray(page)||page.length===0) break;
+    all=all.concat(page);
+    if(page.length<PAGE) break;  // last page
+    offset+=PAGE;
+  }
+  return all;
+}
+// Keep sbSelect for small tables (users, meta) where a single page is always enough
+async function sbSelect(table, params=''){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?${params}`,{headers:{...SB_HDR,'Prefer':'count=exact'}});
+  if(!r.ok) throw new Error(`DB read failed (${table}): ${r.status}`);
+  return r.json();
+}
+async function sbDelete(table){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?id=gte.0`,{method:'DELETE',headers:SB_HDR});
+  if(!r.ok) throw new Error(`DB delete failed (${table}): ${r.status}`);
+}
+async function sbInsertBatch(table, rows){
+  // Supabase max ~2000 rows per request — chunk it
+  const CHUNK=1500;
+  for(let i=0;i<rows.length;i+=CHUNK){
+    const chunk=rows.slice(i,i+CHUNK);
+    const r=await fetch(`${SB_URL}/rest/v1/${table}`,{
+      method:'POST',
+      headers:{...SB_HDR,'Prefer':'return=minimal'},
+      body:JSON.stringify(chunk)
+    });
+    if(!r.ok){const t=await r.text();throw new Error(`DB insert failed (${table}): ${r.status} ${t}`);}
+  }
+}
+async function sbUpsert(table, row){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{...SB_HDR,'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify(row)
+  });
+  if(!r.ok) throw new Error(`DB upsert failed (${table}): ${r.status}`);
+}
+
+// ── Load all datasets from Supabase on page open ────
+async function loadAllFromDB(){
+  try{
+    const [rfi,s1,s2,s3,wld,sor,ncr,meta]=await Promise.all([
+      sbSelectAll('rfi_records','select=date,discipline,section,ic,status&order=date.asc'),
+      sbSelectAll('daily_sec1','select=date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance&order=date.asc'),
+      sbSelectAll('daily_sec2','select=date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance&order=date.asc'),
+      sbSelectAll('daily_sec3','select=date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance&order=date.asc'),
+      sbSelectAll('welder_records','select=welder_id,name,section,cum_aut,cum_rep,cum_pct,wk_aut,wk_rep,wk_pct,remarks'),
+      sbSelectAll('sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc'),
+      sbSelectAll('ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description&order=date.asc'),
+      sbSelect('dataset_meta','select=key,file_name,row_count,uploaded_by,uploaded_at,date_start,date_end'),
+    ]);
+
+    // Map DB column names back to the JS field names the parsers produce
+    if(rfi.length)  ST.data.rfi    = rfi.map(r=>({date:r.date,discipline:r.discipline,section:r.section,ic:r.ic,status:r.status}));
+    if(s1.length)   ST.data.daily1 = s1.map(dbRowToDaily);
+    if(s2.length)   ST.data.daily2 = s2.map(dbRowToDaily);
+    if(s3.length)   ST.data.daily3 = s3.map(dbRowToDaily);
+    if(wld.length)  ST.data.welders= wld.map(r=>({id:r.welder_id,name:r.name,section:r.section,cumAut:+r.cum_aut,cumRep:+r.cum_rep,cumPct:+r.cum_pct,wkAut:+r.wk_aut,wkRep:+r.wk_rep,wkPct:+r.wk_pct,remarks:r.remarks||''}));
+    if(sor.length)  ST.data.sor    = sor.map(r=>({sorNo:r.sor_no,short:r.short_name||r.sor_no,date:r.date,status:r.status,ic:r.ic,km:r.km,desc:r.description||''}));
+    if(ncr.length)  ST.data.ncr    = ncr.map(r=>({ncrNo:r.ncr_no,date:r.date,status:r.status,raisedBy:r.raised_by,againstName:r.against_name,targetClose:r.target_close,actualClose:r.actual_close,desc:r.description||''}));
+
+    // Restore file names from meta
+    meta.forEach(m=>{ ST.files[m.key]=m.file_name||''; });
+
+  }catch(e){
+    // DB unreachable or local file — dashboard shows defaults
+  }
+}
+
+function dbRowToDaily(r){
+  return{date:r.date,welded:+r.welded||0,ndtRev:+r.ndt_rev||0,ndtAppr:+r.ndt_appr||0,
+    ndtRescan:+r.ndt_rescan||0,ndtRepair:+r.ndt_repair||0,fjcReleased:+r.fjc_released||0,
+    fjcTotal:+r.fjc_total||0,fjcAccepted:+r.fjc_accepted||0,fjcRepair:+r.fjc_repair||0,fjcBalance:+r.fjc_balance||0};
+}
+
+// ═══════════════════════════════════════════════════
+// AUTH SYSTEM — Supabase-backed
+// ═══════════════════════════════════════════════════
+const SUPER_ADMIN = 'admin';
+const SESSION_KEY = 'wep_p30312_session';
+const PW_SALT     = 'WEP_P30312_PIPELINE_SALT_2025';
+const AUTH        = {currentUser:null};
+
+async function hashPw(pw){
+  const enc=new TextEncoder();
+  const buf=await crypto.subtle.digest('SHA-256',enc.encode(pw+PW_SALT));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Bootstrap: ensure Super Admin exists in DB ──────
+async function bootstrapAdmin(){
+  try{
+    const rows=await sbSelect('dashboard_users',`username=eq.admin&select=username`);
+    if(!rows.length){
+      const hash=await hashPw('Admin@2025!');
+      await sbUpsert('dashboard_users',{username:'admin',display_name:'Super Admin',role:'superadmin',pw_hash:hash,created_by:'system'});
+      const hint=document.getElementById('loginFirstCred');
+      if(hint) hint.style.display='block';
+    }
+  }catch(e){ /* DB unreachable or local file — silent fail */ }
+}
+
+function getSession(){try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');}catch(e){return null;}}
+function setSession(u){sessionStorage.setItem(SESSION_KEY,JSON.stringify(u));}
+function clearSession(){sessionStorage.removeItem(SESSION_KEY);}
+
+async function initApp(){
+  // Bootstrap in background — do NOT block the login button on it
+  bootstrapAdmin();
+
+  const session=getSession();
+  if(session){
+    try{
+      const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(session.username)}&select=username,role`);
+      if(rows.length){ AUTH.currentUser=session; await loadAndShow(); return; }
+    }catch(e){}
+  }
+  showLogin();
+}
+
+async function loadAndShow(){
+  const ov=document.getElementById('loginOverlay');
+  if(ov) ov.style.display='none';
+  // Reset date slicer to last completed Sat→Fri week on login
+  const {start,end}=defaultWeekDates();
+  ST.start=start; ST.end=end; ST._dateSet=false;
+  // Load saved color scheme for this user
+  try{
+    const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(AUTH.currentUser.username)}&select=color_scheme`);
+    if(rows.length && rows[0].color_scheme && SCHEMES[rows[0].color_scheme]){
+      CURRENT_SCHEME=rows[0].color_scheme;
+    }
+  }catch(e){}
+  applyScheme(CURRENT_SCHEME);
+  document.getElementById('app').innerHTML=`<div style="padding:40px 20px;text-align:center;color:${SCHEMES[CURRENT_SCHEME].faint};font-size:13px">
+    <span style="animation:spin 1s linear infinite;display:inline-block;font-size:20px">⟳</span>
+    &nbsp; Loading dashboard data…</div>`;
+  await loadAllFromDB();
+  render();
+}
+
+function showLogin(){
+  const ov=document.getElementById('loginOverlay');
+  if(ov) ov.style.display='flex';
+  document.getElementById('app').innerHTML='';
+  setTimeout(()=>{
+    const pu=document.getElementById('loginUser');
+    const pp=document.getElementById('loginPass');
+    if(pu) pu.addEventListener('keydown',e=>{if(e.key==='Enter') document.getElementById('loginPass').focus();});
+    if(pp) pp.addEventListener('keydown',e=>{if(e.key==='Enter') attemptLogin();});
+    if(pu) pu.focus();
+  },50);
+}
+
+async function attemptLogin(){
+  const uInput=(document.getElementById('loginUser').value||'').trim().toLowerCase();
+  const pInput=(document.getElementById('loginPass').value||'');
+  const btn=document.getElementById('loginBtn');
+  const errEl=document.getElementById('loginErr');
+  if(!uInput||!pInput){errEl.textContent='Please enter username and password.';errEl.classList.add('show');return;}
+  btn.disabled=true;btn.innerHTML='<span class="login-spin">⟳</span> Signing in…';errEl.classList.remove('show');
+  try{
+    const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uInput)}&select=username,display_name,role,pw_hash`);
+    if(!rows.length){ throw new Error('Invalid username or password.'); }
+    const user=rows[0];
+    const hash=await hashPw(pInput);
+    if(hash!==user.pw_hash){ throw new Error('Invalid username or password.'); }
+    const session={username:uInput,displayName:user.display_name||uInput,role:uInput===SUPER_ADMIN?'superadmin':user.role};
+    setSession(session); AUTH.currentUser=session;
+    await loadAndShow();
+  }catch(e){
+    btn.disabled=false; btn.textContent='Sign In';
+    errEl.textContent=e.message||'Login failed.'; errEl.classList.add('show');
+  }
+}
+
+function logout(){
+  clearSession(); AUTH.currentUser=null;
+  Object.keys(ST.data).forEach(k=>ST.data[k]=null);
+  Object.keys(ST.files).forEach(k=>ST.files[k]='');
+  Object.keys(ST.errors).forEach(k=>ST.errors[k]='');
+  ST.start='2025-05-01'; ST.end='2026-03-27'; ST._dateSet=false;
+  showLogin();
+}
+
+// ── User Management ─────────────────────────────────
+function openUserMgmt(){
+  if(!AUTH.currentUser||AUTH.currentUser.username!==SUPER_ADMIN){alert('Only the Super Admin can manage users.');return;}
+  renderUserList();
+  document.getElementById('userMgmtModal').classList.add('open');
+}
+function closeUserMgmt(){
+  document.getElementById('userMgmtModal').classList.remove('open');
+  ['umgNewUser','umgNewName','umgNewPass','umgNewPw','umgConfPw'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['umgMsg','umgPwMsg'].forEach(id=>{const el=document.getElementById(id);if(el){el.className='umg-msg';el.textContent='';}});
+}
+async function renderUserList(){
+  const list=document.getElementById('umgUserList');
+  if(!list) return;
+  list.innerHTML='<div style="color:#484f58;font-size:11px;padding:8px">Loading…</div>';
+  const users=await sbSelect('dashboard_users','select=username,display_name,role,created_at&order=created_at.asc');
+  const roleColors={superadmin:{bg:'#1a0f3a',txt:'#a371f7',cls:'role-superadmin',lbl:'Super Admin'},admin:{bg:'#0d1f4f',txt:'#388bfd',cls:'role-admin',lbl:'Admin'},viewer:{bg:'#1a1a1a',txt:'#8b949e',cls:'role-viewer',lbl:'Viewer'}};
+  list.innerHTML=users.map(u=>{
+    const rc=roleColors[u.role]||roleColors.viewer;
+    const initials=(u.display_name||u.username).substring(0,2).toUpperCase();
+    const isMe=u.username===AUTH.currentUser.username;
+    const isSA=u.username===SUPER_ADMIN;
+    return`<div class="umg-user-row">
+      <div class="umg-avatar" style="background:${rc.bg};color:${rc.txt}">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div class="umg-uname">${u.username}${isMe?' <span style="color:#8b949e;font-size:9px">(you)</span>':''}</div>
+        <div class="umg-disp">${u.display_name||''} ${u.created_at?'· '+u.created_at.slice(0,10):''}</div>
+      </div>
+      <span class="role-badge ${rc.cls}">${rc.lbl}</span>
+      ${(!isSA&&!isMe)?`<button class="umg-del" onclick="deleteUser('${u.username}')">Remove</button>`:''}
+    </div>`;
+  }).join('');
+}
+async function addUser(){
+  const uname=(document.getElementById('umgNewUser').value||'').trim().toLowerCase();
+  const dname=(document.getElementById('umgNewName').value||'').trim();
+  const pw=(document.getElementById('umgNewPass').value||'');
+  const role=document.getElementById('umgNewRole').value;
+  const msg=document.getElementById('umgMsg');
+  const showMsg=(txt,ok)=>{msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');};
+  if(!uname) return showMsg('Username is required.',false);
+  if(!/^[a-z0-9._-]{3,30}$/.test(uname)) return showMsg('Username: 3-30 chars, letters/numbers/._- only.',false);
+  if(!pw||pw.length<8) return showMsg('Password must be at least 8 characters.',false);
+  try{
+    const existing=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uname)}&select=username`);
+    if(existing.length) return showMsg(`User "${uname}" already exists.`,false);
+    const hash=await hashPw(pw);
+    await sbUpsert('dashboard_users',{username:uname,display_name:dname||uname,role,pw_hash:hash,created_by:AUTH.currentUser.username});
+    showMsg(`User "${uname}" created as ${role}.`,true);
+    document.getElementById('umgNewUser').value='';document.getElementById('umgNewName').value='';document.getElementById('umgNewPass').value='';
+    renderUserList();
+  }catch(e){ showMsg('Error: '+e.message,false); }
+}
+async function deleteUser(uname){
+  if(uname===SUPER_ADMIN){alert('Cannot delete the Super Admin.');return;}
+  if(!confirm(`Remove user "${uname}"?`)) return;
+  try{
+    await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uname)}`,{method:'DELETE',headers:SB_HDR});
+    renderUserList();
+  }catch(e){alert('Delete failed: '+e.message);}
+}
+async function changeMyPassword(){
+  const np=(document.getElementById('umgNewPw').value||'');
+  const cp=(document.getElementById('umgConfPw').value||'');
+  const msg=document.getElementById('umgPwMsg');
+  const showMsg=(txt,ok)=>{msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');};
+  if(np.length<8) return showMsg('Password must be at least 8 characters.',false);
+  if(np!==cp) return showMsg('Passwords do not match.',false);
+  try{
+    const hash=await hashPw(np);
+    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(AUTH.currentUser.username)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify({pw_hash:hash})
+    });
+    if(!r.ok) throw new Error('Update failed');
+    showMsg('Password updated successfully.',true);
+    document.getElementById('umgNewPw').value='';document.getElementById('umgConfPw').value='';
+  }catch(e){ showMsg('Error: '+e.message,false); }
+}
+document.getElementById('userMgmtModal').addEventListener('click',function(e){if(e.target===this)closeUserMgmt();});
+
+// ═══════════════════════════════════════════════════
+// SUPABASE WRITE — called after parsing each file
+// Clears old data for that table then bulk-inserts new rows
+// ═══════════════════════════════════════════════════
+async function saveDataToDB(key, parsed, fileName){
+  const tableMap={rfi:'rfi_records',daily1:'daily_sec1',daily2:'daily_sec2',daily3:'daily_sec3',welders:'welder_records',sor:'sor_records',ncr:'ncr_records'};
+  const table=tableMap[key];
+  if(!table) return;
+
+  // Clear existing rows for this table
+  await sbDelete(table);
+
+  // Map parsed JS objects → DB column names
+  let rows;
+  if(key==='rfi'){
+    rows=parsed.map(r=>({date:r.date,discipline:r.discipline,section:r.section,ic:r.ic,status:r.status}));
+  } else if(key==='daily1'||key==='daily2'||key==='daily3'){
+    rows=parsed.map(r=>({date:r.date,welded:r.welded,ndt_rev:r.ndtRev,ndt_appr:r.ndtAppr,ndt_rescan:r.ndtRescan,ndt_repair:r.ndtRepair,
+      fjc_released:r.fjcReleased,fjc_total:r.fjcTotal,fjc_accepted:r.fjcAccepted,fjc_repair:r.fjcRepair,fjc_balance:r.fjcBalance}));
+  } else if(key==='welders'){
+    rows=parsed.map(r=>({welder_id:r.id,name:r.name,section:r.section,cum_aut:r.cumAut,cum_rep:r.cumRep,cum_pct:r.cumPct,
+      wk_aut:r.wkAut,wk_rep:r.wkRep,wk_pct:r.wkPct,remarks:r.remarks||''}));
+  } else if(key==='sor'){
+    rows=parsed.map(r=>({sor_no:r.sorNo,short_name:r.short||r.sorNo,date:r.date,status:r.status,ic:r.ic,km:r.km,description:r.desc||''}));
+  } else if(key==='ncr'){
+    rows=parsed.map(r=>({ncr_no:r.ncrNo,date:r.date,status:r.status,raised_by:r.raisedBy,against_name:r.againstName,
+      target_close:r.targetClose||null,actual_close:r.actualClose||null,description:r.desc||''}));
+  }
+
+  await sbInsertBatch(table, rows);
+
+  // Update metadata
+  const dates=parsed.map(r=>r.date).filter(Boolean).sort();
+  await sbUpsert('dataset_meta',{key,file_name:fileName,row_count:parsed.length,
+    uploaded_by:AUTH.currentUser?.username||'admin',
+    date_start:dates[0]||null, date_end:dates[dates.length-1]||null});
+}
+
+// ═══════════════════════════════════════════════════
+// COLOR SCHEMES
+// ═══════════════════════════════════════════════════
+const SCHEMES = {
+  slate: {
+    name:'Slate & Amber',
+    bg:'#1e2130', card:'#252a3a', border:'#2d3348', hdr:'#181b28',
+    accent:'#f59e0b', good:'#14b8a6', warn:'#fb923c', bad:'#f43f5e',
+    text:'#f1f0e8', muted:'#7a809a', faint:'#4a5068',
+    cb:'#f59e0b', clb:'#fbbf24', cg:'#14b8a6', cr:'#f43f5e', ca:'#fb923c',
+    cs1:'#f59e0b', cs2:'#a78bfa', cs3:'#14b8a6',
+    chartGrid:'rgba(45,51,72,.5)', progTrack:'#1e2130',
+    loginBg:'#1e2130', loginGrad:'linear-gradient(135deg,#b45309,#f59e0b)',
+  },
+  midnight: {
+    name:'Midnight Oil',
+    bg:'#050508', card:'#0d0d1a', border:'#1a1a2e', hdr:'#02020a',
+    accent:'#00d4ff', good:'#00ff88', warn:'#ffaa00', bad:'#ff3366',
+    text:'#f0f0ff', muted:'#6b6b9a', faint:'#3a3a5a',
+    cb:'#00d4ff', clb:'#66e8ff', cg:'#00ff88', cr:'#ff3366', ca:'#ffaa00',
+    cs1:'#00d4ff', cs2:'#cc44ff', cs3:'#00ff88',
+    chartGrid:'rgba(26,26,46,.8)', progTrack:'#050508',
+    loginBg:'#050508', loginGrad:'linear-gradient(135deg,#007a99,#00d4ff)',
+  },
+  forest: {
+    name:'Deep Forest',
+    bg:'#0d1f1a', card:'#132218', border:'#1a3028', hdr:'#091510',
+    accent:'#10b981', good:'#34d399', warn:'#fbbf24', bad:'#ef4444',
+    text:'#d4f0e8', muted:'#4a8a72', faint:'#2a5040',
+    cb:'#10b981', clb:'#34d399', cg:'#34d399', cr:'#ef4444', ca:'#fbbf24',
+    cs1:'#10b981', cs2:'#6ee7b7', cs3:'#34d399',
+    chartGrid:'rgba(26,48,40,.8)', progTrack:'#0d1f1a',
+    loginBg:'#0d1f1a', loginGrad:'linear-gradient(135deg,#065f46,#10b981)',
+  },
+  navy: {
+    name:'Dark Navy',
+    bg:'#0d1117', card:'#161b22', border:'#30363d', hdr:'#090d13',
+    accent:'#388bfd', good:'#3fb950', warn:'#e3b341', bad:'#f85149',
+    text:'#e6edf3', muted:'#8b949e', faint:'#484f58',
+    cb:'#388bfd', clb:'#60a5fa', cg:'#3fb950', cr:'#f85149', ca:'#e3b341',
+    cs1:'#388bfd', cs2:'#a371f7', cs3:'#3fb950',
+    chartGrid:'rgba(48,54,61,.5)', progTrack:'#21262d',
+    loginBg:'#0d1117', loginGrad:'linear-gradient(135deg,#1d6fa4,#388bfd)',
+  },
+  light: {
+    name:'Corporate Light',
+    bg:'#f8fafc', card:'#ffffff', border:'#e2e8f0', hdr:'#ffffff',
+    accent:'#1e40af', good:'#16a34a', warn:'#d97706', bad:'#dc2626',
+    text:'#1e293b', muted:'#64748b', faint:'#94a3b8',
+    cb:'#1e40af', clb:'#3b82f6', cg:'#16a34a', cr:'#dc2626', ca:'#d97706',
+    cs1:'#1e40af', cs2:'#7c3aed', cs3:'#16a34a',
+    chartGrid:'rgba(226,232,240,.8)', progTrack:'#e2e8f0',
+    loginBg:'#f8fafc', loginGrad:'linear-gradient(135deg,#1e3a8a,#1e40af)',
+  },
+};
+
+let CURRENT_SCHEME = 'slate';
+
+function applyScheme(key){
+  const s = SCHEMES[key] || SCHEMES.slate;
+  CURRENT_SCHEME = key;
+  const r = document.documentElement.style;
+  r.setProperty('--bg',      s.bg);
+  r.setProperty('--card',    s.card);
+  r.setProperty('--border',  s.border);
+  r.setProperty('--hdr',     s.hdr);
+  r.setProperty('--accent',  s.accent);
+  r.setProperty('--good',    s.good);
+  r.setProperty('--warn',    s.warn);
+  r.setProperty('--bad',     s.bad);
+  r.setProperty('--text',    s.text);
+  r.setProperty('--muted',   s.muted);
+  r.setProperty('--faint',   s.faint);
+  // Apply directly to body and key elements via style injection
+  const styleId = 'scheme-dynamic';
+  let el = document.getElementById(styleId);
+  if(!el){ el=document.createElement('style'); el.id=styleId; document.head.appendChild(el); }
+  el.textContent = `
+    body{background:${s.bg}!important;color:${s.text}!important}
+    .hdr{background:${s.hdr}!important;border-color:${s.border}!important}
+    .hdr-title{color:${s.text}!important}
+    .hdr-sub,Hdr-uname{color:${s.muted}!important}
+    .hdr-btn{background:${s.card}!important;border-color:${s.border}!important;color:${s.text}!important}
+    .hdr-btn:hover{border-color:${s.accent}!important;color:${s.accent}!important}
+    .hdr-btn.mgmt{border-color:${s.accent}44!important;color:${s.accent}!important}
+    .hdr-divider{background:${s.border}!important}
+    .upl-bar{background:${s.hdr}!important;border-color:${s.border}!important}
+    .upl-slot{border-color:${s.border}!important}
+    .upl-slot:hover{border-color:${s.accent}!important;background:${s.accent}11!important}
+    .upl-slot.loaded{border-color:${s.good}66!important;background:${s.good}11!important}
+    .upl-slot.unsaved{border-color:${s.accent}88!important;background:${s.accent}11!important}
+    .upl-slot.err{border-color:${s.bad}66!important}
+    .upl-slot-lbl{color:${s.muted}!important}
+    .upl-slot.loaded .upl-slot-lbl{color:${s.good}!important}
+    .upl-slot-cnt{color:${s.accent}!important}
+    .viewer-bar{background:${s.hdr}!important;border-color:${s.card}!important;color:${s.faint}!important}
+    .card{background:${s.card}!important;border-color:${s.border}!important}
+    .slbl{color:${s.muted}!important}
+    th.th{color:${s.muted}!important;border-color:${s.border}!important}
+    td.td{border-color:${s.border}44!important;color:${s.text}!important}
+    td.tf{border-color:${s.border}!important;color:${s.text}!important}
+    .kpi-card{background:${s.card}!important;border-color:${s.border}!important}
+    .kpi-card:hover{box-shadow:0 0 0 2px ${s.border}!important}
+    .kpi-card[data-status="good"]{--kpi-glow:0 0 12px 2px ${s.good}88!important}
+    .kpi-card[data-status="bad"]{--kpi-glow:0 0 12px 2px ${s.bad}88!important}
+    .kpi-card[data-status="warn"]{--kpi-glow:0 0 12px 2px ${s.warn}88!important}
+    .kpi-card[data-status="good"]:hover{border-color:${s.good}77!important}
+    .kpi-card[data-status="bad"]:hover{border-color:${s.bad}77!important}
+    .kpi-card[data-status="warn"]:hover{border-color:${s.warn}77!important}
+    .kpi-lbl,.kpi-goal{color:${s.muted}!important}
+    .bdg{border-color:${s.border}!important}
+    .bdg-cnt{color:${s.muted}!important}
+    .prog-track{background:${s.progTrack}!important}
+    .footer{color:${s.faint}!important}
+    .cb{color:${s.cb}!important}.clb{color:${s.clb}!important}.cg{color:${s.cg}!important}
+    .cr{color:${s.cr}!important}.ca{color:${s.ca}!important}.cm{color:${s.muted}!important}
+    .cs1{color:${s.cs1}!important}.cs2{color:${s.cs2}!important}.cs3{color:${s.cs3}!important}
+    .kpi-inline{border-color:${s.border}!important}
+    .d-inp{background:${s.card}!important;border-color:${s.border}!important;color:${s.text}!important}
+    .filter-tag{color:${s.accent}!important;border-color:${s.accent}44!important}
+    #loginOverlay{background:${s.loginBg}!important}
+    .login-card{background:${s.card}!important;border-color:${s.border}!important}
+    .login-inp{background:${s.bg}!important;border-color:${s.border}!important;color:${s.text}!important}
+    .login-btn{background:${s.loginGrad}!important}
+    .login-proj{color:${s.accent}!important}
+    .login-title{color:${s.text}!important}
+    .login-name,.login-sub,.login-lbl{color:${s.muted}!important}
+    .umg-card{background:${s.card}!important;border-color:${s.border}!important}
+    .umg-hdr{border-color:${s.border}!important}
+    .umg-title{color:${s.text}!important}
+    .umg-add-form,.umg-user-row,.exp-chk{background:${s.bg}!important;border-color:${s.card}!important;color:${s.text}!important}
+    .umg-inp,.umg-sel{background:${s.card}!important;border-color:${s.border}!important;color:${s.text}!important}
+    .umg-add-btn{background:${s.loginGrad}!important}
+    .role-superadmin{color:${s.accent}!important;border-color:${s.accent}44!important}
+    .role-admin{color:${s.good}!important;border-color:${s.good}44!important}
+  `;
+  // Update Chart.js defaults for new charts
+  if(typeof Chart !== 'undefined') Chart.defaults.color = s.muted;
+}
+// ═══════════════════════════════════════════════════
+async function switchScheme(key){
+  applyScheme(key);
+  render();
+  // Save to Supabase in background
+  try{
+    await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(AUTH.currentUser.username)}`,{
+      method:'PATCH',
+      headers:{...SB_HDR,'Prefer':'return=minimal'},
+      body:JSON.stringify({color_scheme:key})
+    });
+  }catch(e){}
+  // Close dropdown
+  const d=document.getElementById('schemeDropdown');
+  if(d) d.style.display='none';
+}
+
+function toggleSchemeDrop(){
+  const d=document.getElementById('schemeDropdown');
+  if(d) d.style.display=d.style.display==='none'?'block':'none';
+  const ed=document.getElementById('exportDrop');
+  if(ed) ed.style.display='none';
+}
+function toggleExportDrop(){
+  const d=document.getElementById('exportDrop');
+  if(d) d.style.display=d.style.display==='none'?'block':'none';
+  const sd=document.getElementById('schemeDropdown');
+  if(sd) sd.style.display='none';
+}
+document.addEventListener('click',e=>{
+  const ew=document.getElementById('exportDropWrap');
+  if(ew&&!ew.contains(e.target)){
+    const d=document.getElementById('exportDrop');
+    if(d) d.style.display='none';
+  }
+  const sw=document.getElementById('schemeDropWrap');
+  if(sw&&!sw.contains(e.target)){
+    const d=document.getElementById('schemeDropdown');
+    if(d) d.style.display='none';
+  }
+});
+
+function exportExcel(){
+  const d=document.getElementById('exportDrop');
+  if(d) d.style.display='none';
+  if(!XLSX){alert('XLSX library not loaded.');return;}
+  const wb=XLSX.utils.book_new();
+
+  // Helper: array of arrays → sheet
+  const mkSheet=(headers,rows)=>{
+    const data=[headers,...rows];
+    return XLSX.utils.aoa_to_sheet(data);
+  };
+
+  // RFI
+  if(ST.data.rfi&&ST.data.rfi.length){
+    const agg=aggRFI(ST.data.rfi);
+    const rows=agg.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
+    rows.push(['TOTAL',agg.totals.acc,agg.totals.accW,agg.totals.can,agg.totals.open,agg.totals.rej,agg.totals.total]);
+    XLSX.utils.book_append_sheet(wb,mkSheet(['Discipline','ACC','ACC W/COMM','CAN','OPEN','REJ','Total']  ,rows),'RFI Status');
+  }
+
+  // NDT
+  const ndtCum=getNDTRows(true);
+  if(ndtCum){
+    const rows=ndtCum.map(r=>[r.s,r.welded,r.rev,r.appr,r.repair,r.bl]);
+    const t=sumK(ndtCum,['welded','rev','appr','repair','bl']);
+    rows.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);
+    XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Welded','EPCM Rev','EPCM Appr','Repair','Backlog'],rows),'NDT Status');
+  }
+
+  // FJC
+  const fjcCum=getFJCRows(true);
+  if(fjcCum){
+    const rows=fjcCum.map(r=>[r.s,r.released,r.total,r.accepted,r.repair,r.balance]);
+    const t=sumK(fjcCum,['released','total','accepted','repair','balance']);
+    rows.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);
+    XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Released','Coated','Accepted','Repair','Balance'],rows),'FJC Status');
+  }
+
+  // Welders
+  if(ST.data.welders&&ST.data.welders.length){
+    const rows=ST.data.welders.map(w=>[w.id,w.name,w.section,w.cumAut,w.cumRep,+w.cumPct.toFixed(2),w.wkAut,w.wkRep,+w.wkPct.toFixed(2),w.remarks]);
+    XLSX.utils.book_append_sheet(wb,mkSheet(['ID','Name','Section','Cum AUT','Cum Rep','Cum Rep%','Wk AUT','Wk Rep','Wk Rep%','Remarks'],rows),'Welders');
+  }
+
+  // SOR
+  if(ST.data.sor&&ST.data.sor.length){
+    const rows=ST.data.sor.map(r=>[r.sorNo,r.short,r.date,r.ic,r.status,r.km,r.desc]);
+    XLSX.utils.book_append_sheet(wb,mkSheet(['SOR No','Short Name','Date','IC','Status','KM','Description'],rows),'Site Observations');
+  }
+
+  // NCR
+  if(ST.data.ncr&&ST.data.ncr.length){
+    const rows=ST.data.ncr.map(r=>[r.ncrNo,r.date,r.raisedBy,r.againstName,r.status,r.targetClose,r.actualClose,r.desc]);
+    XLSX.utils.book_append_sheet(wb,mkSheet(['NCR No','Date','Raised By','Against','Status','Target Close','Actual Close','Description'],rows),'NCR Status');
+  }
+
+  if(wb.SheetNames.length===0){alert('No data loaded to export.');return;}
+  const today=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb,`P30312_Dashboard_${today}.xlsx`);
+}
+
+// ── Custom Export (choose data sets + date range) ───
+function openExportOptions(){
+  const d=document.getElementById('exportDrop');
+  if(d) d.style.display='none';
+  const f=document.getElementById('expFrom'), t=document.getElementById('expTo');
+  if(f&&!f.value) f.value=ST.start;
+  if(t&&!t.value) t.value=ST.end;
+  document.getElementById('exportOptionsModal').classList.add('open');
+}
+function closeExportOptions(){
+  document.getElementById('exportOptionsModal').classList.remove('open');
+  const m=document.getElementById('expMsg');
+  if(m){ m.className='umg-msg'; m.textContent=''; }
+}
+document.getElementById('exportOptionsModal')?.addEventListener('click',function(e){if(e.target===this)closeExportOptions();});
+
+// Latest date present across the daily datasets — used so "Cumulative" sheets
+// always reflect the full history, independent of the chosen export range.
+function maxDateAcross(...datasets){
+  let max=null;
+  datasets.forEach(rows=>{
+    if(!rows) return;
+    rows.forEach(r=>{ if(r.date&&(!max||r.date>max)) max=r.date; });
+  });
+  return max;
+}
+
+function generateCustomExport(){
+  const msg=document.getElementById('expMsg');
+  const showMsg=(txt,ok)=>{ if(msg){ msg.textContent=txt; msg.className='umg-msg '+(ok?'ok':'err'); } };
+  if(!XLSX){ showMsg('XLSX library not loaded.',false); return; }
+
+  const from=document.getElementById('expFrom').value;
+  const to=document.getElementById('expTo').value;
+  if(!from||!to){ showMsg('Please choose both From and To dates.',false); return; }
+  if(from>to){ showMsg('"From" date must be on or before "To" date.',false); return; }
+
+  const sel={
+    rfiPeriod: document.getElementById('expRfiPeriod').checked,
+    rfiCumul:  document.getElementById('expRfiCumul').checked,
+    ndtPeriod: document.getElementById('expNdtPeriod').checked,
+    ndtCumul:  document.getElementById('expNdtCumul').checked,
+    fjcPeriod: document.getElementById('expFjcPeriod').checked,
+    fjcCumul:  document.getElementById('expFjcCumul').checked,
+    welders:   document.getElementById('expWelders').checked,
+    sor:       document.getElementById('expSor').checked,
+    ncr:       document.getElementById('expNcr').checked,
+  };
+  if(!Object.values(sel).some(Boolean)){ showMsg('Select at least one data set to export.',false); return; }
+
+  const wb=XLSX.utils.book_new();
+  // note → an info row placed above the table so the reader knows which
+  // window of data they're looking at, without bloating the sheet name
+  // (Excel sheet names are capped at 31 chars).
+  const mkSheet=(headers,rows,note)=>XLSX.utils.aoa_to_sheet(note?[[note],[],headers,...rows]:[headers,...rows]);
+  const sumK=(rows,keys)=>{ const t={}; keys.forEach(k=>t[k]=rows.reduce((a,r)=>a+(+r[k]||0),0)); return t; };
+  const periodNote=`Period: ${from} to ${to}`;
+  const fullNote='Cumulative — full data history';
+
+  const origStart=ST.start, origEnd=ST.end;
+  try{
+    // ── PERIOD sheets — limited to the chosen export range ──
+    if(sel.rfiPeriod && ST.data.rfi){
+      const agg=aggRFI(ST.data.rfi.filter(r=>r.date>=from&&r.date<=to));
+      const rows=agg.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
+      rows.push(['TOTAL',agg.totals.acc,agg.totals.accW,agg.totals.can,agg.totals.open,agg.totals.rej,agg.totals.total]);
+      XLSX.utils.book_append_sheet(wb,mkSheet(['Discipline','ACC','ACC W/COMM','CAN','OPEN','REJ','Total'],rows,periodNote),'RFI Period');
+    }
+    if(sel.ndtPeriod||sel.fjcPeriod){
+      ST.start=from; ST.end=to;
+      if(sel.ndtPeriod){
+        const rows=getNDTRows(false);
+        if(rows){
+          const t=sumK(rows,['welded','rev','appr','repair','bl']);
+          const out=rows.map(r=>[r.s,r.welded,r.rev,r.appr,r.repair,r.bl]);
+          out.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);
+          XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Welded','EPCM Rev','EPCM Appr','Repair','Backlog'],out,periodNote),'NDT Period');
+        }
+      }
+      if(sel.fjcPeriod){
+        const rows=getFJCRows(false);
+        if(rows){
+          const t=sumK(rows,['released','total','accepted','repair','balance']);
+          const out=rows.map(r=>[r.s,r.released,r.total,r.accepted,r.repair,r.balance]);
+          out.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);
+          XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Released','Coated','Accepted','Repair','Balance'],out,periodNote),'FJC Period');
+        }
+      }
+      ST.start=origStart; ST.end=origEnd;
+    }
+
+    // ── CUMULATIVE sheets — always the full data history ──
+    if(sel.rfiCumul && ST.data.rfi){
+      const agg=aggRFI(ST.data.rfi); // RFI cumulative already aggregates all records, unbounded
+      const rows=agg.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
+      rows.push(['TOTAL',agg.totals.acc,agg.totals.accW,agg.totals.can,agg.totals.open,agg.totals.rej,agg.totals.total]);
+      XLSX.utils.book_append_sheet(wb,mkSheet(['Discipline','ACC','ACC W/COMM','CAN','OPEN','REJ','Total'],rows,fullNote),'RFI Cumulative');
+    }
+    if(sel.ndtCumul||sel.fjcCumul){
+      // getNDTRows/getFJCRows(true) snapshot "as of ST.end" — point it at the
+      // latest date in the data so cumulative reflects the full history,
+      // independent of whatever range was chosen for the export.
+      ST.start=null; ST.end=maxDateAcross(ST.data.daily1,ST.data.daily2,ST.data.daily3)||origEnd;
+      if(sel.ndtCumul){
+        const rows=getNDTRows(true);
+        if(rows){
+          const t=sumK(rows,['welded','rev','appr','repair','bl']);
+          const out=rows.map(r=>[r.s,r.welded,r.rev,r.appr,r.repair,r.bl]);
+          out.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);
+          XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Welded','EPCM Rev','EPCM Appr','Repair','Backlog'],out,fullNote),'NDT Cumulative');
+        }
+      }
+      if(sel.fjcCumul){
+        const rows=getFJCRows(true);
+        if(rows){
+          const t=sumK(rows,['released','total','accepted','repair','balance']);
+          const out=rows.map(r=>[r.s,r.released,r.total,r.accepted,r.repair,r.balance]);
+          out.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);
+          XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Released','Coated','Accepted','Repair','Balance'],out,fullNote),'FJC Cumulative');
+        }
+      }
+      ST.start=origStart; ST.end=origEnd;
+    }
+
+    // ── Standalone data sets (no period/cumulative split) ──
+    if(sel.welders && ST.data.welders?.length){
+      const rows=ST.data.welders.map(w=>[w.id,w.name,w.section,w.cumAut,w.cumRep,+w.cumPct.toFixed(2),w.wkAut,w.wkRep,+w.wkPct.toFixed(2),w.remarks]);
+      XLSX.utils.book_append_sheet(wb,mkSheet(['ID','Name','Section','Cum AUT','Cum Rep','Cum Rep%','Wk AUT','Wk Rep','Wk Rep%','Remarks'],rows),'Welders');
+    }
+    if(sel.sor && ST.data.sor?.length){
+      const rows=ST.data.sor.filter(r=>r.date>=from&&r.date<=to).map(r=>[r.sorNo,r.short,r.date,r.ic,r.status,r.km,r.desc]);
+      XLSX.utils.book_append_sheet(wb,mkSheet(['SOR No','Short Name','Date','IC','Status','KM','Description'],rows,periodNote),'SOR');
+    }
+    if(sel.ncr && ST.data.ncr?.length){
+      const rows=ST.data.ncr.filter(r=>r.date>=from&&r.date<=to).map(r=>[r.ncrNo,r.date,r.raisedBy,r.againstName,r.status,r.targetClose,r.actualClose,r.desc]);
+      XLSX.utils.book_append_sheet(wb,mkSheet(['NCR No','Date','Raised By','Against','Status','Target Close','Actual Close','Description'],rows,periodNote),'NCR');
+    }
+  }catch(e){
+    ST.start=origStart; ST.end=origEnd;
+    showMsg('Export failed: '+e.message,false);
+    return;
+  }
+
+  if(wb.SheetNames.length===0){ showMsg('No data available for the selected data sets / range.',false); return; }
+  XLSX.writeFile(wb,`P30312_CustomExport_${from}_to_${to}.xlsx`);
+  showMsg('Export generated — check your downloads folder.',true);
+}
+
+function exportPDF(theme){
+  const d=document.getElementById('exportDrop');
+  if(d) d.style.display='none';
+
+  // Apply light theme override if requested
+  let styleEl=null;
+  if(theme==='light'){
+    styleEl=document.createElement('style');
+    styleEl.id='print-theme-override';
+    styleEl.textContent=`
+      body{background:#ffffff!important;color:#1e293b!important}
+      .hdr{background:#f8fafc!important;border-color:#e2e8f0!important}
+      .hdr-title,.hdr-sub,.hdr-uname{color:#1e293b!important}
+      .upl-bar,.viewer-bar{background:#f1f5f9!important;border-color:#e2e8f0!important}
+      .card,.kpi-card{background:#ffffff!important;border-color:#e2e8f0!important;color:#1e293b!important}
+      .slbl,.kpi-lbl,.kpi-goal,.cm,.th,.bdg-cnt{color:#64748b!important}
+      .tbl td,.tbl th{border-color:#e2e8f0!important;color:#1e293b!important}
+      .tr-alt{background:rgba(0,0,0,.02)!important}
+      .tr-tot{background:rgba(0,0,0,.04)!important}
+      .prog-track{background:#e2e8f0!important}
+      .footer{color:#94a3b8!important}
+      .bdg{border-color:#e2e8f0!important;background:#f8fafc!important}
+    `;
+    document.head.appendChild(styleEl);
+  }
+
+  window.print();
+
+  // Remove override after print dialog closes
+  if(styleEl){
+    setTimeout(()=>{
+      const el=document.getElementById('print-theme-override');
+      if(el) el.remove();
+    },2000);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// FREE CANVAS ENGINE
+// ═══════════════════════════════════════════════════
+// Grid resolution — 3x finer than the original 12-col grid (36 cols) for
+// Excel-sheet-like control. GAP/SNAP/UNIT_MIN are scaled down to match so
+// proportions and feel stay the same, just at finer granularity.
+const GRID_SCALE = 3;
+const COLS = 12*GRID_SCALE;   // grid columns (36)
+const GAP  = 4.5;             // gap between panels in px (1.5x the original feel)
+const SNAP = 4;               // snap threshold px
+const UNIT_MIN = 14;          // floor for px per grid unit, so cells never get too thin
+
+// px per grid unit (col width and row height) — recalculated to fill the
+// available container width so the 12-col grid spans the whole canvas area
+// instead of sitting in a fixed-size box in the corner of the screen.
+let UNIT = 60;
+function recalcUnit(){
+  const c=document.getElementById('dashCanvas');
+  const containerW=(c&&c.parentElement)?c.parentElement.clientWidth:window.innerWidth;
+  UNIT=Math.max(UNIT_MIN, Math.floor((containerW-GAP*(COLS+1))/COLS));
+}
+
+let EDIT_MODE = false;
+
+// Default layout — {id, col, row, w, h} all in grid units.
+// Defined at the original 12-col resolution, then scaled up by GRID_SCALE so
+// panels keep their exact proportions/positions on the finer 36-col grid.
+const DEFAULT_LAYOUT_BASE = [
+  {id:'rfiPeriod',  col:0, row:0,  w:5, h:6},
+  {id:'rfiDonut',   col:5, row:0,  w:2, h:6},
+  {id:'rfiCumul',   col:7, row:0,  w:5, h:6},
+  {id:'ndtPeriod',  col:0, row:6,  w:6, h:5},
+  {id:'ndtCumul',   col:6, row:6,  w:6, h:5},
+  {id:'fjcPeriod',  col:0, row:11, w:4, h:5},
+  {id:'fjcCumul',   col:4, row:11, w:4, h:5},
+  {id:'welders',    col:8, row:11, w:4, h:5},
+  {id:'progress',   col:0, row:16, w:4, h:4},
+  {id:'ncrTable',   col:4, row:16, w:3, h:4},
+  {id:'ncrBar',     col:7, row:16, w:5, h:4},
+  {id:'sorTable',   col:0, row:20, w:3, h:5},
+  {id:'sorScatter', col:3, row:20, w:9, h:5},
+];
+const DEFAULT_LAYOUT = DEFAULT_LAYOUT_BASE.map(p=>({
+  id:p.id, col:p.col*GRID_SCALE, row:p.row*GRID_SCALE, w:p.w*GRID_SCALE, h:p.h*GRID_SCALE
+}));
+
+// Mutable layout (copy of default, user can modify)
+let CANVAS_LAYOUT = DEFAULT_LAYOUT.map(p=>({...p}));
+
+// Saved layout (persists in localStorage per session).
+// LAYOUT_KEY is versioned to GRID_SCALE — a layout saved at the old 12-col
+// resolution would render tiny/squished on the new 36-col grid, so bumping
+// the key when the grid resolution changes makes old saves simply not match
+// (falling back to DEFAULT_LAYOUT) instead of rendering incorrectly.
+const LAYOUT_KEY = `wep_canvas_layout_g${GRID_SCALE}`;
+function saveLayout(){ try{ localStorage.setItem(LAYOUT_KEY, JSON.stringify(CANVAS_LAYOUT)); }catch(e){} }
+function loadLayout(){ try{ const s=localStorage.getItem(LAYOUT_KEY); if(s) CANVAS_LAYOUT=JSON.parse(s); }catch(e){} }
+
+function colToX(col){ return col*(UNIT+GAP)+GAP; }
+function rowToY(row){ return row*(UNIT+GAP)+GAP; }
+function wToPx(w)   { return w*UNIT+(w-1)*GAP; }
+function hToPx(h)   { return h*UNIT+(h-1)*GAP; }
+function xToCol(x)  { return Math.round((x-GAP)/(UNIT+GAP)); }
+function yToRow(y)  { return Math.round((y-GAP)/(UNIT+GAP)); }
+function pxToW(px)  { return Math.max(1,Math.round((px+GAP)/(UNIT+GAP))); }
+function pxToH(px)  { return Math.max(1,Math.round((px+GAP)/(UNIT+GAP))); }
+
+// Canvas total width = 12 cols + gaps + left/right padding (20px each side)
+function canvasWidth(){ return COLS*(UNIT+GAP)+GAP; }
+function canvasHeight(){
+  const maxRow=Math.max(...CANVAS_LAYOUT.map(p=>p.row+p.h));
+  return rowToY(maxRow)+GAP+40;
+}
+// Canvas origin in viewport coordinates — getBoundingClientRect() already
+// accounts for ALL scrolling (window AND any scrollable ancestor like #app),
+// so pairing it with e.clientX/clientY (also viewport-relative) is the only
+// combination that stays correct regardless of scroll position. Mixing it
+// with e.pageX/pageY (document-relative) or an offsetLeft/offsetParent walk
+// (which ignores ancestor scroll, e.g. #app's overflow-x:auto) is what made
+// drops land away from the cursor.
+function canvasOrigin(){
+  const c=document.getElementById('dashCanvas');
+  if(!c) return{x:0,y:0};
+  const r=c.getBoundingClientRect();
+  return{x:r.left,y:r.top};
+}
+// Convert viewport coords (e.clientX/clientY) to canvas-relative coords
+function pageToCanvas(px,py){ const o=canvasOrigin(); return{x:px-o.x,y:py-o.y}; }
+
+function renderCanvas(htmlMap){
+  const canvas=document.getElementById('dashCanvas');
+  if(!canvas) return;
+  loadLayout();
+  recalcUnit(); // grid columns fill the available width — no dead zone on the right
+  // Set explicit dimensions so coordinate math is reliable
+  canvas.style.width=canvasWidth()+'px';
+  canvas.style.height=canvasHeight()+'px';
+  // Keep the edit-mode dot grid in sync with the actual snap pitch (UNIT+GAP)
+  canvas.style.backgroundSize=`${UNIT+GAP}px ${UNIT+GAP}px`;
+  canvas.innerHTML='';
+
+  CANVAS_LAYOUT.forEach(p=>{
+    const html = htmlMap[p.id];
+    if(!html) return;
+    const div = document.createElement('div');
+    div.className = 'cp';
+    div.dataset.id = p.id;
+    div.style.left   = colToX(p.col)+'px';
+    div.style.top    = rowToY(p.row)+'px';
+    div.style.width  = wToPx(p.w)+'px';
+    div.style.height = hToPx(p.h)+'px';
+    div.innerHTML = html;
+
+    // Span indicator
+    const tip = document.createElement('div');
+    tip.className='cp-span-tip';
+    tip.textContent=`${p.w}×${p.h}`;
+    div.appendChild(tip);
+
+    canvas.appendChild(div);
+  });
+}
+
+// ── Edit mode ────────────────────────────────────────
+function toggleEditMode(){
+  EDIT_MODE=!EDIT_MODE;
+  const btn=document.getElementById('btnEdit');
+  const bar=document.getElementById('canvasModeBar');
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  if(btn){
+    btn.style.color=EDIT_MODE?sc.accent:sc.muted;
+    btn.style.borderColor=EDIT_MODE?sc.accent:'rgba(245,158,11,.3)';
+    btn.style.background=EDIT_MODE?sc.accent+'18':'';
+    btn.textContent=EDIT_MODE?'⊹ Editing…':'⊹ Edit Layout';
+  }
+  if(bar){
+    bar.classList.toggle('on',EDIT_MODE);
+    bar.innerHTML=EDIT_MODE
+      ?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        Edit Layout — drag panels to move · drag ◢ corner to resize width+height · drag → edge for width · drag ↓ edge for height
+        <button onclick="resetLayout()" style="margin-left:auto;font-size:9px;padding:2px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.4);background:none;color:#f59e0b;cursor:pointer">↺ Reset Layout</button>
+        <span style="color:${sc.faint};font-weight:400;text-transform:none;letter-spacing:0;margin-right:8px">Super Admin only</span>`
+      :'';
+  }
+  if(EDIT_MODE) activateEditMode(); else deactivateEditMode();
+}
+
+function activateEditMode(){
+  const canvas=document.getElementById('dashCanvas');
+  if(!canvas) return;
+  canvas.classList.add('edit-mode');
+  canvas.querySelectorAll('.cp').forEach(cp=>{
+    cp.classList.add('editable');
+    // Drag bar
+    if(!cp.querySelector('.cp-drag')){
+      const db=document.createElement('div');
+      db.className='cp-drag'; db.title='Drag to move';
+      db.addEventListener('mousedown',startPanelDrag);
+      cp.appendChild(db);
+    }
+    // SE resize (width+height)
+    if(!cp.querySelector('.cp-res.se')){
+      const se=document.createElement('div');
+      se.className='cp-res se'; se.title='Drag to resize';
+      se.addEventListener('mousedown',e=>startPanelResize(e,'se'));
+      cp.appendChild(se);
+    }
+    // E resize (width only)
+    if(!cp.querySelector('.cp-res.e')){
+      const er=document.createElement('div');
+      er.className='cp-res e'; er.title='Drag to resize width';
+      er.addEventListener('mousedown',e=>startPanelResize(e,'e'));
+      cp.appendChild(er);
+    }
+    // S resize (height only)
+    if(!cp.querySelector('.cp-res.s')){
+      const sr=document.createElement('div');
+      sr.className='cp-res s'; sr.title='Drag to resize height';
+      sr.addEventListener('mousedown',e=>startPanelResize(e,'s'));
+      cp.appendChild(sr);
+    }
+  });
+}
+
+function deactivateEditMode(){
+  const canvas=document.getElementById('dashCanvas');
+  if(!canvas) return;
+  canvas.classList.remove('edit-mode');
+  canvas.querySelectorAll('.cp').forEach(cp=>{
+    cp.classList.remove('editable');
+    cp.querySelectorAll('.cp-drag,.cp-res').forEach(el=>el.remove());
+  });
+}
+
+function resetLayout(){
+  CANVAS_LAYOUT=DEFAULT_LAYOUT.map(p=>({...p}));
+  saveLayout();
+  render();
+}
+
+// ── Snap helpers ─────────────────────────────────────
+const sgH=()=>document.getElementById('sgH');
+const sgV=()=>document.getElementById('sgV');
+function showSgH(y){const g=sgH();if(g){g.style.top=y+'px';g.classList.add('on');}}
+function showSgV(x){const g=sgV();if(g){g.style.left=x+'px';g.classList.add('on');}}
+function hideSg(){sgH()?.classList.remove('on');sgV()?.classList.remove('on');}
+
+function getAllPanelEdges(excludeId){
+  const edges={left:[],right:[],top:[],bottom:[]};
+  document.querySelectorAll('.cp[data-id]').forEach(cp=>{
+    if(cp.dataset.id===excludeId) return;
+    const r=cp.getBoundingClientRect();
+    edges.left.push(r.left); edges.right.push(r.right);
+    edges.top.push(r.top);   edges.bottom.push(r.bottom);
+  });
+  // Add grid column snap lines (viewport coords)
+  const o=canvasOrigin();
+  for(let c=0;c<=COLS;c++) edges.left.push(o.x+colToX(c));
+  return edges;
+}
+function nearestSnap(val,candidates){ let best=null,bd=SNAP; for(const c of candidates){const d=Math.abs(val-c);if(d<bd){bd=d;best=c;}} return best; }
+
+// ── Panel drag (move) ────────────────────────────────
+let _pd=null;
+function startPanelDrag(e){
+  e.preventDefault(); e.stopPropagation();
+  const cp=e.currentTarget.parentElement;
+  const id=cp.dataset.id;
+  const r=cp.getBoundingClientRect();
+
+  // Create live clone (fixed position, viewport coords are fine for visual only)
+  const clone=cp.cloneNode(true);
+  clone.className='cp-clone';
+  clone.style.width=r.width+'px'; clone.style.height=r.height+'px';
+  clone.style.left=r.left+'px'; clone.style.top=r.top+'px';
+  clone.querySelectorAll('.cp-drag,.cp-res,.cp-span-tip').forEach(el=>el.remove());
+  document.body.appendChild(clone);
+  cp.classList.add('is-dragging');
+
+  // Everything below is viewport-relative (clientX/clientY + getBoundingClientRect),
+  // so it stays correct no matter how the window or #app (overflow-x:auto) is scrolled.
+  const o=canvasOrigin();
+  _pd={
+    cp, id, clone,
+    // Offset of cursor from clone's top-left (clone is position:fixed → viewport coords)
+    vOffX: e.clientX-r.left,
+    vOffY: e.clientY-r.top,
+    // Offset of cursor from the panel's canvas-relative left/top — used to
+    // recover the drop position from the cursor's viewport coords on mouseup
+    pOffX: e.clientX-(o.x+parseFloat(cp.style.left)),
+    pOffY: e.clientY-(o.y+parseFloat(cp.style.top)),
+  };
+  window.addEventListener('mousemove',onPanelDrag);
+  window.addEventListener('mouseup',endPanelDrag);
+}
+function onPanelDrag(e){
+  if(!_pd) return;
+  const {clone,vOffX,vOffY,id}=_pd;
+  // Move clone with cursor (viewport coords — clone is position:fixed)
+  clone.style.left=(e.clientX-vOffX)+'px';
+  clone.style.top=(e.clientY-vOffY)+'px';
+  // Snap guides
+  const edges=getAllPanelEdges(id);
+  const sl=nearestSnap(e.clientX-vOffX,[...edges.left,...edges.right]);
+  const st=nearestSnap(e.clientY-vOffY,[...edges.top,...edges.bottom]);
+  if(sl!=null) showSgV(sl); else sgV()?.classList.remove('on');
+  if(st!=null) showSgH(st); else sgH()?.classList.remove('on');
+}
+function endPanelDrag(e){
+  if(!_pd) return;
+  const {cp,id,clone,pOffX,pOffY}=_pd;
+  clone.remove();
+  cp.classList.remove('is-dragging');
+  hideSg();
+
+  // Convert viewport coords to canvas-relative coords — scroll-safe
+  const pos=pageToCanvas(e.clientX-pOffX, e.clientY-pOffY);
+  const newCol=Math.max(0,Math.min(COLS-1,xToCol(pos.x)));
+  const newRow=Math.max(0,yToRow(Math.max(0,pos.y)));
+
+  const p=CANVAS_LAYOUT.find(p=>p.id===id);
+  if(p){
+    p.col=newCol; p.row=newRow;
+    if(p.col+p.w>COLS) p.w=COLS-p.col;
+    saveLayout();
+  }
+
+  cp.style.left=colToX(newCol)+'px';
+  cp.style.top=rowToY(newRow)+'px';
+
+  const canvas=document.getElementById('dashCanvas');
+  if(canvas){ canvas.style.width=canvasWidth()+'px'; canvas.style.height=canvasHeight()+'px'; }
+  setTimeout(()=>Object.values(CHARTS).forEach(c=>{try{c.resize();}catch(er){}}),50);
+  window.removeEventListener('mousemove',onPanelDrag);
+  window.removeEventListener('mouseup',endPanelDrag);
+  _pd=null;
+}
+
+// ── Panel resize ─────────────────────────────────────
+let _pr=null;
+function startPanelResize(e,dir){
+  e.preventDefault(); e.stopPropagation();
+  const cp=e.currentTarget.parentElement;
+  const id=cp.dataset.id;
+  const r=cp.getBoundingClientRect();
+  cp.classList.add('is-dragging');
+  _pr={cp,id,dir,startX:e.clientX,startY:e.clientY,startW:r.width,startH:r.height};
+  window.addEventListener('mousemove',onPanelResize);
+  window.addEventListener('mouseup',endPanelResize);
+}
+function onPanelResize(e){
+  if(!_pr) return;
+  const {cp,id,dir,startX,startY,startW,startH}=_pr;
+  const dx=e.clientX-startX, dy=e.clientY-startY;
+  const p=CANVAS_LAYOUT.find(p=>p.id===id);
+  // Snap the live preview to the same grid units endPanelResize will commit to,
+  // so the panel visibly locks to column/row boundaries as you drag instead of
+  // following the cursor in free pixels and then jumping at release.
+  let w=p?p.w:1, h=p?p.h:1;
+  if(dir==='se'||dir==='e') w=Math.max(1,Math.min(p?COLS-p.col:COLS,pxToW(startW+dx)));
+  if(dir==='se'||dir==='s') h=Math.max(1,pxToH(startH+dy));
+  cp.style.width=wToPx(w)+'px';
+  cp.style.height=hToPx(h)+'px';
+  const tip=cp.querySelector('.cp-span-tip');
+  if(tip) tip.textContent=`${w}×${h}`;
+}
+function endPanelResize(e){
+  if(!_pr) return;
+  const {cp,id,dir,startX,startY,startW,startH}=_pr;
+  cp.classList.remove('is-dragging');
+  hideSg();
+  const dx=e.clientX-startX, dy=e.clientY-startY;
+  const p=CANVAS_LAYOUT.find(p=>p.id===id);
+  if(p){
+    const rawW=startW+dx, rawH=startH+dy;
+    if(dir==='se'||dir==='e') p.w=Math.max(1,Math.min(COLS-p.col,pxToW(rawW)));
+    if(dir==='se'||dir==='s') p.h=Math.max(1,pxToH(rawH));
+    cp.style.width=wToPx(p.w)+'px';
+    cp.style.height=hToPx(p.h)+'px';
+    const tip=cp.querySelector('.cp-span-tip');
+    if(tip) tip.textContent=`${p.w}×${p.h}`;
+    saveLayout();
+  }
+  const canvas=document.getElementById('dashCanvas');
+  if(canvas){ canvas.style.width=canvasWidth()+'px'; canvas.style.height=canvasHeight()+'px'; }
+  setTimeout(()=>Object.values(CHARTS).forEach(c=>{try{c.resize();}catch(er){}}),50);
+  window.removeEventListener('mousemove',onPanelResize);
+  window.removeEventListener('mouseup',endPanelResize);
+  _pr=null;
+}
+
+// Re-fit the grid to the available width when the window is resized
+// (debounced — re-rendering on every resize tick would be wasteful and
+// would also tear down/rebuild Chart.js instances mid-drag).
+let _resizeT=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(_resizeT);
+  _resizeT=setTimeout(()=>{ if(!_pd&&!_pr) render(); },200);
+});
+
+// ═══════════════════════════════════════════════════
+// KICK OFF
+// ═══════════════════════════════════════════════════
+initApp();
+</script>
+</body>
+</html>
