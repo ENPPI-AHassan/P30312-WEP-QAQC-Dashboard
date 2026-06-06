@@ -6,10 +6,48 @@
 <title>P30312 — Weekly QA/QC Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-serif;min-width:900px;overflow-x:auto}
-#app{padding-bottom:48px;overflow-x:auto}
+#app{padding-bottom:48px;overflow-x:auto;margin-left:58px}
+/* ── Side navigation: slim rail permanently visible, slides wider to reveal links ── */
+.sidenav{position:fixed;top:0;left:0;bottom:0;width:58px;background:#181b28;border-right:1px solid #2d3348;
+  z-index:1200;display:flex;flex-direction:column;overflow:hidden;white-space:nowrap;
+  transition:width .25s ease;box-shadow:8px 0 24px rgba(0,0,0,.35)}
+.sidenav.open{width:278px}
+.sidenav-toggle{flex:none;width:36px;height:36px;margin:14px 0 14px 11px;border-radius:8px;background:transparent;
+  border:1px solid #2d3348;color:#f1f0e8;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s ease}
+.sidenav-toggle:hover{background:#252a3a}
+.sidenav-toggle svg{width:18px;height:18px;flex:none}
+.sidenav-link{display:flex;align-items:center;gap:10px;padding:11px 22px;color:#a8afc7;font-size:13px;
+  font-weight:500;text-decoration:none;border-left:3px solid transparent;white-space:nowrap;
+  transition:background .15s ease,color .15s ease}
+.sidenav-link:hover{background:#212640;color:#f1f0e8;border-left-color:#388bfd}
+.sidenav-link:focus,.sidenav-link:focus-visible{outline:none}
+#sidenavExtra{display:flex;flex-direction:column;flex:1;min-height:0}
+#sidenavExtra > *{opacity:0;transform:translateY(-6px);transition:opacity .3s ease,transform .3s ease}
+.sidenav.open #sidenavExtra > *{opacity:1;transform:translateY(0)}
+.sidenav.open #sidenavExtra > *:nth-child(1){transition-delay:.05s}
+.sidenav.open #sidenavExtra > *:nth-child(2){transition-delay:.11s}
+.sidenav.open #sidenavExtra > *:nth-child(3){transition-delay:.17s}
+.sidenav.open #sidenavExtra > *:nth-child(4){transition-delay:.23s}
+.sidenav.open #sidenavExtra > *:nth-child(5){transition-delay:.29s}
+.sidenav.open #sidenavExtra > *:nth-child(6){transition-delay:.35s}
+.sidenav.open #sidenavExtra > *:nth-child(7){transition-delay:.41s}
+.sidenav.open #sidenavExtra > *:nth-child(8){transition-delay:.47s}
+.sidenav-divider{margin:10px 22px;margin-top:auto;border-top:1px dashed #2d3348;flex:none}
+.sidenav-userinfo{padding:4px 22px 8px;display:flex;flex-direction:column;gap:8px}
+.sidenav-uirow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sidenav-uilbl{font-size:10px;color:#7a809a;text-transform:uppercase;letter-spacing:.05em}
+.sidenav-uival{font-size:12px;color:#f1f0e8;font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidenav-signout{margin:6px 14px 16px;padding:11px 14px;border-radius:8px;background:#252a3a;border:1px solid #2d3348;
+  color:#f85149;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:8px;white-space:nowrap;transition:box-shadow .25s,border-color .25s,background .2s}
+.sidenav-signout:hover{border-color:rgba(244,63,94,.45);background:rgba(244,63,94,.08);box-shadow:0 0 12px 2px rgba(244,63,94,.55)}
+.sidenav-backdrop{display:none;position:fixed;inset:0;left:58px;background:rgba(0,0,0,.4);z-index:1050}
+.sidenav-backdrop.open{display:block}
 .hdr{background:#181b28;border-bottom:1px solid #2d3348;padding:10px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .hdr-title{font-size:15px;font-weight:700;letter-spacing:.02em;color:#f1f0e8}
 .hdr-sub{font-size:10px;color:#7a809a;margin-top:2px}
@@ -120,6 +158,11 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .login-first-cred b{color:#14b8a6}
 .login-cred-row{display:flex;justify-content:space-between;margin-top:4px}
 .login-spin{display:inline-block;animation:spin 1s linear infinite;margin-right:6px}
+.login-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#4a5068;font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:#2d3348}
+.login-guest-btn{width:100%;background:none;border:1px solid #2d3348;border-radius:6px;color:#a8afc7;font-size:13px;font-weight:600;padding:10px;cursor:pointer;transition:border-color .2s,background .2s,color .2s}
+.login-guest-btn:hover{border-color:#388bfd;color:#f1f0e8;background:rgba(56,139,253,.08)}
+.login-guest-note{font-size:10px;color:#4a5068;margin-top:8px;text-align:center;line-height:1.5}
 #userMgmtModal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8888;display:none;align-items:center;justify-content:center}
 #userMgmtModal.open{display:flex}
 .umg-card{background:#252a3a;border:1px solid #2d3348;border-radius:12px;width:580px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6)}
@@ -137,8 +180,11 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .role-superadmin{background:#2a1f0a;color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
 .role-admin{background:#0f2420;color:#14b8a6;border:1px solid rgba(20,184,166,.3)}
 .role-viewer{background:#252a3a;color:#7a809a;border:1px solid #2d3348}
-.umg-del{background:none;border:1px solid rgba(244,63,94,.3);border-radius:4px;color:#f43f5e;font-size:10px;padding:3px 8px;cursor:pointer;transition:all .2s}
-.umg-del:hover{background:rgba(244,63,94,.1)}
+.umg-del{background:none;border:1px solid rgba(244,63,94,.3);border-radius:5px;color:#f43f5e;font-size:12px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.umg-del:hover{background:rgba(244,63,94,.12)}
+.umg-edit{background:none;border:1px solid rgba(245,158,11,.35);border-radius:5px;color:#f59e0b;font-size:12px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.umg-edit:hover{background:rgba(245,158,11,.12)}
+.umg-edit-form{background:#1e2130;border:1px solid #2d3348;border-radius:8px;padding:12px;margin:-2px 0 8px}
 .umg-add-form{background:#1e2130;border:1px solid #252a3a;border-radius:8px;padding:14px}
 .umg-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .umg-inp{width:100%;background:#252a3a;border:1px solid #2d3348;border-radius:5px;color:#f1f0e8;padding:7px 10px;font-size:12px;font-family:monospace;outline:none;transition:border-color .2s}
@@ -223,6 +269,9 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
     <div class="login-field"><label class="login-lbl" for="loginPass">Password</label><input class="login-inp" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password"></div>
     <button class="login-btn" id="loginBtn" onclick="attemptLogin()">Sign In</button>
     <div class="login-err" id="loginErr"></div>
+    <div class="login-divider">or</div>
+    <button class="login-guest-btn" id="loginGuestBtn" onclick="continueAsGuest()">Continue as Guest (view-only)</button>
+    <div class="login-guest-note">No account needed — read-only access for this session.<br>Your view won't be saved and resets when you sign out or reload.</div>
   </div>
 </div>
 
@@ -318,6 +367,18 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 <!-- CANVAS MODE BAR -->
 <div id="canvasModeBar" class="canvas-mode-bar"></div>
 
+<!-- SIDE NAVIGATION -->
+<div id="sidenavBackdrop" class="sidenav-backdrop" onclick="toggleSidenav(false)"></div>
+<nav id="sidenav" class="sidenav">
+  <button id="sidenavToggle" class="sidenav-toggle" onclick="toggleSidenav()" title="Toggle navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div id="sidenavExtra"></div>
+</nav>
+<!-- Dropdown panels live OUTSIDE .sidenav so they aren't clipped by its overflow:hidden -->
+<div id="exportDrop" style="display:none;position:fixed;border-radius:8px;min-width:230px;z-index:1500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden"></div>
+<div id="schemeDropdown" style="display:none;position:fixed;border-radius:8px;min-width:190px;z-index:1500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden"></div>
+
 <div id="app">
   <div id="dashCanvas"></div>
 </div>
@@ -327,6 +388,20 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 <input type="file" id="fileSingle" accept=".xlsx,.xls" style="display:none">
 
 <script>
+// ── Side navigation toggle (overlay — does not affect page layout) ──
+function toggleSidenav(force){
+  const nav=document.getElementById('sidenav');
+  const backdrop=document.getElementById('sidenavBackdrop');
+  const open=force!==undefined?force:!nav.classList.contains('open');
+  nav.classList.toggle('open',open);
+  backdrop.classList.toggle('open',open);
+  if(!open){
+    if(document.activeElement&&nav.contains(document.activeElement)) document.activeElement.blur();
+    const ed=document.getElementById('exportDrop'); if(ed) ed.style.display='none';
+    const sd=document.getElementById('schemeDropdown'); if(sd) sd.style.display='none';
+  }
+}
+
 // ═══════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════
@@ -351,17 +426,19 @@ const ST = {
   end:   _defEnd,
   unsaved: false,   // true when data is in memory but not yet saved to Supabase
   data: {
-    rfi:     null,
-    daily1:  null,
-    daily2:  null,
-    daily3:  null,
-    welders: null,
-    sor:     null,
-    ncr:     null,
+    rfi:        null,
+    daily1:     null,
+    daily2:     null,
+    daily3:     null,
+    welders:    null,
+    sor:        null,
+    ncr:        null,
+    deployment: null,
   },
   files: {
-    rfi:'', daily1:'', daily2:'', daily3:'', welders:'', sor:'', ncr:''
+    rfi:'', daily1:'', daily2:'', daily3:'', welders:'', sor:'', ncr:'', deployment:''
   },
+  dpMonth: null,  // selected month on deployment page (YYYY-MM)
   errors: {},
   processing: {}
 };
@@ -552,9 +629,45 @@ function parseNCR(ab){
     if(againstName.toUpperCase()==='BIN ASHEER') againstName='BINASHEER';
     const targetClose=xlDateToISO(r[5]);
     const actualClose=xlDateToISO(r[6]);
-    records.push({ncrNo,date:dateStr,status,raisedBy,againstName,targetClose,actualClose,desc:(r[3]||'').toString().slice(0,120)});
+    records.push({ncrNo,date:dateStr,status,raisedBy,againstName,targetClose,actualClose,desc:(r[3]||'').toString().trim()});
   }
   return records;
+}
+
+function parseDeployment(ab){
+  const wb=XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
+  const planWs=wb.Sheets['DP_PLAN'];
+  const actualWs=wb.Sheets['DP_ACTUAL'];
+  if(!planWs||!actualWs) throw new Error('Missing DP_PLAN or DP_ACTUAL sheet.');
+
+  function parseSheet(ws){
+    const raw=XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+    if(!raw.length) return{months:[],rows:[]};
+    const hdr=raw[0];
+    const months=hdr.slice(5).map(d=>{
+      if(d instanceof Date) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if(typeof d==='string'&&d.length>=7) return d.slice(0,7);
+      return null;
+    }).filter(Boolean);
+    const rows=[];
+    for(let i=1;i<raw.length;i++){
+      const r=raw[i]; if(!r||!r[0]) continue;
+      rows.push({
+        loc:(r[0]||'').toString().trim(),
+        cat:(r[1]||'').toString().trim(),
+        role:(r[2]||'').toString().trim(),
+        name:(r[3]||'').toString().trim()||null,
+        max:+(r[4]||0),
+        vals:months.map((_,j)=>+(r[5+j]||0))
+      });
+    }
+    return{months,rows};
+  }
+
+  const plan=parseSheet(planWs);
+  const actual=parseSheet(actualWs);
+  if(!plan.rows.length) throw new Error('No rows found in DP_PLAN sheet.');
+  return{months:plan.months, plan:plan.rows, actual:actual.rows};
 }
 
 // ═══════════════════════════════════════════════════
@@ -673,29 +786,32 @@ function bRFIDonut(periodTotals, cumTotals, live){
 }
 
 function bNDTTable(secRows, title, live, kpis){
+  const hideBacklog=!!(AUTH.currentUser&&AUTH.currentUser.isGuest);
   const totals = secRows ? sumK(secRows,['welded','rev','appr','rescan','repair','bl']) : null;
   const sc=['cs1','cs2','cs3'];
+  const colCount=hideBacklog?5:6;
   const trs = secRows ? secRows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
     <td class="td tl ${sc[i]||''}">${r.s}</td>
     <td class="td">${fn(r.welded)}</td><td class="td">${fn(r.rev)}</td>
     <td class="td cg">${fn(r.appr)}</td><td class="td cr">${fn(r.repair)}</td>
-    <td class="td ${r.bl>100?'cr':'ca'}">${fn(r.bl)}</td>
-  </tr>`).join('') : `<tr><td colspan="6" class="td tl cm" style="padding:16px">Upload Daily Pipeline files</td></tr>`;
-  // Build inline KPIs if provided
+    ${hideBacklog?'':`<td class="td ${r.bl>100?'cr':'ca'}">${fn(r.bl)}</td>`}
+  </tr>`).join('') : `<tr><td colspan="${colCount}" class="td tl cm" style="padding:16px">Upload Daily Pipeline files</td></tr>`;
+  // Build inline KPIs if provided (drop NDT Backlog for guests)
+  const kpisShown=hideBacklog&&kpis?kpis.filter(k=>k.label!=='NDT Backlog'):kpis;
   let kpiHtml='';
-  if(kpis&&kpis.length){
-    const cols=kpis.length===1?'1fr':'repeat('+kpis.length+',1fr)';
-    kpiHtml=`<div class="kpi-inline" style="grid-template-columns:${cols}">${kpis.map(k=>bKPIinline(k.label,k.value,k.goal,k.unit)).join('')}</div>`;
+  if(kpisShown&&kpisShown.length){
+    const cols=kpisShown.length===1?'1fr':'repeat('+kpisShown.length+',1fr)';
+    kpiHtml=`<div class="kpi-inline" style="grid-template-columns:${cols}">${kpisShown.map(k=>bKPIinline(k.label,k.value,k.goal,k.unit)).join('')}</div>`;
   }
   return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}${pill(live)}</div>
   <div class="ox"><table class="tbl"><thead><tr>
     <th class="th tl">Section</th><th class="th">Welded</th><th class="th">EPCM Rev</th>
-    <th class="th">Accepted</th><th class="th">Repair</th><th class="th">Backlog</th>
+    <th class="th">Accepted</th><th class="th">Repair</th>${hideBacklog?'':'<th class="th">Backlog</th>'}
   </tr></thead><tbody>${trs}</tbody>
   ${totals?`<tfoot><tr class="tr-tot"><td class="tf tl cm">Total</td>
     <td class="tf">${fn(totals.welded)}</td><td class="tf">${fn(totals.rev)}</td>
     <td class="tf cg">${fn(totals.appr)}</td><td class="tf cr">${fn(totals.repair)}</td>
-    <td class="tf ${totals.bl>200?'cr':'ca'}">${fn(totals.bl)}</td>
+    ${hideBacklog?'':`<td class="tf ${totals.bl>200?'cr':'ca'}">${fn(totals.bl)}</td>`}
   </tr></tfoot>`:''}
   </table></div>${kpiHtml}</div>`;
 }
@@ -884,7 +1000,8 @@ const SLOT_DEFS=[
   {key:'daily3', icon:'🔧', label:'Daily Sec-3',    hint:'Daily_SEC3 sheet'},
   {key:'welders',icon:'👷', label:'Welders',         hint:'Weekly_WLDR_REP sheet'},
   {key:'sor',    icon:'👁', label:'SOR Register',   hint:'SOR sheet'},
-  {key:'ncr',    icon:'⚠', label:'NCR Register',   hint:'NCR sheet'},
+  {key:'ncr',        icon:'⚠', label:'NCR Register',      hint:'NCR sheet'},
+  {key:'deployment', icon:'👥', label:'EPCM Deployment', hint:'DP_PLAN + DP_ACTUAL sheets'},
 ];
 
 function bUploadBar(){
@@ -979,11 +1096,7 @@ function bUploadBar(){
 // ═══════════════════════════════════════════════════
 function bHeader(){
   const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
-  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
   const isAdmin=!isViewer; // superadmin + admin both get controls
-  const u=AUTH.currentUser||{};
-  const roleCls=isSA?'role-superadmin':u.role==='admin'?'role-admin':'role-viewer';
-  const roleLabel=isSA?'Super Admin':u.role==='admin'?'Admin':'Viewer';
 
   // Format date as DD/MM/YYYY for display
   const fmtDisp=d=>{if(!d)return'—';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;};
@@ -1001,70 +1114,86 @@ function bHeader(){
         &nbsp;To: <span style="color:#e6edf3;font-family:monospace">${fmtDisp(ST.end)}</span>
       </div>`;
 
-  const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
-  const schemeOpts=Object.entries(SCHEMES).map(([k,v])=>`
-    <button onclick="switchScheme('${k}')" style="width:100%;background:none;border:none;color:${k===CURRENT_SCHEME?s.accent:'inherit'};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s;font-weight:${k===CURRENT_SCHEME?'700':'400'}"
-      onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
-      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${v.accent};flex-shrink:0"></span>
-      ${v.name}${k===CURRENT_SCHEME?' ✓':''}
-    </button>`).join('');
-
   return`<div class="hdr">
     <div><div class="hdr-title">WEEKLY QA/QC DASHBOARD</div><div class="hdr-sub">P30312 — WEST TO EAST PIPELINE PROJECT</div></div>
     ${dateSection}
-    <div class="hdr-divider"></div>
-    <div class="hdr-user">
-      <span class="hdr-uname">${u.displayName||u.username||''}</span>
-      <span class="role-badge ${roleCls}">${roleLabel}</span>
-
-      <!-- Scheme picker -->
-      <div style="position:relative" id="schemeDropWrap">
-        <button onclick="toggleSchemeDrop()" title="Color scheme"
-          style="background:${s.card};border:1px solid ${s.border};border-radius:5px;color:${s.accent};font-size:11px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .2s">
-          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.accent}"></span>Theme
-        </button>
-        <div id="schemeDropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:${s.card};border:1px solid ${s.border};border-radius:8px;min-width:190px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden">
-          <div style="padding:6px 14px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${s.faint}">Color Scheme</div>
-          ${schemeOpts}
-        </div>
-      </div>
-
-      <!-- Export -->
-      <div style="position:relative;display:inline-block" id="exportDropWrap">
-        <button onclick="toggleExportDrop()"
-          style="background:${s.card};border:1px solid ${s.border};border-radius:5px;color:${s.text};font-size:11px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .2s">
-          ⬇ Export
-        </button>
-        <div id="exportDrop" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:${s.card};border:1px solid ${s.border};border-radius:8px;min-width:230px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden">
-          <div style="padding:6px 0">
-            <div style="padding:4px 14px 2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${s.faint}">Excel</div>
-            <button onclick="exportExcel()" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
-              onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
-              📊 Export all datasets to Excel
-            </button>
-            <button onclick="openExportOptions()" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
-              onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
-              📋 Custom export… (choose data sets &amp; date range)
-            </button>
-            <div style="height:1px;background:${s.border};margin:4px 0"></div>
-            <div style="padding:4px 14px 2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${s.faint}">PDF</div>
-            <button onclick="exportPDF('current')" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
-              onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
-              🎨 PDF — Current theme
-            </button>
-            <button onclick="exportPDF('light')" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
-              onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
-              ☀️ PDF — Corporate Light (print-friendly)
-            </button>
-          </div>
-        </div>
-      </div>
-
-      ${isSA?`<button class="hdr-btn mgmt" onclick="openUserMgmt()">⚙ Users</button>`:''}
-      ${isSA?`<button class="hdr-btn" id="btnEdit" onclick="toggleEditMode()" style="border-color:rgba(245,158,11,.3);color:#7a809a">⊹ Edit Layout</button>`:''}
-      <button class="hdr-btn danger" onclick="logout()">Sign Out</button>
-    </div>
   </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// SIDEBAR — relocated header functions (Export, Theme, Edit Layout,
+// User Management, then user info + Sign Out)
+// ═══════════════════════════════════════════════════
+function fillSidenavDrops(){
+  const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const ed=document.getElementById('exportDrop');
+  const sd=document.getElementById('schemeDropdown');
+  if(ed){
+    ed.style.background=s.card;
+    ed.style.border=`1px solid ${s.border}`;
+    ed.innerHTML=`
+      <div style="padding:6px 0">
+        <button onclick="openExportOptions()" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
+          onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
+          📋 Custom Export to Excel
+        </button>
+        <button onclick="exportDashboardImage()" id="btnExportImg" style="width:100%;background:none;border:none;color:${s.text};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s"
+          onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
+          🖼️ High-Res Image Dashboard Export
+        </button>
+      </div>`;
+  }
+  if(sd){
+    sd.style.background=s.card;
+    sd.style.border=`1px solid ${s.border}`;
+    const schemeOpts=Object.entries(SCHEMES).map(([k,v])=>`
+      <button onclick="switchScheme('${k}')" style="width:100%;background:none;border:none;color:${k===CURRENT_SCHEME?s.accent:'inherit'};font-size:12px;padding:8px 14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s;font-weight:${k===CURRENT_SCHEME?'700':'400'}"
+        onmouseover="this.style.background='${s.accent}11'" onmouseout="this.style.background='none'">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${v.accent};flex-shrink:0"></span>
+        ${v.name}${k===CURRENT_SCHEME?' ✓':''}
+      </button>`).join('');
+    sd.innerHTML=`<div style="padding:6px 14px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${s.faint}">Color Scheme</div>${schemeOpts}`;
+  }
+}
+
+function bSidenavExtra(){
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const u=AUTH.currentUser||{};
+  const isGuest=!!u.isGuest;
+  const roleCls=isSA?'role-superadmin':isGuest?'role-viewer':u.role==='admin'?'role-admin':'role-viewer';
+  const roleLabel=isSA?'Super Admin':isGuest?'Guest':u.role==='admin'?'Admin':'Viewer';
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+
+  const navActive='border-left-color:'+sc.accent+';background:#212640;color:#f1f0e8';
+  return `
+    <!-- Page Navigation -->
+    <button class="sidenav-link" style="width:100%;background:none;border:none;cursor:pointer;${APP_VIEW==='dashboard'?navActive:''}" onclick="switchView('dashboard')">⊟ Dashboard</button>
+    <button class="sidenav-link" style="width:100%;background:none;border:none;cursor:pointer;${APP_VIEW==='deployment'?navActive:''}" onclick="switchView('deployment')">👥 Manpower Deployment</button>
+
+    <!-- Export -->
+    <div class="sidenav-item" id="exportDropWrap">
+      <button class="sidenav-link" style="width:100%;background:none;border:none;cursor:pointer" onclick="toggleExportDrop()">⬇ Export</button>
+    </div>
+
+    <!-- Theme -->
+    <div class="sidenav-item" id="schemeDropWrap">
+      <button class="sidenav-link" style="width:100%;background:none;border:none;cursor:pointer" onclick="toggleSchemeDrop()">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${(SCHEMES[CURRENT_SCHEME]||SCHEMES.slate).accent}"></span>Theme
+      </button>
+    </div>
+
+    ${isSA?`<button class="sidenav-link" id="btnEdit" style="width:100%;background:none;border:none;cursor:pointer" onclick="toggleEditMode()">⊹ Edit Layout</button>`:''}
+    ${isSA?`<button class="sidenav-link" style="width:100%;background:none;border:none;cursor:pointer" onclick="openUserMgmt()">⚙ User Management</button>`:''}
+
+    <div class="sidenav-divider"></div>
+
+    <div class="sidenav-userinfo">
+      <div class="sidenav-uirow"><span class="sidenav-uilbl">Username</span><span class="sidenav-uival">${u.displayName||u.username||''}</span></div>
+      <div class="sidenav-uirow"><span class="sidenav-uilbl">Access Type</span><span class="role-badge ${roleCls}">${roleLabel}</span></div>
+      ${(!isGuest&&u.lastLogin)?`<div class="sidenav-uirow"><span class="sidenav-uilbl">Last Sign-in</span><span class="sidenav-uival" style="font-size:10px">${fmtLoginTime(u.lastLogin)}</span></div>`:''}
+    </div>
+    <button class="sidenav-signout" onclick="logout()"><span style="font-size:15px;line-height:1">⏻</span> Sign Out</button>
+  `;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1180,11 +1309,22 @@ function getPeriodKPIs(){
 }
 
 // ═══════════════════════════════════════════════════
+// VIEW ROUTING
+// ═══════════════════════════════════════════════════
+let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment'
+
+function switchView(v){
+  APP_VIEW = v;
+  render();
+}
+
+// ═══════════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════════
 function render(){
   Object.values(CHARTS).forEach(c=>{try{c.destroy();}catch(e){}});
   Object.keys(CHARTS).forEach(k=>delete CHARTS[k]);
+  if(APP_VIEW==='deployment'){ renderDeployment(); return; }
 
   const rfiData=getRFIData();
   const rfiLive=!rfiData.isDefault;
@@ -1230,6 +1370,11 @@ function render(){
     </div>
   `;
 
+  // Render relocated header functions into the sidebar
+  const sidenavExtraEl=document.getElementById('sidenavExtra');
+  if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
+  fillSidenavDrops();
+
   // Inject canvas mode bar
   const modeBar=document.getElementById('canvasModeBar');
   const appEl=document.getElementById('app');
@@ -1241,6 +1386,236 @@ function render(){
   bindEvents();
   // Re-apply edit mode if active
   if(EDIT_MODE) activateEditMode();
+}
+
+// ═══════════════════════════════════════════════════
+// DEPLOYMENT PAGE
+// ═══════════════════════════════════════════════════
+function renderDeployment(){
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const dep=ST.data.deployment;
+  const isViewer=AUTH.currentUser&&(AUTH.currentUser.role==='viewer'||!!AUTH.currentUser.isGuest);
+
+  // Default selected month = current calendar month
+  if(!ST.dpMonth){
+    const n=new Date();
+    ST.dpMonth=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  document.getElementById('app').innerHTML=`
+    ${bHeader()}
+    ${bDeploymentBody(sc, dep, isViewer)}
+  `;
+
+  const sidenavExtraEl=document.getElementById('sidenavExtra');
+  if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
+  fillSidenavDrops();
+  bindDeploymentEvents();
+  if(dep) initDeploymentCharts(dep, sc);
+}
+
+function dpStatus(planVal, actualVal, monthStr){
+  if(planVal===0) return 'neutral';
+  const now=new Date();
+  const nowStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const isPastOrCurrent=monthStr<=nowStr;
+  if(isPastOrCurrent && actualVal===0)       return 'missed';
+  if(isPastOrCurrent && actualVal<planVal)   return 'partial';
+  if(isPastOrCurrent && actualVal>=planVal)  return 'met';
+  return 'pending'; // future with plan > 0
+}
+
+function dpStatusBadge(status, sc){
+  const cfg={
+    missed: {label:'Missed',   bg:sc.bad+'22',  border:sc.bad+'66',  color:sc.bad},
+    partial:{label:'Partial',  bg:sc.warn+'22', border:sc.warn+'66', color:sc.warn},
+    met:    {label:'Met',      bg:sc.good+'22', border:sc.good+'66', color:sc.good},
+    pending:{label:'Pending',  bg:sc.ca+'22',   border:sc.ca+'66',   color:sc.ca},
+    neutral:{label:'—',        bg:'transparent',border:'transparent', color:sc.faint},
+  };
+  const c=cfg[status]||cfg.neutral;
+  return `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;
+    background:${c.bg};border:1px solid ${c.border};color:${c.color}">${c.label}</span>`;
+}
+
+function bDeploymentBody(sc, dep, isViewer){
+  const months=dep?dep.months:[];
+  const selMonth=ST.dpMonth||'';
+  const monthIdx=dep?dep.months.indexOf(selMonth):-1;
+
+  // Month selector options
+  const monthOpts=months.map(m=>`<option value="${m}"${m===selMonth?' selected':''}>${fmtDeployMonth(m)}</option>`).join('');
+
+  // ── Category table ──
+  const cats=['Category I','Category II','Category III','Category IV'];
+  const catRows=dep?cats.map(cat=>{
+    const pv=dep.plan.filter(r=>r.cat===cat).reduce((s,r)=>s+(r.vals[monthIdx]>=0?r.vals[monthIdx]:0),0);
+    const av=dep.actual.filter(r=>r.cat===cat).reduce((s,r)=>s+(r.vals[monthIdx]>=0?r.vals[monthIdx]:0),0);
+    const st=dpStatus(pv,av,selMonth);
+    return`<tr class="${cats.indexOf(cat)%2?'tr-alt':''}">
+      <td class="td tl cs1">${cat}</td>
+      <td class="td">${pv||'—'}</td>
+      <td class="td">${av||'—'}</td>
+      <td class="td" style="color:${av-pv<0?sc.bad:av-pv>0?sc.good:sc.muted}">${pv>0||av>0?(av-pv>0?'+':'')+(av-pv):'—'}</td>
+      <td class="td">${dpStatusBadge(st,sc)}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="5" class="td tl cm" style="padding:14px;color:${sc.faint}">Upload EPCM Deployment file to view data</td></tr>`;
+
+  // ── Role table ──
+  const roleSet=dep?[...new Set([...dep.plan.map(r=>r.role),...dep.actual.map(r=>r.role)])].sort():[];
+  const roleRows=dep?roleSet.map((role,i)=>{
+    const pv=dep.plan.filter(r=>r.role===role).reduce((s,r)=>s+(r.vals[monthIdx]>=0?r.vals[monthIdx]:0),0);
+    const av=dep.actual.filter(r=>r.role===role).reduce((s,r)=>s+(r.vals[monthIdx]>=0?r.vals[monthIdx]:0),0);
+    const st=dpStatus(pv,av,selMonth);
+    return`<tr class="${i%2?'tr-alt':''}">
+      <td class="td tl">${role}</td>
+      <td class="td">${pv||'—'}</td>
+      <td class="td">${av||'—'}</td>
+      <td class="td" style="color:${av-pv<0?sc.bad:av-pv>0?sc.good:sc.muted}">${pv>0||av>0?(av-pv>0?'+':'')+(av-pv):'—'}</td>
+      <td class="td">${dpStatusBadge(st,sc)}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="5" class="td tl cm" style="padding:14px;color:${sc.faint}">Upload EPCM Deployment file to view data</td></tr>`;
+
+  const uploadSlot=isViewer?'':(`
+    <div class="card" style="margin-bottom:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-size:12px;color:${sc.muted};font-weight:600">EPCM Deployment File</span>
+      ${dep
+        ?`<span style="font-size:11px;color:${sc.good}">✅ ${ST.files.deployment||'Loaded'} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows</span>
+           <button onclick="document.getElementById('dpFileInput').click()" style="margin-left:auto;background:${sc.card};border:1px solid ${sc.border};border-radius:6px;color:${sc.muted};font-size:11px;padding:5px 12px;cursor:pointer">Replace</button>`
+        :`<span style="font-size:11px;color:${sc.faint}">No file loaded — upload EPCM_Deployment.xlsx</span>
+           <button onclick="document.getElementById('dpFileInput').click()" style="margin-left:auto;background:${sc.loginGrad};border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:600;padding:6px 14px;cursor:pointer">Upload File</button>`}
+      <input type="file" id="dpFileInput" accept=".xlsx,.xls" style="display:none">
+    </div>`);
+
+  const ctrlBar=dep?`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:11px;color:${sc.muted};font-weight:600">Selected Month:</span>
+      <select id="dpMonthSel" onchange="ST.dpMonth=this.value;render()"
+        style="background:${sc.card};border:1px solid ${sc.border};border-radius:6px;color:${sc.text};
+               font-size:12px;padding:5px 10px;cursor:pointer">
+        ${monthOpts}
+      </select>
+      <span style="font-size:10px;color:${sc.faint};margin-left:4px">Showing headcount for ${fmtDeployMonth(selMonth)}</span>
+    </div>`:'';
+
+  return`<div style="padding:16px 20px 32px 78px;min-height:100vh;background:${sc.bg}">
+    <div style="max-width:1400px">
+      <div style="margin-bottom:18px">
+        <div style="font-size:18px;font-weight:700;color:${sc.text}">Manpower Deployment Status</div>
+        <div style="font-size:11px;color:${sc.faint};margin-top:3px">EPCM Personnel — Planned vs. Actual Headcount</div>
+      </div>
+
+      ${uploadSlot}
+      ${ctrlBar}
+
+      <!-- Tables row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="card" style="display:flex;flex-direction:column">
+          <div class="slbl">By Category${dep?` · ${fmtDeployMonth(selMonth)}`:''}${dep?`<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">all locations</span>`:''}</div>
+          <div class="ox"><table class="tbl"><thead><tr>
+            <th class="th tl">Category</th><th class="th">Plan</th><th class="th">Actual</th><th class="th">Variance</th><th class="th">Status</th>
+          </tr></thead><tbody>${catRows}</tbody></table></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column">
+          <div class="slbl">By Role${dep?` · ${fmtDeployMonth(selMonth)}`:''}${dep?`<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">summed across all locations</span>`:''}</div>
+          <div class="ox" style="max-height:340px"><table class="tbl"><thead><tr>
+            <th class="th tl">Role</th><th class="th">Plan</th><th class="th">Actual</th><th class="th">Variance</th><th class="th">Status</th>
+          </tr></thead><tbody>${roleRows}</tbody></table></div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="card" style="display:flex;flex-direction:column">
+          <div class="slbl">6-Month Outlook<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">current month + 5</span></div>
+          <div style="flex:1;min-height:220px;position:relative"><canvas id="dpChart6m"></canvas></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column">
+          <div class="slbl">Full Project Scope<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">Oct 2025 – Jan 2029</span></div>
+          <div style="flex:1;min-height:220px;position:relative"><canvas id="dpChartFull"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function fmtDeployMonth(str){
+  if(!str||str.length<7) return str||'';
+  const d=new Date(str+'-01');
+  return isNaN(d)?str:d.toLocaleString(undefined,{month:'short',year:'numeric'});
+}
+
+function bindDeploymentEvents(){
+  const inp=document.getElementById('dpFileInput');
+  if(inp) inp.onchange=async e=>{
+    const f=e.target.files[0]; inp.value='';
+    if(f) await handleFile('deployment',f);
+  };
+}
+
+function initDeploymentCharts(dep, sc){
+  Chart.defaults.color=sc.muted;
+  Chart.defaults.font.family='system-ui,-apple-system,sans-serif';
+
+  const now=new Date();
+  const nowStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  const totalPlan=dep.months.map((_,i)=>dep.plan.reduce((s,r)=>s+(r.vals[i]||0),0));
+  const totalActual=dep.months.map((_,i)=>dep.actual.reduce((s,r)=>s+(r.vals[i]||0),0));
+
+  // Point color per month: missed=bad, met=good, pending=warn, neutral/future=accent
+  function ptColor(months, plan, actual){
+    return months.map((m,i)=>{
+      const p=plan[i], a=actual[i];
+      const st=dpStatus(p,a,m);
+      if(st==='missed') return sc.bad;
+      if(st==='partial') return sc.warn;
+      if(st==='met') return sc.good;
+      if(st==='pending') return sc.ca;
+      return sc.faint;
+    });
+  }
+
+  const commonOpts=(title)=>({
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom',labels:{boxWidth:10,padding:14,font:{size:11}}},
+      tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y}`}},
+      title:{display:false}
+    },
+    scales:{
+      x:{grid:{color:sc.chartGrid},ticks:{font:{size:9},maxRotation:45,minRotation:30}},
+      y:{grid:{color:sc.chartGrid},ticks:{font:{size:10}},beginAtZero:true,title:{display:true,text:'Headcount',font:{size:10}}}
+    }
+  });
+
+  // ── 6-month chart ──
+  const curIdx=Math.max(0,dep.months.indexOf(nowStr));
+  const sliceEnd=Math.min(dep.months.length, curIdx+6);
+  const m6=dep.months.slice(curIdx,sliceEnd);
+  const p6=totalPlan.slice(curIdx,sliceEnd);
+  const a6=totalActual.slice(curIdx,sliceEnd);
+  const ptc6=ptColor(m6,p6,a6);
+
+  const el6=document.getElementById('dpChart6m');
+  if(el6) CHARTS.dp6m=new Chart(el6,{type:'line',data:{
+    labels:m6.map(fmtDeployMonth),
+    datasets:[
+      {label:'Plan',data:p6,borderColor:sc.accent,backgroundColor:sc.accent+'22',pointBackgroundColor:sc.accent,tension:.3,fill:true,pointRadius:5},
+      {label:'Actual',data:a6,borderColor:sc.cb,backgroundColor:sc.cb+'22',pointBackgroundColor:ptc6,pointBorderColor:ptc6,tension:.3,fill:true,pointRadius:5}
+    ]
+  },options:commonOpts('6-Month')});
+
+  // ── Full scope chart ──
+  const ptcFull=ptColor(dep.months,totalPlan,totalActual);
+  const elFull=document.getElementById('dpChartFull');
+  if(elFull) CHARTS.dpFull=new Chart(elFull,{type:'line',data:{
+    labels:dep.months.map(fmtDeployMonth),
+    datasets:[
+      {label:'Plan',data:totalPlan,borderColor:sc.accent,backgroundColor:sc.accent+'15',pointBackgroundColor:sc.accent,tension:.3,fill:true,pointRadius:3},
+      {label:'Actual',data:totalActual,borderColor:sc.cb,backgroundColor:sc.cb+'15',pointBackgroundColor:ptcFull,pointBorderColor:ptcFull,tension:.3,fill:true,pointRadius:3}
+    ]
+  },options:commonOpts('Full Scope')});
 }
 
 // ═══════════════════════════════════════════════════
@@ -1399,7 +1774,7 @@ async function clearAllFiles(){
   const btn=document.getElementById('btnClearFiles');
   if(btn){btn.disabled=true;btn.textContent='⟳ Clearing…';}
   try{
-    const tables=['rfi_records','daily_sec1','daily_sec2','daily_sec3','welder_records','sor_records','ncr_records'];
+    const tables=['rfi_records','daily_sec1','daily_sec2','daily_sec3','welder_records','sor_records','ncr_records','deployment_data'];
     await Promise.all(tables.map(t=>sbDelete(t)));
     // Reset all state
     Object.keys(ST.data).forEach(k=>ST.data[k]=null);
@@ -1434,6 +1809,7 @@ function detectKey(wb){
   if(names.some(n=>n.includes('WLDR')||n.includes('WELDER'))) return 'welders';
   if(names.some(n=>n==='SOR'||n.includes('SOR'))) return 'sor';
   if(names.some(n=>n==='NCR'||n.includes('NCR'))) return 'ncr';
+  if(names.some(n=>n==='DP_PLAN'||n.includes('DP_PLAN'))) return 'deployment';
   return null;
 }
 
@@ -1525,7 +1901,8 @@ async function handleFile(forcedKey, file){
     const detected=detectKey(wb);
     if(detected && detected!==forcedKey){
       const expNames={rfi:'RFI Register',daily1:'Daily Section-1',daily2:'Daily Section-2',
-        daily3:'Daily Section-3',welders:'Welders Performance',sor:'SOR Register',ncr:'NCR Register'};
+        daily3:'Daily Section-3',welders:'Welders Performance',sor:'SOR Register',ncr:'NCR Register',
+        deployment:'EPCM Deployment'};
       const expectedName=expNames[forcedKey]||forcedKey;
       const actualName=file.name.split('/').pop().split('\\').pop();
       ST.errors[forcedKey]=`WRONG_FILE|${expectedName}|${actualName}`;
@@ -1550,10 +1927,12 @@ async function handleFile(forcedKey, file){
     else if(key==='daily2') parsed=parseDaily(ab);
     else if(key==='daily3') parsed=parseDaily(ab);
     else if(key==='welders') parsed=parseWelders(ab);
-    else if(key==='sor')    parsed=parseSOR(ab);
-    else if(key==='ncr')    parsed=parseNCR(ab);
+    else if(key==='sor')        parsed=parseSOR(ab);
+    else if(key==='ncr')        parsed=parseNCR(ab);
+    else if(key==='deployment') parsed=parseDeployment(ab);
 
-    if(!parsed||!parsed.length) throw new Error('No valid records found. Check file format.');
+    const isEmpty=!parsed||(key==='deployment'?!parsed.plan?.length:!parsed.length);
+    if(isEmpty) throw new Error('No valid records found. Check file format.');
 
     ST.data[key]=parsed;
     ST.processing[key]=false;
@@ -1626,7 +2005,7 @@ async function sbUpsert(table, row){
 // ── Load all datasets from Supabase on page open ────
 async function loadAllFromDB(){
   try{
-    const [rfi,s1,s2,s3,wld,sor,ncr,meta]=await Promise.all([
+    const [rfi,s1,s2,s3,wld,sor,ncr,dep,meta]=await Promise.all([
       sbSelectAll('rfi_records','select=date,discipline,section,ic,status&order=date.asc'),
       sbSelectAll('daily_sec1','select=date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance&order=date.asc'),
       sbSelectAll('daily_sec2','select=date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance&order=date.asc'),
@@ -1634,6 +2013,7 @@ async function loadAllFromDB(){
       sbSelectAll('welder_records','select=welder_id,name,section,cum_aut,cum_rep,cum_pct,wk_aut,wk_rep,wk_pct,remarks'),
       sbSelectAll('sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc'),
       sbSelectAll('ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description&order=date.asc'),
+      sbSelectAll('deployment_data','select=payload,file_name').catch(()=>[]),
       sbSelect('dataset_meta','select=key,file_name,row_count,uploaded_by,uploaded_at,date_start,date_end'),
     ]);
 
@@ -1645,9 +2025,15 @@ async function loadAllFromDB(){
     if(wld.length)  ST.data.welders= wld.map(r=>({id:r.welder_id,name:r.name,section:r.section,cumAut:+r.cum_aut,cumRep:+r.cum_rep,cumPct:+r.cum_pct,wkAut:+r.wk_aut,wkRep:+r.wk_rep,wkPct:+r.wk_pct,remarks:r.remarks||''}));
     if(sor.length)  ST.data.sor    = sor.map(r=>({sorNo:r.sor_no,short:r.short_name||r.sor_no,date:r.date,status:r.status,ic:r.ic,km:r.km,desc:r.description||''}));
     if(ncr.length)  ST.data.ncr    = ncr.map(r=>({ncrNo:r.ncr_no,date:r.date,status:r.status,raisedBy:r.raised_by,againstName:r.against_name,targetClose:r.target_close,actualClose:r.actual_close,desc:r.description||''}));
+    if(dep.length && dep[0].payload){
+      try{
+        const d=typeof dep[0].payload==='string'?JSON.parse(dep[0].payload):dep[0].payload;
+        if(d.plan&&d.actual){ ST.data.deployment=d; ST.files.deployment=dep[0].file_name||''; }
+      }catch(e){}
+    }
 
     // Restore file names from meta
-    meta.forEach(m=>{ ST.files[m.key]=m.file_name||''; });
+    meta.forEach(m=>{ if(m.key!=='deployment') ST.files[m.key]=m.file_name||''; });
 
   }catch(e){
     // DB unreachable or local file — dashboard shows defaults
@@ -1711,13 +2097,15 @@ async function loadAndShow(){
   // Reset date slicer to last completed Sat→Fri week on login
   const {start,end}=defaultWeekDates();
   ST.start=start; ST.end=end; ST._dateSet=false;
-  // Load saved color scheme for this user
-  try{
-    const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(AUTH.currentUser.username)}&select=color_scheme`);
-    if(rows.length && rows[0].color_scheme && SCHEMES[rows[0].color_scheme]){
-      CURRENT_SCHEME=rows[0].color_scheme;
-    }
-  }catch(e){}
+  // Load saved color scheme for this user (guests have no DB record — skip)
+  if(!AUTH.currentUser.isGuest){
+    try{
+      const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(AUTH.currentUser.username)}&select=color_scheme`);
+      if(rows.length && rows[0].color_scheme && SCHEMES[rows[0].color_scheme]){
+        CURRENT_SCHEME=rows[0].color_scheme;
+      }
+    }catch(e){}
+  }
   applyScheme(CURRENT_SCHEME);
   document.getElementById('app').innerHTML=`<div style="padding:40px 20px;text-align:center;color:${SCHEMES[CURRENT_SCHEME].faint};font-size:13px">
     <span style="animation:spin 1s linear infinite;display:inline-block;font-size:20px">⟳</span>
@@ -1730,6 +2118,15 @@ function showLogin(){
   const ov=document.getElementById('loginOverlay');
   if(ov) ov.style.display='flex';
   document.getElementById('app').innerHTML='';
+  // Reset login button + error in case they were left in a "Signing in…" state from a prior session
+  const btn=document.getElementById('loginBtn');
+  if(btn){ btn.disabled=false; btn.textContent='Sign In'; }
+  const errEl=document.getElementById('loginErr');
+  if(errEl) errEl.classList.remove('show');
+  const pu0=document.getElementById('loginUser');
+  const pp0=document.getElementById('loginPass');
+  if(pu0) pu0.value='';
+  if(pp0) pp0.value='';
   setTimeout(()=>{
     const pu=document.getElementById('loginUser');
     const pp=document.getElementById('loginPass');
@@ -1737,6 +2134,13 @@ function showLogin(){
     if(pp) pp.addEventListener('keydown',e=>{if(e.key==='Enter') attemptLogin();});
     if(pu) pu.focus();
   },50);
+}
+
+function continueAsGuest(){
+  // Ephemeral, read-only session — not persisted to sessionStorage or the
+  // users table, so it never survives a reload/sign-out (one-time access).
+  AUTH.currentUser={username:'guest',displayName:'Guest',role:'viewer',isGuest:true};
+  loadAndShow();
 }
 
 async function attemptLogin(){
@@ -1752,8 +2156,22 @@ async function attemptLogin(){
     const user=rows[0];
     const hash=await hashPw(pInput);
     if(hash!==user.pw_hash){ throw new Error('Invalid username or password.'); }
-    const session={username:uInput,displayName:user.display_name||uInput,role:uInput===SUPER_ADMIN?'superadmin':user.role};
+
+    // Last-sign-in tracking lives in an optional `last_login timestamptz` column
+    // on dashboard_users. Queried/patched separately (and silently ignored on
+    // failure) so a missing column never breaks the core login flow.
+    let prevLogin=null;
+    try{
+      const llRows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uInput)}&select=last_login`);
+      if(llRows.length) prevLogin=llRows[0].last_login||null;
+    }catch(e){}
+
+    const session={username:uInput,displayName:user.display_name||uInput,role:uInput===SUPER_ADMIN?'superadmin':user.role,lastLogin:prevLogin};
     setSession(session); AUTH.currentUser=session;
+    // Stamp this sign-in time (fire-and-forget)
+    fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify({last_login:new Date().toISOString()})
+    }).catch(()=>{});
     await loadAndShow();
   }catch(e){
     btn.disabled=false; btn.textContent='Sign In';
@@ -1762,6 +2180,7 @@ async function attemptLogin(){
 }
 
 function logout(){
+  toggleSidenav(false);
   clearSession(); AUTH.currentUser=null;
   Object.keys(ST.data).forEach(k=>ST.data[k]=null);
   Object.keys(ST.files).forEach(k=>ST.files[k]='');
@@ -1778,30 +2197,102 @@ function openUserMgmt(){
 }
 function closeUserMgmt(){
   document.getElementById('userMgmtModal').classList.remove('open');
+  UMG_EDITING=null;
   ['umgNewUser','umgNewName','umgNewPass','umgNewPw','umgConfPw'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['umgMsg','umgPwMsg'].forEach(id=>{const el=document.getElementById(id);if(el){el.className='umg-msg';el.textContent='';}});
 }
+let UMG_EDITING=null;
+let UMG_USERS_CACHE=[];
+function fmtLoginTime(iso){
+  if(!iso) return 'Never';
+  const d=new Date(iso);
+  if(isNaN(d)) return 'Never';
+  return d.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
 async function renderUserList(){
   const list=document.getElementById('umgUserList');
   if(!list) return;
   list.innerHTML='<div style="color:#484f58;font-size:11px;padding:8px">Loading…</div>';
   const users=await sbSelect('dashboard_users','select=username,display_name,role,created_at&order=created_at.asc');
+  UMG_USERS_CACHE=users;
+  // Last-sign-in is an optional column — fetched separately so a missing
+  // `last_login` column never breaks the core user list.
+  try{
+    const llRows=await sbSelect('dashboard_users','select=username,last_login');
+    const llMap=Object.fromEntries(llRows.map(r=>[r.username,r.last_login]));
+    users.forEach(u=>{ u.last_login=llMap[u.username]||null; });
+  }catch(e){}
   const roleColors={superadmin:{bg:'#1a0f3a',txt:'#a371f7',cls:'role-superadmin',lbl:'Super Admin'},admin:{bg:'#0d1f4f',txt:'#388bfd',cls:'role-admin',lbl:'Admin'},viewer:{bg:'#1a1a1a',txt:'#8b949e',cls:'role-viewer',lbl:'Viewer'}};
   list.innerHTML=users.map(u=>{
     const rc=roleColors[u.role]||roleColors.viewer;
     const initials=(u.display_name||u.username).substring(0,2).toUpperCase();
     const isMe=u.username===AUTH.currentUser.username;
     const isSA=u.username===SUPER_ADMIN;
-    return`<div class="umg-user-row">
-      <div class="umg-avatar" style="background:${rc.bg};color:${rc.txt}">${initials}</div>
-      <div style="flex:1;min-width:0">
-        <div class="umg-uname">${u.username}${isMe?' <span style="color:#8b949e;font-size:9px">(you)</span>':''}</div>
-        <div class="umg-disp">${u.display_name||''} ${u.created_at?'· '+u.created_at.slice(0,10):''}</div>
+    const editing=UMG_EDITING===u.username;
+    const editForm=editing?`<div class="umg-edit-form">
+      <div class="umg-form-grid">
+        <div><div class="umg-slbl" style="margin-bottom:5px">Display Name</div><input class="umg-inp" id="umgEditName_${u.username}" type="text" value="${(u.display_name||'').replace(/"/g,'&quot;')}"></div>
+        <div><div class="umg-slbl" style="margin-bottom:5px">Role</div><select class="umg-sel" id="umgEditRole_${u.username}" ${isSA?'disabled':''}>
+          <option value="admin" ${u.role==='admin'?'selected':''}>Admin (upload + manage)</option>
+          <option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer (read-only)</option>
+          ${isSA?`<option value="superadmin" selected>Super Admin</option>`:''}
+        </select></div>
+        <div><div class="umg-slbl" style="margin-bottom:5px">Reset Password <span style="text-transform:none;font-weight:400;color:#4a5068">(leave blank to keep current)</span></div><input class="umg-inp" id="umgEditPass_${u.username}" type="password" placeholder="Min 8 characters"></div>
       </div>
-      <span class="role-badge ${rc.cls}">${rc.lbl}</span>
-      ${(!isSA&&!isMe)?`<button class="umg-del" onclick="deleteUser('${u.username}')">Remove</button>`:''}
+      <div style="display:flex;gap:8px">
+        <button class="umg-add-btn" onclick="saveUserEdit('${u.username}')">Save Changes</button>
+        <button class="umg-add-btn" style="background:#2d3348" onclick="cancelEditUser()">Cancel</button>
+      </div>
+      <div class="umg-msg" id="umgEditMsg_${u.username}"></div>
+    </div>`:'';
+    return`<div class="umg-user-row" style="${editing?'flex-direction:column;align-items:stretch':''}">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;${editing?'margin-bottom:10px':''}">
+        <div class="umg-avatar" style="background:${rc.bg};color:${rc.txt}">${initials}</div>
+        <div style="flex:1;min-width:0">
+          <div class="umg-uname">${u.username}${isMe?' <span style="color:#8b949e;font-size:9px">(you)</span>':''}</div>
+          <div class="umg-disp">${u.display_name||''} ${u.created_at?'· joined '+u.created_at.slice(0,10):''} · last sign-in: ${fmtLoginTime(u.last_login)}</div>
+        </div>
+        <span class="role-badge ${rc.cls}">${rc.lbl}</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+          <button class="umg-edit" title="${editing?'Close edit form':'Edit user'}" style="${editing?'background:rgba(245,158,11,.18)':''}" onclick="${editing?'cancelEditUser()':`toggleEditUser('${u.username}')`}">&#9998;</button>
+          ${(!isSA&&!isMe)?`<button class="umg-del" title="Remove user" onclick="deleteUser('${u.username}')">&#10005;</button>`:''}
+        </div>
+      </div>
+      ${editForm}
     </div>`;
   }).join('');
+}
+function toggleEditUser(uname){
+  UMG_EDITING=uname;
+  renderUserList();
+}
+function cancelEditUser(){
+  UMG_EDITING=null;
+  renderUserList();
+}
+async function saveUserEdit(uname){
+  const nameEl=document.getElementById(`umgEditName_${uname}`);
+  const roleEl=document.getElementById(`umgEditRole_${uname}`);
+  const passEl=document.getElementById(`umgEditPass_${uname}`);
+  const msg=document.getElementById(`umgEditMsg_${uname}`);
+  const showMsg=(txt,ok)=>{if(msg){msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');}};
+  const dname=(nameEl?.value||'').trim();
+  const role=roleEl?roleEl.value:undefined;
+  const pw=(passEl?.value||'');
+  if(pw && pw.length<8) return showMsg('Password must be at least 8 characters.',false);
+  const patch={display_name:dname||uname};
+  if(role && uname!==SUPER_ADMIN) patch.role=role;
+  try{
+    if(pw){ patch.pw_hash=await hashPw(pw); }
+    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uname)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
+    });
+    if(!r.ok) throw new Error('Update failed');
+    showMsg(pw?'User updated and password reset.':'User updated.',true);
+    UMG_EDITING=null;
+    setTimeout(renderUserList,700);
+  }catch(e){ showMsg('Error: '+e.message,false); }
 }
 async function addUser(){
   const uname=(document.getElementById('umgNewUser').value||'').trim().toLowerCase();
@@ -1855,6 +2346,23 @@ document.getElementById('userMgmtModal').addEventListener('click',function(e){if
 // Clears old data for that table then bulk-inserts new rows
 // ═══════════════════════════════════════════════════
 async function saveDataToDB(key, parsed, fileName){
+  // Deployment is stored as a single JSON blob in its own table
+  if(key==='deployment'){
+    // Delete the existing row (if any) then insert fresh
+    await fetch(`${SB_URL}/rest/v1/deployment_data?id=eq.1`,{method:'DELETE',headers:SB_HDR}).catch(()=>{});
+    const r=await fetch(`${SB_URL}/rest/v1/deployment_data`,{
+      method:'POST',
+      headers:{...SB_HDR,'Prefer':'return=minimal'},
+      body:JSON.stringify({id:1, payload:parsed, file_name:fileName,
+        uploaded_by:AUTH.currentUser?.username||'admin', uploaded_at:new Date().toISOString()})
+    });
+    if(!r.ok){const t=await r.text();throw new Error(`DB insert failed (deployment_data): ${r.status} ${t}`);}
+    await sbUpsert('dataset_meta',{key:'deployment',file_name:fileName,row_count:parsed.plan.length,
+      uploaded_by:AUTH.currentUser?.username||'admin', date_start:parsed.months[0]||null,
+      date_end:parsed.months[parsed.months.length-1]||null});
+    return;
+  }
+
   const tableMap={rfi:'rfi_records',daily1:'daily_sec1',daily2:'daily_sec2',daily3:'daily_sec3',welders:'welder_records',sor:'sor_records',ncr:'ncr_records'};
   const table=tableMap[key];
   if(!table) return;
@@ -2044,15 +2552,30 @@ async function switchScheme(key){
   if(d) d.style.display='none';
 }
 
+function positionSidenavDrop(dropEl,wrapEl){
+  const r=wrapEl.getBoundingClientRect();
+  dropEl.style.left=r.right+'px';
+  dropEl.style.top=r.top+'px';
+}
 function toggleSchemeDrop(){
   const d=document.getElementById('schemeDropdown');
-  if(d) d.style.display=d.style.display==='none'?'block':'none';
+  const w=document.getElementById('schemeDropWrap');
+  if(d&&w){
+    const show=d.style.display==='none'||!d.style.display;
+    if(show) positionSidenavDrop(d,w);
+    d.style.display=show?'block':'none';
+  }
   const ed=document.getElementById('exportDrop');
   if(ed) ed.style.display='none';
 }
 function toggleExportDrop(){
   const d=document.getElementById('exportDrop');
-  if(d) d.style.display=d.style.display==='none'?'block':'none';
+  const w=document.getElementById('exportDropWrap');
+  if(d&&w){
+    const show=d.style.display==='none'||!d.style.display;
+    if(show) positionSidenavDrop(d,w);
+    d.style.display=show?'block':'none';
+  }
   const sd=document.getElementById('schemeDropdown');
   if(sd) sd.style.display='none';
 }
@@ -2068,67 +2591,6 @@ document.addEventListener('click',e=>{
     if(d) d.style.display='none';
   }
 });
-
-function exportExcel(){
-  const d=document.getElementById('exportDrop');
-  if(d) d.style.display='none';
-  if(!XLSX){alert('XLSX library not loaded.');return;}
-  const wb=XLSX.utils.book_new();
-
-  // Helper: array of arrays → sheet
-  const mkSheet=(headers,rows)=>{
-    const data=[headers,...rows];
-    return XLSX.utils.aoa_to_sheet(data);
-  };
-
-  // RFI
-  if(ST.data.rfi&&ST.data.rfi.length){
-    const agg=aggRFI(ST.data.rfi);
-    const rows=agg.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
-    rows.push(['TOTAL',agg.totals.acc,agg.totals.accW,agg.totals.can,agg.totals.open,agg.totals.rej,agg.totals.total]);
-    XLSX.utils.book_append_sheet(wb,mkSheet(['Discipline','ACC','ACC W/COMM','CAN','OPEN','REJ','Total']  ,rows),'RFI Status');
-  }
-
-  // NDT
-  const ndtCum=getNDTRows(true);
-  if(ndtCum){
-    const rows=ndtCum.map(r=>[r.s,r.welded,r.rev,r.appr,r.repair,r.bl]);
-    const t=sumK(ndtCum,['welded','rev','appr','repair','bl']);
-    rows.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);
-    XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Welded','EPCM Rev','EPCM Appr','Repair','Backlog'],rows),'NDT Status');
-  }
-
-  // FJC
-  const fjcCum=getFJCRows(true);
-  if(fjcCum){
-    const rows=fjcCum.map(r=>[r.s,r.released,r.total,r.accepted,r.repair,r.balance]);
-    const t=sumK(fjcCum,['released','total','accepted','repair','balance']);
-    rows.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);
-    XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Released','Coated','Accepted','Repair','Balance'],rows),'FJC Status');
-  }
-
-  // Welders
-  if(ST.data.welders&&ST.data.welders.length){
-    const rows=ST.data.welders.map(w=>[w.id,w.name,w.section,w.cumAut,w.cumRep,+w.cumPct.toFixed(2),w.wkAut,w.wkRep,+w.wkPct.toFixed(2),w.remarks]);
-    XLSX.utils.book_append_sheet(wb,mkSheet(['ID','Name','Section','Cum AUT','Cum Rep','Cum Rep%','Wk AUT','Wk Rep','Wk Rep%','Remarks'],rows),'Welders');
-  }
-
-  // SOR
-  if(ST.data.sor&&ST.data.sor.length){
-    const rows=ST.data.sor.map(r=>[r.sorNo,r.short,r.date,r.ic,r.status,r.km,r.desc]);
-    XLSX.utils.book_append_sheet(wb,mkSheet(['SOR No','Short Name','Date','IC','Status','KM','Description'],rows),'Site Observations');
-  }
-
-  // NCR
-  if(ST.data.ncr&&ST.data.ncr.length){
-    const rows=ST.data.ncr.map(r=>[r.ncrNo,r.date,r.raisedBy,r.againstName,r.status,r.targetClose,r.actualClose,r.desc]);
-    XLSX.utils.book_append_sheet(wb,mkSheet(['NCR No','Date','Raised By','Against','Status','Target Close','Actual Close','Description'],rows),'NCR Status');
-  }
-
-  if(wb.SheetNames.length===0){alert('No data loaded to export.');return;}
-  const today=new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb,`P30312_Dashboard_${today}.xlsx`);
-}
 
 // ── Custom Export (choose data sets + date range) ───
 function openExportOptions(){
@@ -2278,54 +2740,63 @@ function generateCustomExport(){
   showMsg('Export generated — check your downloads folder.',true);
 }
 
-function exportPDF(theme){
+async function exportDashboardImage(){
   const d=document.getElementById('exportDrop');
   if(d) d.style.display='none';
 
-  // Apply light theme override if requested
-  let styleEl=null;
-  if(theme==='light'){
-    styleEl=document.createElement('style');
-    styleEl.id='print-theme-override';
-    styleEl.textContent=`
-      body{background:#ffffff!important;color:#1e293b!important}
-      .hdr{background:#f8fafc!important;border-color:#e2e8f0!important}
-      .hdr-title,.hdr-sub,.hdr-uname{color:#1e293b!important}
-      .upl-bar,.viewer-bar{background:#f1f5f9!important;border-color:#e2e8f0!important}
-      .card,.kpi-card{background:#ffffff!important;border-color:#e2e8f0!important;color:#1e293b!important}
-      .slbl,.kpi-lbl,.kpi-goal,.cm,.th,.bdg-cnt{color:#64748b!important}
-      .tbl td,.tbl th{border-color:#e2e8f0!important;color:#1e293b!important}
-      .tr-alt{background:rgba(0,0,0,.02)!important}
-      .tr-tot{background:rgba(0,0,0,.04)!important}
-      .prog-track{background:#e2e8f0!important}
-      .footer{color:#94a3b8!important}
-      .bdg{border-color:#e2e8f0!important;background:#f8fafc!important}
-    `;
-    document.head.appendChild(styleEl);
+  const target=document.getElementById('app');
+  const btn=document.getElementById('btnExportImg');
+  if(!target||typeof html2canvas!=='function'){
+    alert('Image export library failed to load — check your internet connection and try again.');
+    return;
   }
 
-  window.print();
+  const origLabel=btn?btn.innerHTML:null;
+  if(btn){ btn.innerHTML='⏳ Rendering high-res image…'; btn.style.pointerEvents='none'; }
 
-  // Remove override after print dialog closes
-  if(styleEl){
-    setTimeout(()=>{
-      const el=document.getElementById('print-theme-override');
-      if(el) el.remove();
-    },2000);
+  try{
+    const bg=getComputedStyle(document.body).backgroundColor;
+    const canvas=await html2canvas(target,{
+      scale:Math.max(3, window.devicePixelRatio*2),
+      useCORS:true,
+      backgroundColor:bg,
+      windowWidth:target.scrollWidth,
+      windowHeight:target.scrollHeight,
+      scrollX:0,
+      scrollY:0
+    });
+    await new Promise(resolve=>{
+      canvas.toBlob(blob=>{
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download=`QAQC_Dashboard_${new Date().toISOString().slice(0,10)}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        resolve();
+      },'image/png',1.0);
+    });
+  }catch(e){
+    alert('Failed to export dashboard image: '+e.message);
+  }finally{
+    if(btn){ btn.innerHTML=origLabel; btn.style.pointerEvents=''; }
   }
 }
 
 // ═══════════════════════════════════════════════════
 // FREE CANVAS ENGINE
 // ═══════════════════════════════════════════════════
-// Grid resolution — 3x finer than the original 12-col grid (36 cols) for
+// Grid resolution — 6x finer than the original 12-col grid (72 cols) for
 // Excel-sheet-like control. GAP/SNAP/UNIT_MIN are scaled down to match so
-// proportions and feel stay the same, just at finer granularity.
-const GRID_SCALE = 3;
-const COLS = 12*GRID_SCALE;   // grid columns (36)
-const GAP  = 4.5;             // gap between panels in px (1.5x the original feel)
-const SNAP = 4;               // snap threshold px
-const UNIT_MIN = 14;          // floor for px per grid unit, so cells never get too thin
+// proportions and feel stay the same, just at finer granularity (each
+// resize/move step works out to half the px size of the previous grid).
+const GRID_SCALE = 6;
+const COLS = 12*GRID_SCALE;   // grid columns (72)
+const GAP  = 2.25;            // gap between panels in px
+const SNAP = 2;               // snap threshold px
+const UNIT_MIN = 7;           // floor for px per grid unit, so cells never get too thin
 
 // px per grid unit (col width and row height) — recalculated to fill the
 // available container width so the 12-col grid spans the whole canvas area
@@ -2334,7 +2805,10 @@ let UNIT = 60;
 function recalcUnit(){
   const c=document.getElementById('dashCanvas');
   const containerW=(c&&c.parentElement)?c.parentElement.clientWidth:window.innerWidth;
-  UNIT=Math.max(UNIT_MIN, Math.floor((containerW-GAP*(COLS+1))/COLS));
+  // No flooring — a fractional UNIT lets the grid span the container width
+  // exactly (canvasWidth() = COLS*(UNIT+GAP)+GAP), eliminating the leftover
+  // sliver on the right that floor() rounding loss produced (worse at higher COLS).
+  UNIT=Math.max(UNIT_MIN, (containerW-GAP*(COLS+1))/COLS);
 }
 
 let EDIT_MODE = false;
@@ -2445,9 +2919,8 @@ function toggleEditMode(){
   const bar=document.getElementById('canvasModeBar');
   const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
   if(btn){
-    btn.style.color=EDIT_MODE?sc.accent:sc.muted;
-    btn.style.borderColor=EDIT_MODE?sc.accent:'rgba(245,158,11,.3)';
-    btn.style.background=EDIT_MODE?sc.accent+'18':'';
+    btn.style.color=EDIT_MODE?sc.accent:'';
+    btn.style.background=EDIT_MODE?sc.accent+'18':'none';
     btn.textContent=EDIT_MODE?'⊹ Editing…':'⊹ Edit Layout';
   }
   if(bar){
