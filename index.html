@@ -756,6 +756,7 @@ function bFJCTable(secRows, title, live, kpis){
 }
 
 function bProgress(live){
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
   const d1r = ST.data.daily1, d2r = ST.data.daily2, d3r = ST.data.daily3;
   let totalJoints=42000, wTotal=0, fjcTotal=0;
   if(d1r&&d2r&&d3r){
@@ -766,9 +767,9 @@ function bProgress(live){
   const wPct=Math.min(100,wTotal/totalJoints*100);
   const fjcPct=Math.min(100,fjcTotal/totalJoints*100);
   const bars=[
-    {l:'Total Joints',v:totalJoints,pct:100,   c:'#21262d'},
-    {l:'Welded',      v:wTotal,    pct:wPct,   c:'#388bfd'},
-    {l:'FJC Accepted',v:fjcTotal,  pct:fjcPct, c:'#a371f7'},
+    {l:'Total Joints',v:totalJoints,pct:100,   c:sc.progTrack||sc.border},
+    {l:'Welded',      v:wTotal,    pct:wPct,   c:sc.cb},
+    {l:'FJC Accepted',v:fjcTotal,  pct:fjcPct, c:sc.cs2},
   ];
   return`<div class="card"><div class="slbl">Welding Progress${pill(live)}</div>
   ${bars.map(b=>`<div class="prog-row">
@@ -863,10 +864,10 @@ function bNCRTable(ncrRecs, live){
 function bNCRBar(ncrRecs, live){
   const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
   return`<div class="card" style="display:flex;flex-direction:column">
-    <div class="slbl">NCR by IC${pill(live)}</div>
+    <div class="slbl">NCR BY ENTITY${pill(live)}</div>
     <div class="ch-wrap" style="flex:1;min-height:160px"><canvas id="ncrBarChart"></canvas></div>
     <div style="display:flex;gap:16px;margin-top:8px;font-size:9px;justify-content:center">
-      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.cp};margin-right:4px;vertical-align:middle"></span>Total</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.accent};margin-right:4px;vertical-align:middle"></span>Total</span>
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.good};margin-right:4px;vertical-align:middle"></span>Closed</span>
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.bad};margin-right:4px;vertical-align:middle"></span>Open</span>
     </div>
@@ -1354,7 +1355,7 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
     const totalVals = rows.map(([,v])=>v.closed+v.open);
     CHARTS.ncrBar=new Chart(ncrBarEl,{type:'bar',
       data:{labels,datasets:[
-        {label:'Total',  data:totalVals,  backgroundColor:sc.cp+'bb',  borderRadius:3,borderSkipped:false},
+        {label:'Total',  data:totalVals,  backgroundColor:sc.accent+'bb',  borderRadius:3,borderSkipped:false},
         {label:'Closed', data:closedVals, backgroundColor:sc.good+'cc', borderRadius:3,borderSkipped:false},
         {label:'Open',   data:openVals,   backgroundColor:sc.bad+'cc',  borderRadius:3,borderSkipped:false},
       ]},
