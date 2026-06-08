@@ -66,37 +66,62 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .hdr-btn.mgmt:hover{background:rgba(245,158,11,.08);border-color:#f59e0b}
 .btn-x{background:none;border:none;cursor:pointer;color:#7a809a;padding:0;font-size:16px;line-height:1;margin-left:auto}
 .btn-x:hover{color:#f1f0e8}
-.upl-bar{background:#181b28;border-bottom:1px solid #2d3348;padding:8px 20px 10px}
-.upl-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-bottom:6px}
-.upl-slot{border:1px dashed #2d3348;border-radius:6px;padding:7px 10px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:2px;min-width:0}
-.upl-slot:hover,.upl-slot.drag{border-color:#f59e0b;background:rgba(245,158,11,.06)}
-.upl-slot.loaded{border-color:rgba(20,184,166,.4);background:#0a2020;border-style:solid;cursor:default}
-.upl-slot.loaded:hover{border-color:rgba(20,184,166,.6);background:#0d2828}
-.upl-slot.unsaved{border-color:rgba(245,158,11,.5);background:#231e0a;border-style:solid;cursor:default}
-.upl-slot.unsaved:hover{border-color:rgba(245,158,11,.75);background:#2a2510}
-.upl-slot.err{border-color:rgba(244,63,94,.4);background:#200a10}
-.upl-slot-top{display:flex;align-items:center;gap:5px}
-.upl-slot-icon{font-size:13px;flex-shrink:0}
-.upl-slot-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#7a809a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.upl-slot.loaded .upl-slot-lbl{color:#14b8a6}
-.upl-slot-fn{font-size:9px;color:#4a5068;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:18px}
-.upl-slot.loaded .upl-slot-fn{color:#14b8a6;opacity:.7}
-.upl-slot-cnt{font-size:9px;color:#f59e0b;padding-left:18px;font-family:monospace}
-.upl-err-row{display:flex;gap:10px;flex-wrap:wrap}
+/* ── Upload Bar v2 ── */
+.upl-bar{position:fixed;top:52px;left:58px;right:0;z-index:150;background:#181b28;border-bottom:1px solid #2d3348;overflow:hidden;transition:height .4s cubic-bezier(.4,0,.2,1),top .4s cubic-bezier(.4,0,.2,1),box-shadow .4s ease;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.upl-bar.collapsed{top:0;box-shadow:0 4px 24px rgba(0,0,0,.65)}
+/* Expanded panel */
+.upl-expanded{display:flex;align-items:stretch;padding:10px 20px;gap:0;transition:opacity .28s ease,transform .35s cubic-bezier(.4,0,.2,1);opacity:1;transform:translateY(0)}
+.upl-bar.collapsed .upl-expanded{opacity:0;transform:translateY(-7px);pointer-events:none}
+/* Actions column */
+.upl-actions-col{display:flex;flex-direction:column;gap:5px;justify-content:center;min-width:148px}
+.upl-btn{display:flex;align-items:center;gap:7px;padding:6px 13px;border-radius:7px;font-size:11px;font-weight:600;letter-spacing:.03em;border:none;cursor:pointer;white-space:nowrap;transition:opacity .15s,background .15s}
+.upl-btn:disabled{opacity:.35;cursor:not-allowed}
+.upl-btn-primary{background:#f59e0b;color:#0e101a}
+.upl-btn-primary:hover:not(:disabled){background:#fbbf24}
+.upl-btn-ghost{background:rgba(255,255,255,.06);color:#9ca3af;border:1px solid rgba(255,255,255,.09)}
+.upl-btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.1);color:#d1d5db}
+.upl-btn-danger{background:rgba(244,63,94,.1);color:#f87171;border:1px solid rgba(244,63,94,.2)}
+.upl-btn-danger:hover:not(:disabled){background:rgba(244,63,94,.18)}
+/* Divider */
+.upl-vsep{width:1px;background:rgba(255,255,255,.07);margin:0 16px;align-self:stretch}
+/* Dataset cards */
+.upl-cards{display:flex;gap:7px;flex:1;flex-wrap:wrap;align-items:flex-start;align-content:flex-start}
+.upl-card{position:relative;background:#0e101a;border:1px solid #1e2235;border-radius:8px;padding:7px 11px 7px 14px;min-width:105px;overflow:hidden;cursor:pointer;transition:border-color .2s,background .2s}
+.upl-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:8px 0 0 8px;transition:background .3s}
+.upl-card.ok{cursor:default}.upl-card.ok::before{background:#14b8a6}
+.upl-card.unsaved::before{background:#f59e0b}
+.upl-card.err::before{background:#f43f5e}
+.upl-card.empty::before{background:#2d3348}
+.upl-card:not(.ok):not(.unsaved):hover{border-color:#f59e0b;background:rgba(245,158,11,.04)}
+.upl-card-name{font-size:10px;font-weight:700;letter-spacing:.06em;color:#9ca3af;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upl-card.ok .upl-card-name{color:#14b8a6}
+.upl-card.unsaved .upl-card-name{color:#f59e0b}
+.upl-card-file{font-size:8.5px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.upl-card.ok .upl-card-file{color:#0d6b60}
+.upl-card-rows{font-size:9px;font-weight:600;margin-top:3px}
+.upl-card.ok .upl-card-rows{color:#14b8a6}
+.upl-card.unsaved .upl-card-rows{color:#f59e0b}
+.upl-card.err .upl-card-rows{color:#f43f5e}
+/* Status row */
+.upl-status-row{display:flex;align-items:center;gap:8px;padding:3px 20px 7px;transition:opacity .28s ease,transform .35s cubic-bezier(.4,0,.2,1);opacity:1;transform:translateY(0)}
+.upl-bar.collapsed .upl-status-row{opacity:0;transform:translateY(-4px);pointer-events:none}
+/* Collapsed strip */
+.upl-strip{position:absolute;bottom:0;left:0;right:0;height:44px;display:flex;align-items:center;padding:0 20px;gap:6px;opacity:0;transform:translateY(7px);transition:opacity .28s ease,transform .35s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.upl-bar.collapsed .upl-strip{opacity:1;transform:translateY(0);pointer-events:all}
+.upl-strip-btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;border:none;cursor:pointer;transition:background .15s,opacity .15s;flex-shrink:0}
+.upl-strip-btn:disabled{opacity:.3;cursor:not-allowed}
+.upl-strip-sep{width:1px;height:20px;background:rgba(255,255,255,.08);margin:0 2px}
+.upl-strip-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600}
+/* Legacy compat */
+.upl-err-row{display:flex;gap:10px;flex-wrap:wrap;padding:0 20px 6px}
 .upl-err-item{font-size:10px;color:#f43f5e}
 .viewer-bar{background:#181b28;border-bottom:1px solid #252a3a;padding:5px 20px;font-size:10px;color:#4a5068;display:flex;align-items:center;gap:8px}
-.row{padding:0 20px;margin-top:10px;display:grid;gap:10px;align-items:stretch}
-.r-rfi{grid-template-columns:1fr 220px 1fr}
-.r-ndt{grid-template-columns:1fr 1fr}
-.r-fjc{grid-template-columns:1fr 1fr 1.2fr}
-.r-prog{grid-template-columns:1fr 260px 1.6fr}
-.r-sor{grid-template-columns:260px 1fr}
-.combo{display:flex;flex-direction:column;gap:10px;min-width:0}
-.combo>.card{flex:1}
 .card{background:#252a3a;border:1px solid #2d3348;border-radius:8px;padding:12px 14px}
 .slbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a809a;margin-bottom:8px}
 .tbl{width:100%;border-collapse:collapse}
-th.th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#7a809a;padding:5px 8px;border-bottom:1px solid #2d3348;white-space:nowrap;text-align:center}
+th.th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#7a809a;padding:5px 8px;border-bottom:1px solid #2d3348;white-space:nowrap;text-align:center;position:sticky;top:0;z-index:2;background:var(--card,#252a3a)}
+/* Sticky headers for all tables inside scrollable panels */
+.cp>.card table th{position:sticky;top:0;z-index:2}
 td.td{font-size:11px;padding:4px 8px;border-bottom:1px solid rgba(45,51,72,.5);font-family:monospace;white-space:nowrap;text-align:center}
 td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:600;font-family:monospace;text-align:center}
 .tr-alt{background:rgba(255,255,255,.02)}
@@ -134,35 +159,38 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .footer{text-align:center;margin-top:20px;font-size:10px;color:#4a5068;padding:0 20px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{display:inline-block;animation:spin 1s linear infinite}
-#loginOverlay{position:fixed;inset:0;background:#1e2130;z-index:9999;display:flex;align-items:center;justify-content:center}
-.login-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(245,158,11,.07) 0%,transparent 70%)}
-.login-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(45,51,72,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(45,51,72,.3) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
-.login-card{position:relative;z-index:1;background:#252a3a;border:1px solid #2d3348;border-radius:12px;padding:36px 40px;width:380px;box-shadow:0 24px 80px rgba(0,0,0,.5)}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
-.login-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#b45309,#f59e0b);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.login-proj{font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;text-transform:uppercase}
-.login-name{font-size:13px;color:#7a809a;margin-top:1px}
-.login-title{font-size:20px;font-weight:700;margin-bottom:6px;color:#f1f0e8}
-.login-sub{font-size:12px;color:#7a809a;margin-bottom:28px}
+/* ── Login overlay — Option C full-bleed illustration ── */
+#loginOverlay{position:fixed;inset:0;background:#080a10;z-index:9999;display:flex;overflow:hidden}
+.login-illus{position:absolute;right:30px;top:0;bottom:0;width:54%;pointer-events:none}
+.login-illus svg{width:100%;height:100%}
+.login-illus-grad{position:absolute;inset:0;background:linear-gradient(90deg,#080a10 12%,rgba(8,10,16,.45) 32%,rgba(8,10,16,.08) 100%);pointer-events:none}
+.login-content{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:80px 88px;max-width:530px;height:100%}
+.login-proj-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);border-radius:20px;margin-bottom:32px;width:fit-content}
+.login-chip-dot{width:6px;height:6px;border-radius:50%;background:#f59e0b;box-shadow:0 0 6px #f59e0b;flex-shrink:0}
+.login-chip-txt{font-size:10px;font-weight:700;letter-spacing:.1em;color:#f59e0b;text-transform:uppercase}
+.login-title{font-size:38px;font-weight:800;line-height:1.12;margin-bottom:10px;color:#f1f0e8}
+.login-title span{color:#f59e0b}
+.login-sub{font-size:13px;color:#4a5068;margin-bottom:40px;line-height:1.65;max-width:360px}
+.login-card{background:rgba(10,12,20,.82);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:32px;backdrop-filter:blur(20px);max-width:370px;width:100%}
+.login-lbl{font-size:10px;font-weight:700;color:#4a5068;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:7px}
 .login-field{margin-bottom:16px}
-.login-lbl{font-size:11px;font-weight:600;color:#7a809a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
-.login-inp{width:100%;background:#1e2130;border:1px solid #2d3348;border-radius:6px;color:#f1f0e8;padding:9px 12px;font-size:13px;font-family:monospace;outline:none;transition:border-color .2s}
-.login-inp:focus{border-color:#f59e0b}
-.login-inp::placeholder{color:#4a5068}
-.login-btn{width:100%;background:linear-gradient(135deg,#b45309,#f59e0b);border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;padding:10px;cursor:pointer;transition:opacity .2s;margin-top:4px}
+.login-inp{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#f1f0e8;padding:11px 14px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+.login-inp:focus{border-color:rgba(245,158,11,.5);box-shadow:0 0 0 3px rgba(245,158,11,.06)}
+.login-inp::placeholder{color:#2d3348}
+.login-btn{width:100%;background:linear-gradient(135deg,#b45309,#f59e0b);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;padding:12px;cursor:pointer;margin-top:4px;letter-spacing:.03em;transition:opacity .2s}
 .login-btn:hover{opacity:.88}
 .login-btn:disabled{opacity:.45;cursor:not-allowed}
-.login-err{background:#2d1018;border:1px solid rgba(244,63,94,.3);border-radius:6px;padding:8px 12px;font-size:12px;color:#f43f5e;margin-top:12px;display:none}
+.login-err{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:8px;padding:9px 12px;font-size:12px;color:#f43f5e;margin-top:12px;display:none}
 .login-err.show{display:block}
-.login-first-cred{background:#1a200f;border:1px solid rgba(20,184,166,.2);border-radius:6px;padding:10px 14px;margin-bottom:24px;font-size:11px;color:#7a809a}
+.login-first-cred{background:rgba(20,184,166,.06);border:1px solid rgba(20,184,166,.2);border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:11px;color:#7a809a}
 .login-first-cred b{color:#14b8a6}
 .login-cred-row{display:flex;justify-content:space-between;margin-top:4px}
 .login-spin{display:inline-block;animation:spin 1s linear infinite;margin-right:6px}
-.login-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#4a5068;font-size:10px;text-transform:uppercase;letter-spacing:.08em}
-.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:#2d3348}
-.login-guest-btn{width:100%;background:none;border:1px solid #2d3348;border-radius:6px;color:#a8afc7;font-size:13px;font-weight:600;padding:10px;cursor:pointer;transition:border-color .2s,background .2s,color .2s}
-.login-guest-btn:hover{border-color:#388bfd;color:#f1f0e8;background:rgba(56,139,253,.08)}
-.login-guest-note{font-size:10px;color:#4a5068;margin-top:8px;text-align:center;line-height:1.5}
+.login-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#2a2e40;font-size:10px;text-transform:uppercase;letter-spacing:.1em}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.login-guest-btn{width:100%;background:none;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#4a5068;font-size:13px;font-weight:600;padding:11px;cursor:pointer;transition:border-color .2s,color .2s}
+.login-guest-btn:hover{border-color:rgba(255,255,255,.18);color:#a8afc7}
+.login-guest-note{font-size:10px;color:#2d3348;margin-top:10px;text-align:center;line-height:1.5}
 #userMgmtModal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8888;display:none;align-items:center;justify-content:center}
 #userMgmtModal.open{display:flex}
 .umg-card{background:#252a3a;border:1px solid #2d3348;border-radius:12px;width:580px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6)}
@@ -202,9 +230,6 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .exp-chk:hover{border-color:#f59e0b66}
 .exp-chk input{accent-color:#f59e0b;cursor:pointer;width:14px;height:14px;flex-shrink:0}
 .exp-note{font-size:10px;color:#7a809a;margin-top:8px;line-height:1.5}
-.src-pill{font-size:9px;padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:600;vertical-align:middle}
-.src-live{background:#0f2420;color:#14b8a6;border:1px solid rgba(20,184,166,.3)}
-.src-default{background:#2a2010;color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
 @media print{
   .hdr{position:relative!important}
   .upl-bar,.viewer-bar{display:none!important}
@@ -215,10 +240,10 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 }
 
 /* ── FREE CANVAS LAYOUT ── */
-#dashCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
+#dashCanvas,#dpCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
 .cp{position:absolute;box-sizing:border-box;padding:4px}
 .cp>.card,.cp>.kpi-card{width:100%;height:100%;box-sizing:border-box;overflow:auto}
-#dashCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
 .cp.editable{cursor:default}.cp.editable:hover{z-index:100}
 .cp-drag{position:absolute;top:0;left:0;right:28px;height:24px;cursor:grab;z-index:20;
   border-radius:8px 8px 0 0;display:flex;align-items:center;padding-left:8px;opacity:0;transition:opacity .2s}
@@ -231,16 +256,28 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
   border-right:3px solid var(--accent,#f59e0b);border-bottom:3px solid var(--accent,#f59e0b);border-radius:0 0 6px 0}
 .cp-res.e{right:0;top:50%;transform:translateY(-50%);width:8px;height:40px;cursor:e-resize;
   background:var(--accent,#f59e0b);border-radius:4px}
+.cp-res.w{left:0;top:50%;transform:translateY(-50%);width:8px;height:40px;cursor:w-resize;
+  background:var(--accent,#f59e0b);border-radius:4px}
 .cp-res.s{bottom:0;left:50%;transform:translateX(-50%);height:8px;width:40px;cursor:s-resize;
   background:var(--accent,#f59e0b);border-radius:4px}
+.cp-close{position:absolute;top:0;right:0;width:22px;height:22px;cursor:pointer;z-index:21;
+  display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;
+  font-size:13px;line-height:1;color:var(--accent,#f59e0b);border-radius:0 8px 0 4px}
+.cp.editable:hover .cp-close{opacity:.7}
+.cp-close:hover{opacity:1!important;background:rgba(245,158,11,.12)}
 .cp.is-dragging{opacity:.45;z-index:200;pointer-events:none}
 .cp-clone{position:fixed;pointer-events:none;z-index:9999;opacity:.78;border-radius:8px;box-shadow:0 16px 48px rgba(0,0,0,.5)}
 .sg{position:fixed;z-index:9998;pointer-events:none;background:#378ADD;opacity:0;transition:opacity .08s}
 .sg.h{left:0;right:0;height:1px}.sg.v{top:0;bottom:0;width:1px}.sg.on{opacity:1}
-.canvas-mode-bar{display:none;padding:5px 20px;font-size:10px;font-weight:600;letter-spacing:.06em;
-  text-transform:uppercase;align-items:center;gap:12px;background:rgba(245,158,11,.08);
-  border-bottom:1px solid rgba(245,158,11,.2);color:#f59e0b}
+.canvas-mode-bar{display:none;position:fixed;top:52px;left:58px;right:0;z-index:200;
+  padding:10px 20px;font-size:10px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;align-items:center;gap:12px;
+  background:rgba(14,16,26,.96);border-bottom:2px solid rgba(245,158,11,.55);
+  border-top:1px solid rgba(245,158,11,.25);color:#f59e0b;
+  box-shadow:0 4px 24px rgba(0,0,0,.6)}
 .canvas-mode-bar.on{display:flex}
+/* Push canvas content below the edit bar when active */
+#dashCanvas.edit-mode,#dpCanvas.edit-mode{margin-top:36px}
 .cp-span-tip{position:absolute;top:2px;right:30px;font-size:9px;color:var(--accent,#f59e0b);
   opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:none;
   background:rgba(0,0,0,.5);padding:1px 5px;border-radius:3px}
@@ -252,26 +289,148 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 
 <!-- LOGIN OVERLAY -->
 <div id="loginOverlay">
-  <div class="login-bg"></div><div class="login-grid"></div>
-  <div class="login-card">
-    <div class="login-logo">
-      <div class="login-logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-      <div><div class="login-proj">P30312 — PIPELINE PROJECT</div><div class="login-name">West to East Pipeline</div></div>
+  <!-- Full-bleed pipeline illustration (right side) -->
+  <div class="login-illus">
+    <svg viewBox="0 0 720 900" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <rect width="720" height="900" fill="#080a10"/>
+      <defs>
+        <radialGradient id="lg1" cx="55%" cy="55%" r="55%">
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity=".09"/>
+          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="lgShine" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="rgba(255,255,255,0.04)"/>
+          <stop offset="40%"  stop-color="rgba(255,255,255,0)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0.25)"/>
+        </linearGradient>
+      </defs>
+      <rect width="720" height="900" fill="url(#lg1)"/>
+
+      <!-- CONCRETE COATING -->
+      <path d="M 82 375 L 578 375" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+      <path d="M 82 605 L 578 605" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+      <rect x="82" y="375" width="496" height="230" fill="rgba(18,16,36,0.88)"/>
+      <ellipse cx="578" cy="490" rx="34" ry="115" fill="rgba(28,22,52,0.95)" stroke="rgba(167,139,250,0.55)" stroke-width="1.8"/>
+      <ellipse cx="82"  cy="490" rx="34" ry="115" fill="rgba(18,16,36,0.95)" stroke="rgba(167,139,250,0.3)"  stroke-width="1.2"/>
+
+      <!-- 3LPE COATING -->
+      <path d="M 82 396 L 578 396" stroke="rgba(52,211,153,0.22)" stroke-width="1"/>
+      <path d="M 82 584 L 578 584" stroke="rgba(52,211,153,0.22)" stroke-width="1"/>
+      <rect x="82" y="396" width="496" height="188" fill="rgba(8,24,18,0.6)"/>
+      <ellipse cx="578" cy="490" rx="26" ry="94" fill="rgba(10,26,20,0.92)" stroke="rgba(52,211,153,0.5)"  stroke-width="1.8"/>
+      <ellipse cx="82"  cy="490" rx="26" ry="94" fill="rgba(8,20,16,0.92)"  stroke="rgba(52,211,153,0.25)" stroke-width="1"/>
+
+      <!-- STEEL PIPE -->
+      <path d="M 82 418 L 578 418" stroke="rgba(56,189,248,0.28)" stroke-width="1"/>
+      <path d="M 82 562 L 578 562" stroke="rgba(56,189,248,0.28)" stroke-width="1"/>
+      <rect x="82" y="418" width="496" height="144" fill="rgba(6,16,28,0.78)"/>
+      <ellipse cx="578" cy="490" rx="20" ry="72" fill="rgba(8,18,34,0.96)"  stroke="rgba(56,189,248,0.6)"  stroke-width="2"/>
+      <ellipse cx="82"  cy="490" rx="20" ry="72" fill="rgba(6,14,26,0.96)"  stroke="rgba(56,189,248,0.3)"  stroke-width="1.2"/>
+
+      <!-- BORE -->
+      <rect x="82" y="440" width="496" height="100" fill="rgba(3,4,10,0.97)"/>
+      <ellipse cx="578" cy="490" rx="14" ry="50" fill="rgba(3,4,10,0.99)" stroke="rgba(80,100,140,0.2)"  stroke-width="1"/>
+      <ellipse cx="82"  cy="490" rx="14" ry="50" fill="rgba(3,4,10,0.99)" stroke="rgba(80,100,140,0.15)" stroke-width="1"/>
+      <rect x="82" y="375" width="496" height="230" fill="url(#lgShine)"/>
+
+      <!-- WELD JOINT -->
+      <line x1="330" y1="375" x2="330" y2="605" stroke="rgba(245,158,11,0.2)" stroke-width="2" stroke-dasharray="7 5"/>
+      <text x="323" y="370" font-size="8.5" fill="rgba(245,158,11,0.5)" font-family="monospace" text-anchor="middle">WELD JOINT</text>
+
+      <!-- 48" DIMENSION LINE -->
+      <line x1="38" y1="375" x2="38" y2="605" stroke="rgba(245,158,11,0.45)" stroke-width="1"/>
+      <line x1="32" y1="375" x2="44" y2="375" stroke="rgba(245,158,11,0.45)" stroke-width="1"/>
+      <line x1="32" y1="605" x2="44" y2="605" stroke="rgba(245,158,11,0.45)" stroke-width="1"/>
+      <text x="33" y="492" font-size="9" fill="#f59e0b" font-family="monospace" text-anchor="middle" transform="rotate(-90,33,492)">48&quot; DIAMETER</text>
+
+      <!-- ANNOTATION LINES — fully inside viewbox -->
+      <line x1="612" y1="378" x2="638" y2="348" stroke="rgba(167,139,250,0.55)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="638" y1="348" x2="710" y2="348" stroke="rgba(167,139,250,0.55)" stroke-width="1"/>
+      <text x="641" y="344" font-size="9" fill="#a78bfa" font-family="monospace">CONCRETE COATING</text>
+      <line x1="604" y1="398" x2="638" y2="415" stroke="rgba(52,211,153,0.55)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="638" y1="415" x2="710" y2="415" stroke="rgba(52,211,153,0.55)" stroke-width="1"/>
+      <text x="641" y="411" font-size="9" fill="#34d399" font-family="monospace">3LPE COATING</text>
+      <line x1="598" y1="422" x2="638" y2="468" stroke="rgba(56,189,248,0.55)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="638" y1="468" x2="710" y2="468" stroke="rgba(56,189,248,0.55)" stroke-width="1"/>
+      <text x="641" y="464" font-size="9" fill="#38bdf8" font-family="monospace">STEEL PIPE</text>
+
+      <!-- AUT SCANNER -->
+      <g transform="translate(230,342)">
+        <rect x="-62" y="-26" width="124" height="46" rx="7" fill="rgba(8,10,20,0.96)" stroke="rgba(245,158,11,0.6)" stroke-width="1.6"/>
+        <line x1="-46" y1="0" x2="46" y2="0" stroke="rgba(245,158,11,0.45)" stroke-width="1"/>
+        <circle cx="-30" cy="0" r="3.5" fill="none" stroke="rgba(245,158,11,0.75)" stroke-width="1.2"/><circle cx="-30" cy="0" r="1.2" fill="#f59e0b"/>
+        <circle cx="0"   cy="0" r="3.5" fill="none" stroke="rgba(245,158,11,0.75)" stroke-width="1.2"/><circle cx="0"   cy="0" r="1.2" fill="#f59e0b"/>
+        <circle cx="30"  cy="0" r="3.5" fill="none" stroke="rgba(245,158,11,0.75)" stroke-width="1.2"/><circle cx="30"  cy="0" r="1.2" fill="#f59e0b"/>
+        <line x1="0" y1="20" x2="0" y2="33" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <text x="0" y="36" text-anchor="middle" font-size="9" fill="#f59e0b" font-family="monospace" letter-spacing="0.07em">AUT SCANNER</text>
+      </g>
+
+      <!-- KPI PANEL — left-aligned with form margin -->
+      <g transform="translate(90,110)">
+        <rect width="210" height="130" rx="10" fill="rgba(8,10,20,0.9)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+        <text x="14" y="24" font-size="9" fill="#3a4058" font-family="monospace" letter-spacing="0.08em">INSPECTION KPIs</text>
+        <line x1="14" y1="31" x2="196" y2="31" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+        <text x="14" y="52" font-size="17" fill="#f1f0e8" font-family="monospace" font-weight="bold">1,247</text>
+        <text x="108" y="52" font-size="8.5" fill="#3a4058" font-family="monospace">JOINTS INSPECTED</text>
+        <rect x="14" y="58" width="140" height="4" rx="2" fill="rgba(245,158,11,0.12)"/>
+        <rect x="14" y="58" width="104" height="4" rx="2" fill="rgba(245,158,11,0.65)"/>
+        <text x="14" y="82" font-size="17" fill="#34d399" font-family="monospace" font-weight="bold">98.4%</text>
+        <text x="108" y="82" font-size="8.5" fill="#3a4058" font-family="monospace">ACCEPTANCE RATE</text>
+        <rect x="14" y="88" width="140" height="4" rx="2" fill="rgba(52,211,153,0.12)"/>
+        <rect x="14" y="88" width="136" height="4" rx="2" fill="rgba(52,211,153,0.6)"/>
+        <text x="14" y="112" font-size="17" fill="#38bdf8" font-family="monospace" font-weight="bold">247</text>
+        <text x="72" y="112" font-size="8.5" fill="#3a4058" font-family="monospace">PERSONNEL DEPLOYED</text>
+      </g>
+
+      <!-- FEATURE BADGES (bottom row) -->
+      <g font-family="monospace" font-size="10" font-weight="700" letter-spacing="0.09em">
+        <rect x="68" y="726" width="148" height="32" rx="16" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.35)" stroke-width="1.2"/>
+        <circle cx="91" cy="742" r="4" fill="#f59e0b" opacity="0.85"/>
+        <text x="103" y="746.5" fill="#f59e0b" opacity="0.9">QA TRACKING</text>
+        <rect x="228" y="726" width="162" height="32" rx="16" fill="rgba(56,189,248,0.07)" stroke="rgba(56,189,248,0.3)" stroke-width="1.2"/>
+        <circle cx="251" cy="742" r="4" fill="#38bdf8" opacity="0.85"/>
+        <text x="263" y="746.5" fill="#38bdf8" opacity="0.9">QC INSPECTION</text>
+        <rect x="402" y="726" width="188" height="32" rx="16" fill="rgba(167,139,250,0.07)" stroke="rgba(167,139,250,0.28)" stroke-width="1.2"/>
+        <circle cx="425" cy="742" r="4" fill="#a78bfa" opacity="0.85"/>
+        <text x="437" y="746.5" fill="#a78bfa" opacity="0.9">EPCM DEPLOYMENT</text>
+      </g>
+
+      <!-- scan pulse rings -->
+      <ellipse cx="230" cy="490" rx="12" ry="115" fill="none" stroke="rgba(245,158,11,0.05)" stroke-width="14"/>
+      <ellipse cx="230" cy="490" rx="12" ry="94"  fill="none" stroke="rgba(245,158,11,0.07)" stroke-width="8"/>
+      <!-- ambient particles -->
+      <g fill="rgba(245,158,11,0.2)">
+        <circle cx="120" cy="220" r="1.5"/><circle cx="460" cy="180" r="1"/><circle cx="580" cy="260" r="1.5"/>
+        <circle cx="300" cy="700" r="1"/><circle cx="500" cy="740" r="1.5"/><circle cx="140" cy="770" r="1"/>
+        <circle cx="650" cy="660" r="1"/><circle cx="670" cy="330" r="1.5"/>
+      </g>
+    </svg>
+    <div class="login-illus-grad"></div>
+  </div>
+
+  <!-- Left: form content -->
+  <div class="login-content">
+    <div class="login-proj-chip">
+      <span class="login-chip-dot"></span>
+      <span class="login-chip-txt">P30312 — WEST TO EAST PIPELINE PROJECT</span>
     </div>
-    <div id="loginFirstCred" class="login-first-cred" style="display:none">
-      <div>&#9889; <b>First-time setup</b> — default Super Admin credentials:</div>
-      <div class="login-cred-row"><span>Username: <b>admin</b></span><span>Password: <b>Admin@2025!</b></span></div>
-      <div style="margin-top:4px;color:#484f58">Change your password after first login via User Management.</div>
+    <div class="login-title">QA/QC<br><span>Dashboard</span></div>
+    <div class="login-sub">Integrated quality assurance &amp; inspection management for the West to East Pipeline Project.</div>
+
+    <div class="login-card">
+      <div id="loginFirstCred" class="login-first-cred" style="display:none">
+        <div>&#9889; <b>First-time setup</b> — default Super Admin credentials:</div>
+        <div class="login-cred-row"><span>Username: <b>admin</b></span><span>Password: <b>Admin@2025!</b></span></div>
+        <div style="margin-top:4px;color:#484f58">Change your password after first login via User Management.</div>
+      </div>
+      <div class="login-field"><label class="login-lbl" for="loginUser">Username</label><input class="login-inp" id="loginUser" type="text" placeholder="Enter username" autocomplete="username"></div>
+      <div class="login-field"><label class="login-lbl" for="loginPass">Password</label><input class="login-inp" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password"></div>
+      <button class="login-btn" id="loginBtn" onclick="attemptLogin()">Sign In</button>
+      <div class="login-err" id="loginErr"></div>
+      <div class="login-divider">or</div>
+      <button class="login-guest-btn" id="loginGuestBtn" onclick="continueAsGuest()">Continue as Guest (view-only)</button>
+      <div class="login-guest-note">No account needed — read-only access for this session.<br>Your view won't be saved and resets when you sign out or reload.</div>
     </div>
-    <div class="login-title">QA/QC Dashboard</div>
-    <div class="login-sub">Sign in to access the dashboard</div>
-    <div class="login-field"><label class="login-lbl" for="loginUser">Username</label><input class="login-inp" id="loginUser" type="text" placeholder="Enter username" autocomplete="username"></div>
-    <div class="login-field"><label class="login-lbl" for="loginPass">Password</label><input class="login-inp" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password"></div>
-    <button class="login-btn" id="loginBtn" onclick="attemptLogin()">Sign In</button>
-    <div class="login-err" id="loginErr"></div>
-    <div class="login-divider">or</div>
-    <button class="login-guest-btn" id="loginGuestBtn" onclick="continueAsGuest()">Continue as Guest (view-only)</button>
-    <div class="login-guest-note">No account needed — read-only access for this session.<br>Your view won't be saved and resets when you sign out or reload.</div>
   </div>
 </div>
 
@@ -640,25 +799,88 @@ function parseDeployment(ab){
   const actualWs=wb.Sheets['DP_ACTUAL'];
   if(!planWs||!actualWs) throw new Error('Missing DP_PLAN or DP_ACTUAL sheet.');
 
+  // Parse a header cell value into "YYYY-MM" string, or null if not a valid month
+  const MON_NAMES={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  function parseMonthHdr(d){
+    if(d instanceof Date) return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;
+    if(typeof d==='number'&&d>1000){
+      const info=XLSX.SSF.parse_date_code(d);
+      if(info&&info.y>1900) return `${info.y}-${String(info.m).padStart(2,'0')}`;
+    }
+    if(typeof d==='string'){
+      let m=d.match(/^(\d{4})[\/\-](\d{1,2})/);
+      if(m) return `${m[1]}-${m[2].padStart(2,'0')}`;
+      m=d.match(/^(\d{1,2})[\/\-](\d{4})/);
+      if(m) return `${m[2]}-${m[1].padStart(2,'0')}`;
+      m=d.match(/^([A-Za-z]{3})[\s\-](\d{2,4})$/);
+      if(m){
+        const mo=MON_NAMES[m[1].toLowerCase()];
+        if(mo){
+          const yr=m[2].length===2?2000+parseInt(m[2]):parseInt(m[2]);
+          return `${yr}-${String(mo).padStart(2,'0')}`;
+        }
+      }
+    }
+    return null;
+  }
+
   function parseSheet(ws){
-    const raw=XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
-    if(!raw.length) return{months:[],rows:[]};
-    const hdr=raw[0];
-    const months=hdr.slice(5).map(d=>{
-      if(d instanceof Date) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      if(typeof d==='string'&&d.length>=7) return d.slice(0,7);
-      return null;
-    }).filter(Boolean);
+    // Determine sheet range
+    const ref=ws['!ref'];
+    if(!ref) return{months:[],rows:[]};
+    const range=XLSX.utils.decode_range(ref);
+    const nRows=range.e.r+1;  // total rows (0-indexed end + 1)
+    const nCols=range.e.c+1;
+
+    // Fixed column layout: A=0 LOC, B=1 CAT, C=2 ROLE, D=3 NAME, E=4 MAX, F=5 first month
+    const COL={loc:0, cat:1, role:2, name:3, max:4};
+    const MONTH_START_COL=5;  // column F — guaranteed starting point for month headers
+
+    // Helper: read a cell value from the worksheet by (row, col), both 0-indexed
+    function cellVal(r,c){
+      const addr=XLSX.utils.encode_cell({r,c});
+      const cell=ws[addr];
+      if(!cell) return '';
+      // For date cells: use the w (formatted) or v (raw) property
+      // With cellDates:true on XLSX.read, .v is a JS Date object
+      return cell.v!==undefined?cell.v:'';
+    }
+
+    // Build monthCols from header row (row 0), starting strictly at column F
+    // For date header cells, prefer .w (Excel-formatted string like "Oct-25") over .v (Date object)
+    // because Excel stores end-of-month dates which shift into previous month under UTC offset
+    const monthCols=[];
+    for(let c=MONTH_START_COL;c<nCols;c++){
+      const addr=XLSX.utils.encode_cell({r:0,c});
+      const cell=ws[addr];
+      if(!cell) continue;
+      const hv=cell.w||cell.v||'';
+      const m=parseMonthHdr(hv);
+      if(m) monthCols.push({month:m,ci:c});
+    }
+    const months=monthCols.map(x=>x.month);
+
+    // Find last non-empty data row
+    let lastRow=nRows-1;
+    while(lastRow>0){
+      let empty=true;
+      for(let c=0;c<Math.min(5,nCols);c++){if(cellVal(lastRow,c)!==''){empty=false;break;}}
+      if(!empty) break;
+      lastRow--;
+    }
+
     const rows=[];
-    for(let i=1;i<raw.length;i++){
-      const r=raw[i]; if(!r||!r[0]) continue;
+    for(let r=1;r<=lastRow;r++){
+      const loc=cellVal(r,COL.loc);
+      if(!loc) continue;
       rows.push({
-        loc:(r[0]||'').toString().trim(),
-        cat:(r[1]||'').toString().trim(),
-        role:(r[2]||'').toString().trim(),
-        name:(r[3]||'').toString().trim()||null,
-        max:+(r[4]||0),
-        vals:months.map((_,j)=>+(r[5+j]||0))
+        loc:  loc.toString().trim(),
+        cat:  (cellVal(r,COL.cat)||'').toString().trim(),
+        role: (cellVal(r,COL.role)||'').toString().trim(),
+        name: (cellVal(r,COL.name)||'').toString().trim()||null,
+        max:  +(cellVal(r,COL.max)||0),
+        _months:months,
+        vals:monthCols.map(x=>+(cellVal(r,x.ci)||0))
       });
     }
     return{months,rows};
@@ -667,7 +889,27 @@ function parseDeployment(ab){
   const plan=parseSheet(planWs);
   const actual=parseSheet(actualWs);
   if(!plan.rows.length) throw new Error('No rows found in DP_PLAN sheet.');
-  return{months:plan.months, plan:plan.rows, actual:actual.rows};
+
+  // Build unified month list — union of plan and actual months, sorted chronologically
+  const allMonths=[...new Set([...plan.months,...actual.months])].sort();
+
+  // Re-index each row's vals against the unified month list
+  function reindex(rows, sheetMonths){
+    return rows.map(r=>{
+      const vals=allMonths.map(m=>{
+        const si=sheetMonths.indexOf(m);
+        return si>=0?(r.vals[si]||0):0;
+      });
+      const {_months,...rest}=r;
+      return{...rest,vals};
+    });
+  }
+
+  return{
+    months:allMonths,
+    plan:reindex(plan.rows,plan.months),
+    actual:reindex(actual.rows,actual.months)
+  };
 }
 
 // ═══════════════════════════════════════════════════
@@ -721,10 +963,8 @@ function mkFJCRow(secLabel, rows, start, end, cumulative){
 // ═══════════════════════════════════════════════════
 // HTML BUILDERS
 // ═══════════════════════════════════════════════════
-function pill(){ return ''; }
-
 function bRFITable(rows, totals, title, live){
-  if(!rows) return `<div class="card" style="display:flex;flex-direction:column;height:100%"><div class="slbl">${title}${pill(false)}</div><div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#484f58">Upload RFI Register to populate</div></div>`;
+  if(!rows) return `<div class="card" style="display:flex;flex-direction:column;height:100%"><div class="slbl">${title}</div><div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#484f58">Upload RFI Register to populate</div></div>`;
   const trs=rows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
     <td class="td tl">${r.d}</td>
     <td class="td cb">${fn(r.acc)}</td><td class="td clb">${fn(r.accW)}</td>
@@ -747,7 +987,7 @@ function bRFITable(rows, totals, title, live){
     <div class="bdg-cnt">${fn(b.v)}</div>
   </div>`).join('');
   return`<div class="card" style="display:flex;flex-direction:column">
-    <div class="slbl">${title}${pill(live)}</div>
+    <div class="slbl">${title}</div>
     <div class="ox" style="flex:1"><table class="tbl"><thead><tr>
       <th class="th tl">Discipline</th><th class="th">ACC</th><th class="th">ACC W/C</th>
       <th class="th">CAN</th><th class="th">OPEN</th><th class="th">REJ</th><th class="th">Total</th>
@@ -803,7 +1043,7 @@ function bNDTTable(secRows, title, live, kpis){
     const cols=kpisShown.length===1?'1fr':'repeat('+kpisShown.length+',1fr)';
     kpiHtml=`<div class="kpi-inline" style="grid-template-columns:${cols}">${kpisShown.map(k=>bKPIinline(k.label,k.value,k.goal,k.unit)).join('')}</div>`;
   }
-  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}${pill(live)}</div>
+  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}</div>
   <div class="ox"><table class="tbl"><thead><tr>
     <th class="th tl">Section</th><th class="th">Welded</th><th class="th">EPCM Rev</th>
     <th class="th">Accepted</th><th class="th">Repair</th>${hideBacklog?'':'<th class="th">Backlog</th>'}
@@ -858,7 +1098,7 @@ function bFJCTable(secRows, title, live, kpis){
     const cols='repeat('+kpis.length+',1fr)';
     kpiHtml=`<div class="kpi-inline" style="grid-template-columns:${cols}">${kpis.map(k=>bKPIinline(k.label,k.value,k.goal,k.unit)).join('')}</div>`;
   }
-  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}${pill(live)}</div>
+  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}</div>
   <div class="ox"><table class="tbl"><thead><tr>
     <th class="th tl">Section</th><th class="th">Released</th><th class="th">Coated</th>
     <th class="th">Accepted</th><th class="th">Repair</th><th class="th">Balance</th>
@@ -887,7 +1127,7 @@ function bProgress(live){
     {l:'Welded',      v:wTotal,    pct:wPct,   c:sc.cb},
     {l:'FJC Accepted',v:fjcTotal,  pct:fjcPct, c:sc.cs2},
   ];
-  return`<div class="card"><div class="slbl">Welding Progress${pill(live)}</div>
+  return`<div class="card"><div class="slbl">Welding Progress</div>
   ${bars.map(b=>`<div class="prog-row">
     <div class="prog-meta">
       <span class="cm" style="text-transform:uppercase;letter-spacing:.06em;font-size:9px">${b.l}</span>
@@ -902,7 +1142,7 @@ function bWelderChart(wData){
   const over = welders.filter(w=>w.cumPct>3&&w.cumAut>0).sort((a,b)=>b.cumPct-a.cumPct);
   if(!over.length) return`<div class="card" style="min-height:180px;display:flex;align-items:center;justify-content:center"><span class="cm" style="font-size:11px">No welders &gt; 3% repair rate</span></div>`;
   const h=Math.max(180,over.length*26+80);
-  return`<div class="card"><div class="slbl">Welders &gt; 3% Repair Rate${pill(!!wData)}</div>
+  return`<div class="card"><div class="slbl">Welders &gt; 3% Repair Rate</div>
     <div class="ch-wrap" style="height:${h}px"><canvas id="welderChart"></canvas></div>
   </div>`;
 }
@@ -926,7 +1166,7 @@ function bSORTable(sorRecs, live){
     <td class="td tl">${r.ic}</td>
     <td class="td cg">${fn(r.closed)}</td><td class="td ca">${fn(r.open)}</td><td class="td">${fn(r.total)}</td>
   </tr>`).join('');
-  return`<div class="card" style="min-width:220px"><div class="slbl">Site Observations${pill(live)}</div>
+  return`<div class="card" style="min-width:220px"><div class="slbl">Site Observations</div>
   <table class="tbl"><thead><tr>
     <th class="th tl">IC</th><th class="th">Closed</th><th class="th">Open</th><th class="th">Total</th>
   </tr></thead><tbody>${trs}</tbody>
@@ -968,7 +1208,7 @@ function bNCRTable(ncrRecs, live){
     <td class="td tl">${r.against}</td>
     <td class="td cg">${fn(r.closed)}</td><td class="td ca">${fn(r.open)}</td><td class="td">${fn(r.total)}</td>
   </tr>`).join('');
-  return`<div class="card" style="min-width:220px"><div class="slbl">NCR Status${pill(live)}</div>
+  return`<div class="card" style="min-width:220px"><div class="slbl">NCR Status</div>
   <table class="tbl"><thead><tr>
     <th class="th tl">Against</th><th class="th">Closed</th><th class="th">Open</th><th class="th">Total</th>
   </tr></thead><tbody>${trs}</tbody>
@@ -980,7 +1220,7 @@ function bNCRTable(ncrRecs, live){
 function bNCRBar(ncrRecs, live){
   const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
   return`<div class="card" style="display:flex;flex-direction:column">
-    <div class="slbl">NCR BY ENTITY${pill(live)}</div>
+    <div class="slbl">NCR BY ENTITY</div>
     <div class="ch-wrap" style="flex:1;min-height:160px"><canvas id="ncrBarChart"></canvas></div>
     <div style="display:flex;gap:16px;margin-top:8px;font-size:9px;justify-content:center">
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.accent};margin-right:4px;vertical-align:middle"></span>Total</span>
@@ -1004,6 +1244,19 @@ const SLOT_DEFS=[
   {key:'deployment', icon:'👥', label:'EPCM Deployment', hint:'DP_PLAN + DP_ACTUAL sheets'},
 ];
 
+// SVG icons — modern minimal stroke style
+const UPL_ICONS={
+  upload:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+  save:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
+  trash:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>`,
+  calX:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="14" x2="14" y2="18"/><line x1="14" y1="14" x2="10" y2="18"/></svg>`,
+  layout:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+  check:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  warn:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  err:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+  spin:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>`,
+};
+
 function bUploadBar(){
   const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
   if(isViewer) return '';
@@ -1012,82 +1265,107 @@ function bUploadBar(){
   const loadedCount=Object.values(ST.data).filter(v=>v!==null).length;
   const totalCount=SLOT_DEFS.length;
   const anyProcessing=Object.values(ST.processing).some(v=>v);
+  const hasRFI=!!ST.data.rfi;
+  const allSaved=loadedCount>0&&!ST.unsaved;
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const isEditing=!!EDIT_MODE;
 
-  const slotHtml=SLOT_DEFS.map(s=>{
+  // ── Dataset cards ──
+  const cardsHtml=SLOT_DEFS.map(s=>{
     const loaded=ST.data[s.key]!==null;
     const processing=ST.processing[s.key];
     const errMsg=ST.errors[s.key];
-    const unsavedSlot=loaded&&ST.unsaved;
+    const unsaved=loaded&&ST.unsaved;
     const isWrongFile=errMsg&&errMsg.startsWith('WRONG_FILE|');
-    const clz=`upl-slot${loaded?(unsavedSlot?' unsaved':' loaded'):''}${errMsg?' err':''}`;
-    const rowCount=loaded&&Array.isArray(ST.data[s.key])?fn(ST.data[s.key].length)+' rows':'';
+    const rowCount=loaded&&Array.isArray(ST.data[s.key])?fn(ST.data[s.key].length)+' rows':loaded?'loaded':'';
     const fname=ST.files[s.key]?ST.files[s.key].split('/').pop().split('\\').pop():'';
-    let errDisplay='', errTitle='';
-    if(isWrongFile){
-      const parts=errMsg.split('|');
-      const expected=parts[1]||''; const actual=(parts[2]||'').split('/').pop().split('\\').pop();
-      errDisplay=`Wrong file uploaded`;
-      errTitle=`Expected: ${expected} — Got: ${actual}`;
-    } else if(errMsg){
-      errDisplay=errMsg.slice(0,38);
-      errTitle=errMsg;
-    }
-    return`<div class="${clz}" id="slot_${s.key}" data-key="${s.key}"
-        title="${loaded?fname+(unsavedSlot?' — UNSAVED, press Save to publish':' — click to replace'):errTitle||'Click to upload individually'}">
-      <div class="upl-slot-top">
-        <span class="upl-slot-icon">${processing?'⟳':loaded?(unsavedSlot?'🟡':'✅'):errMsg?'❌':s.icon}</span>
-        <span class="upl-slot-lbl">${s.label}</span>
+    let errDisplay='',errTitle='';
+    if(isWrongFile){const p=errMsg.split('|');errDisplay='Wrong file';errTitle=`Expected: ${p[1]||''} — Got: ${(p[2]||'').split('/').pop()}`;}
+    else if(errMsg){errDisplay=errMsg.slice(0,22);errTitle=errMsg;}
+    const stateClass=errMsg?'err':unsaved?'unsaved':loaded?'ok':'empty';
+    const icon=processing?UPL_ICONS.spin:unsaved?UPL_ICONS.warn:loaded?UPL_ICONS.check:errMsg?UPL_ICONS.err:'';
+    return`<div class="upl-card ${stateClass}" id="slot_${s.key}" data-key="${s.key}"
+      title="${loaded?fname+(unsaved?' — UNSAVED':' — click to replace'):errTitle||'Click to upload'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
+        <span class="upl-card-name">${s.label}</span>
+        <span style="flex-shrink:0">${icon}</span>
       </div>
-      <div class="upl-slot-fn">${loaded?fname:s.hint}</div>
-      ${loaded?`<div class="upl-slot-cnt" style="${unsavedSlot?`color:${sc.warn}`:''}">${rowCount}${unsavedSlot?' · unsaved':''}</div>`:''}
-      ${errMsg?`<div class="upl-slot-cnt" style="color:${sc.bad}">${errDisplay}</div>`:''}
+      <div class="upl-card-file">${loaded?fname:s.hint}</div>
+      ${rowCount?`<div class="upl-card-rows">${rowCount}${unsaved?' · unsaved':''}</div>`:''}
+      ${errMsg&&!loaded?`<div class="upl-card-rows" style="color:#f43f5e">${errDisplay}</div>`:''}
     </div>`;
   }).join('');
 
   const errHtml=Object.entries(ST.errors).filter(([,v])=>v).map(([k,v])=>`<span class="upl-err-item">⚠ ${k}: ${v}</span>`).join('');
-  const hasRFI=!!ST.data.rfi;
 
-  return`<div class="upl-bar">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-      <!-- Upload All -->
-      <button id="btnUploadAll" onclick="document.getElementById('fileMulti').click()"
-        style="background:${sc.loginGrad};border:none;border-radius:6px;color:#fff;
-               font-size:12px;font-weight:600;padding:7px 16px;cursor:pointer;display:flex;align-items:center;gap:6px;
-               white-space:nowrap;${anyProcessing?'opacity:.5;pointer-events:none':''}">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
-          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-        </svg>
-        ${anyProcessing?'⟳ Processing…':'Upload All Files'}
-      </button>
-      <!-- Save -->
-      <button id="btnSave" onclick="saveAllToDB()" ${!ST.unsaved?'disabled':''}
-        style="background:${ST.unsaved?`linear-gradient(135deg,${sc.good}99,${sc.good})`:sc.card};
-               border:1px solid ${ST.unsaved?sc.good+'66':sc.border};
-               border-radius:6px;color:${ST.unsaved?'#fff':sc.faint};font-size:12px;font-weight:600;
-               padding:7px 16px;cursor:${ST.unsaved?'pointer':'not-allowed'};white-space:nowrap;transition:all .2s">
-        💾 Save
-      </button>
-      <!-- Clear Files -->
-      <button id="btnClearFiles" onclick="clearAllFiles()" ${!loadedCount?'disabled':''}
-        style="background:${loadedCount?sc.bad+'22':sc.card};border:1px solid ${loadedCount?sc.bad+'55':sc.border};
-               border-radius:6px;color:${loadedCount?sc.bad:sc.faint};font-size:12px;font-weight:600;
-               padding:7px 16px;cursor:${loadedCount?'pointer':'not-allowed'};white-space:nowrap;transition:all .2s">
-        🗑 Clear Dashboard
-      </button>
-      <!-- Clear Period -->
-      <button onclick="clearPeriod()" ${!hasRFI?'disabled':''}
-        style="background:${sc.card};border:1px solid ${hasRFI?sc.border:sc.card};
-               border-radius:6px;color:${hasRFI?sc.muted:sc.faint};font-size:12px;font-weight:600;
-               padding:7px 16px;cursor:${hasRFI?'pointer':'not-allowed'};white-space:nowrap;transition:all .2s">
-        📅 Clear Period
-      </button>
-      <span style="font-size:10px;color:${sc.faint};margin-left:4px">Auto-detected by sheet name</span>
-      ${loadedCount>0?`<span style="font-size:10px;color:${ST.unsaved?sc.warn:sc.good};margin-left:auto">
-        ${ST.unsaved?'⚠ '+loadedCount+'/'+totalCount+' datasets loaded — unsaved':'✓ '+loadedCount+'/'+totalCount+' datasets saved'}</span>`:''}
+  // ── Status label ──
+  const statusColor=ST.unsaved?sc.warn:sc.good;
+  const statusTxt=loadedCount>0?(ST.unsaved?`⚠ ${loadedCount}/${totalCount} unsaved`:`✓ ${loadedCount}/${totalCount} saved`):'';
+
+  // ── Collapsed strip ──
+  const stripUploadStyle=`background:rgba(245,158,11,.15);color:#f59e0b`;
+  const stripGhostStyle=`background:rgba(255,255,255,.06);color:#6b7280`;
+  const stripDangerStyle=`background:rgba(244,63,94,.1);color:#f87171`;
+
+  return`<div class="upl-bar" id="uplBarWrap">
+
+    <!-- ── Expanded panel ── -->
+    <div class="upl-expanded">
+      <div class="upl-actions-col">
+        <button id="btnUploadAll" class="upl-btn upl-btn-primary" onclick="document.getElementById('fileMulti').click()" ${anyProcessing?'disabled':''}>
+          ${UPL_ICONS.upload} ${anyProcessing?'Processing…':'Upload All'}
+        </button>
+        <button id="btnSave" class="upl-btn ${ST.unsaved?'upl-btn-ghost':'upl-btn-ghost'}" onclick="saveAllToDB()" ${!ST.unsaved?'disabled':''}
+          style="${ST.unsaved?`color:#14b8a6;border-color:rgba(20,184,166,.35);background:rgba(20,184,166,.08)`:''}">
+          ${UPL_ICONS.save} Save
+        </button>
+        <div style="display:flex;gap:5px">
+          <button id="btnClearFiles" class="upl-btn upl-btn-danger" onclick="clearAllFiles()" ${!loadedCount?'disabled':''} style="flex:1">
+            ${UPL_ICONS.trash} Clear
+          </button>
+          <button class="upl-btn upl-btn-ghost" onclick="clearPeriod()" ${!hasRFI?'disabled':''} style="flex:1">
+            ${UPL_ICONS.calX} Period
+          </button>
+        </div>
+        ${isSA?`<button id="btnEdit" class="upl-btn upl-btn-ghost" onclick="toggleEditMode()" style="${isEditing?'color:#f59e0b;border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)':''}">
+          ${UPL_ICONS.layout} ${isEditing?'Exit Edit':'Edit Layout'}
+        </button>`:''}
+      </div>
+      <div class="upl-vsep"></div>
+      <div class="upl-cards">${cardsHtml}</div>
     </div>
-    <div class="upl-grid">${slotHtml}</div>
-    ${errHtml?`<div class="upl-err-row" style="margin-top:4px">${errHtml}</div>`:''}
+
+    <!-- ── Status + hint row ── -->
+    <div class="upl-status-row">
+      <span style="font-size:9.5px;color:${sc.faint}">Auto-detected by sheet name</span>
+      ${statusTxt?`<span style="font-size:10px;font-weight:600;color:${statusColor};margin-left:auto">${statusTxt}</span>`:''}
+    </div>
+
+    <!-- ── Collapsed strip ── -->
+    <div class="upl-strip">
+      <button class="upl-strip-btn" onclick="document.getElementById('fileMulti').click()" style="${stripUploadStyle}" title="Upload All Files" ${anyProcessing?'disabled':''}>
+        ${UPL_ICONS.upload}
+      </button>
+      <button class="upl-strip-btn" onclick="saveAllToDB()" style="${ST.unsaved?`background:rgba(20,184,166,.1);color:#14b8a6`:'background:rgba(255,255,255,.05);color:#374151'}" title="Save" ${!ST.unsaved?'disabled':''}>
+        ${UPL_ICONS.save}
+      </button>
+      <button class="upl-strip-btn" onclick="clearAllFiles()" style="${stripDangerStyle}" title="Clear Dashboard" ${!loadedCount?'disabled':''}>
+        ${UPL_ICONS.trash}
+      </button>
+      <button class="upl-strip-btn" onclick="clearPeriod()" style="${stripGhostStyle}" title="Clear Period" ${!hasRFI?'disabled':''}>
+        ${UPL_ICONS.calX}
+      </button>
+      ${isSA?`<div class="upl-strip-sep"></div>
+      <button class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
+        ${UPL_ICONS.layout}
+      </button>`:''}
+      <div class="upl-strip-sep"></div>
+      <div class="upl-strip-status">
+        ${statusTxt?`<span style="color:${statusColor}">${statusTxt}</span>`:`<span style="color:#374151">No data loaded</span>`}
+      </div>
+    </div>
+
+    ${errHtml?`<div class="upl-err-row">${errHtml}</div>`:''}
   </div>`;
 }
 
@@ -1182,7 +1460,6 @@ function bSidenavExtra(){
       </button>
     </div>
 
-    ${isSA?`<button class="sidenav-link" id="btnEdit" style="width:100%;background:none;border:none;cursor:pointer" onclick="toggleEditMode()">⊹ Edit Layout</button>`:''}
     ${isSA?`<button class="sidenav-link" style="width:100%;background:none;border:none;cursor:pointer" onclick="openUserMgmt()">⚙ User Management</button>`:''}
 
     <div class="sidenav-divider"></div>
@@ -1321,10 +1598,58 @@ function switchView(v){
 // ═══════════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════════
+// ── Generic collapsible bar controller ──
+// Each page calls initCollapsibleBar(barId, spacerId, stateKey)
+// stateKey keeps collapse state across re-renders per page independently.
+const _barCollapseState={};
+
+function initCollapsibleBar(barId, spacerId, stateKey){
+  const bar=document.getElementById(barId);
+  const spacer=document.getElementById(spacerId);
+  if(!bar) return;
+
+  const collapsed=!!_barCollapseState[stateKey];
+  const collapsedH=44;
+
+  // Measure natural expanded height
+  bar.style.height='';
+  bar.classList.remove('collapsed');
+  const expandedH=bar.scrollHeight;
+
+  // Apply saved state
+  if(collapsed){
+    bar.style.height=collapsedH+'px';
+    bar.classList.add('collapsed');
+  } else {
+    bar.style.height=expandedH+'px';
+  }
+  if(spacer) spacer.style.height=expandedH+'px';
+
+  function setCollapsed(yes){
+    if(yes===_barCollapseState[stateKey]) return;
+    _barCollapseState[stateKey]=yes;
+    bar.style.height=(yes?collapsedH:expandedH)+'px';
+    bar.classList.toggle('collapsed',yes);
+  }
+
+  const listenerKey='_barScrollFn_'+stateKey;
+  if(window[listenerKey]) window.removeEventListener('scroll',window[listenerKey],{passive:true});
+  window[listenerKey]=()=>{
+    const sy=window.scrollY||document.documentElement.scrollTop;
+    if(sy>30) setCollapsed(true);
+    else if(sy<60) setCollapsed(false);
+  };
+  window.addEventListener('scroll',window[listenerKey],{passive:true});
+}
+
+function initUploadBarScroll(){ initCollapsibleBar('uplBarWrap','uplBarSpacer','dash'); }
+function initDPBarScroll(){ initCollapsibleBar('dpBarWrap','dpBarSpacer','dp'); }
+
 function render(){
   Object.values(CHARTS).forEach(c=>{try{c.destroy();}catch(e){}});
   Object.keys(CHARTS).forEach(k=>delete CHARTS[k]);
-  if(APP_VIEW==='deployment'){ renderDeployment(); return; }
+  if(APP_VIEW==='deployment'){ ACTIVE_CANVAS_ID='dpCanvas'; renderDeployment(); return; }
+  ACTIVE_CANVAS_ID='dashCanvas';
 
   const rfiData=getRFIData();
   const rfiLive=!rfiData.isDefault;
@@ -1364,6 +1689,7 @@ function render(){
   document.getElementById('app').innerHTML=`
     ${bHeader()}
     ${bUploadBar()}
+    <div id="uplBarSpacer"></div>
     <div id="dashCanvas"></div>
     <div class="footer" style="position:relative;z-index:1;padding:8px 20px;text-align:center;font-size:10px;color:#4a5068">
       P30312 · RFI: ${rfiLive?fn(ST.data.rfi.length)+' live':'default'} · Daily: ${dailyLive?'live':'default'} · Welders: ${welderData?fn(welderData.length)+' live':'default'} · SOR: ${sorRecs?fn(sorRecs.length)+' live':'default'} · NCR: ${ncrRecs?fn(ncrRecs.length)+' live':'default'}
@@ -1375,17 +1701,14 @@ function render(){
   if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
   fillSidenavDrops();
 
-  // Inject canvas mode bar
-  const modeBar=document.getElementById('canvasModeBar');
-  const appEl=document.getElementById('app');
-  if(modeBar && appEl) appEl.insertBefore(modeBar, appEl.firstChild);
-
   // Render canvas panels
   renderCanvas(PANELS_HTML);
   initCharts(rfiData, welderData, sorRecs, ncrRecs);
   bindEvents();
   // Re-apply edit mode if active
   if(EDIT_MODE) activateEditMode();
+  // Init collapsible upload bar
+  initUploadBarScroll();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1396,22 +1719,47 @@ function renderDeployment(){
   const dep=ST.data.deployment;
   const isViewer=AUTH.currentUser&&(AUTH.currentUser.role==='viewer'||!!AUTH.currentUser.isGuest);
 
-  // Default selected month = current calendar month
-  if(!ST.dpMonth){
+  // Initialise multi-month selection (ST.dpMonths replaces ST.dpMonth)
+  if(!ST.dpMonths){
     const n=new Date();
-    ST.dpMonth=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+    const curM=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+    const dep2=ST.data.deployment;
+    if(dep2&&dep2.months.length){
+      // Default to current month if present, otherwise the last available month
+      const m=dep2.months.includes(curM)?curM:dep2.months[dep2.months.length-1];
+      ST.dpMonths=[m];
+    } else {
+      ST.dpMonths=[curM];
+    }
   }
 
   document.getElementById('app').innerHTML=`
     ${bHeader()}
-    ${bDeploymentBody(sc, dep, isViewer)}
+    ${bDeployBar(sc, dep, isViewer)}
+    <div id="dpBarSpacer"></div>
+    <div id="dpCanvas"></div>
   `;
 
   const sidenavExtraEl=document.getElementById('sidenavExtra');
   if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
   fillSidenavDrops();
+
+  const DP_PANELS = {
+    dpUpload:    bDPUploadPanel(sc, dep, isViewer),
+    dpCtrl:      bDPCtrlPanel(sc, dep),
+    dpCats:      bDPCatsPanel(sc, dep),
+    dpRoles:     bDPRolesPanel(sc, dep),
+    dpChart6m:   bDPChart6mPanel(sc),
+    dpHiring:    bDPHiringPanel(sc),
+    dpLocRole:   bDPLocRolePanel(sc, dep),
+    dpPersonnel: bPersonnelTable(sc, dep),
+  };
+
+  renderCanvas(DP_PANELS);
   bindDeploymentEvents();
   if(dep) initDeploymentCharts(dep, sc);
+  if(EDIT_MODE) activateEditMode();
+  initDPBarScroll();
 }
 
 function dpStatus(planVal, actualVal, monthStr){
@@ -1438,104 +1786,305 @@ function dpStatusBadge(status, sc){
     background:${c.bg};border:1px solid ${c.border};color:${c.color}">${c.label}</span>`;
 }
 
-function bDeploymentBody(sc, dep, isViewer){
-  const months=dep?dep.months:[];
-  const selMonth=ST.dpMonth||'';
-  const monthIdx=dep?dep.months.indexOf(selMonth):-1;
+// Status for an aggregated multi-month selection
+function dpStatusMulti(pv, av, selMonths){
+  if(pv===0&&av===0) return 'neutral';
+  if(pv===0) return 'neutral';
+  const n=new Date();
+  const curM=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  if((selMonths||[]).every(m=>m>curM)) return 'pending';
+  if(av===0) return 'missed';
+  if(av>=pv) return 'met';
+  return 'partial';
+}
 
-  // Month selector options
-  const monthOpts=months.map(m=>`<option value="${m}"${m===selMonth?' selected':''}>${fmtDeployMonth(m)}</option>`).join('');
+// ── Multi-month dropdown helpers ──
+function getDpMonthLabel(){
+  const ms=ST.dpMonths||[];
+  if(!ms.length) return 'No months selected';
+  if(ms.length===1) return fmtDeployMonth(ms[0]);
+  if(ms.length<=3) return ms.map(fmtDeployMonth).join(', ');
+  return `${fmtDeployMonth(ms[0])} – ${fmtDeployMonth(ms[ms.length-1])} (${ms.length} months)`;
+}
+function updateDpCtrlLabel(){
+  const lbl=getDpMonthLabel();
+  const cnt=(ST.dpMonths||[]).length+' selected';
+  ['dpMonthLabel','dpMonthLabelExp'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=lbl;});
+  ['dpMonthCount','dpMonthCountExp'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=cnt;});
+}
+function dpMonthToggle(m, checked){
+  if(!ST.dpMonths) ST.dpMonths=[];
+  if(checked&&!ST.dpMonths.includes(m)) ST.dpMonths.push(m);
+  if(!checked) ST.dpMonths=ST.dpMonths.filter(x=>x!==m);
+  const dep=ST.data.deployment;
+  if(dep) ST.dpMonths.sort((a,b)=>dep.months.indexOf(a)-dep.months.indexOf(b));
+  updateDpCtrlLabel();
+}
+function dpMonthSelAll(){
+  const dep=ST.data.deployment;
+  if(!dep) return;
+  ST.dpMonths=[...dep.months];
+  document.querySelectorAll('#dpMonthDropdown input[type=checkbox]').forEach(cb=>cb.checked=true);
+  updateDpCtrlLabel();
+}
+function dpMonthClear(){
+  ST.dpMonths=[];
+  document.querySelectorAll('#dpMonthDropdown input[type=checkbox]').forEach(cb=>cb.checked=false);
+  updateDpCtrlLabel();
+}
+function toggleDpMonthDrop(btn){
+  const existing=document.getElementById('dpMonthDropdown');
+  if(existing){ existing.remove(); return; }
+  const dep=ST.data.deployment;
+  if(!dep) return;
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const selMs=ST.dpMonths||[];
+  if(!btn) btn=document.getElementById('dpMonthDropBtn')||document.getElementById('dpMonthDropBtnExp');
+  if(!btn) return;
+  // Snapshot selection so click-outside/scroll can discard without re-render
+  const _snapshot=[...selMs];
+  function closeDrop(apply){
+    dd.remove();
+    if(apply) render();
+    else{ ST.dpMonths=[..._snapshot]; updateDpCtrlLabel(); }
+  }
+  const r=btn.getBoundingClientRect();
+  const ddMinW=210;
+  const ddLeft=r.left+ddMinW>window.innerWidth-16 ? Math.max(8,r.right-ddMinW) : r.left;
+  const dd=document.createElement('div');
+  dd.id='dpMonthDropdown';
+  dd.style.cssText=`position:fixed;top:${r.bottom+4}px;left:${ddLeft}px;z-index:1400;
+    background:${sc.card};border:1px solid ${sc.border};border-radius:8px;
+    box-shadow:0 8px 28px rgba(0,0,0,.45);padding:8px 6px 6px;max-height:320px;
+    overflow-y:auto;min-width:200px;display:flex;flex-direction:column`;
+  dd.innerHTML=`
+    <div style="display:flex;gap:6px;padding:2px 4px 8px;border-bottom:1px solid ${sc.border};margin-bottom:6px;flex-shrink:0">
+      <button onclick="dpMonthSelAll()" style="flex:1;background:${sc.accent}18;border:1px solid ${sc.accent}44;border-radius:5px;color:${sc.accent};font-size:10px;font-weight:600;padding:3px 0;cursor:pointer">All</button>
+      <button onclick="dpMonthClear()" style="flex:1;background:${sc.bg};border:1px solid ${sc.border};border-radius:5px;color:${sc.muted};font-size:10px;font-weight:600;padding:3px 0;cursor:pointer">Clear</button>
+    </div>
+    <div style="overflow-y:auto;flex:1">
+    ${dep.months.map(m=>`
+      <label style="display:flex;align-items:center;gap:7px;padding:3px 8px;cursor:pointer;border-radius:4px">
+        <input type="checkbox" value="${m}" ${selMs.includes(m)?'checked':''} onchange="dpMonthToggle('${m}',this.checked)"
+          style="accent-color:${sc.accent};width:13px;height:13px;cursor:pointer">
+        <span style="font-size:11px;color:${selMs.includes(m)?sc.text:sc.muted}">${fmtDeployMonth(m)}</span>
+      </label>`).join('')}
+    </div>
+    <div style="padding:8px 4px 2px;border-top:1px solid ${sc.border};margin-top:6px;flex-shrink:0">
+      <button id="dpMonthApplyBtn" style="width:100%;padding:5px 0;border-radius:5px;border:1px solid ${sc.accent}66;background:${sc.accent}22;color:${sc.accent};font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.03em">Apply</button>
+    </div>`;
+  document.body.appendChild(dd);
+  dd.querySelector('#dpMonthApplyBtn').addEventListener('click',()=>closeDrop(true));
+  // Dropdown closes only on outside click — not on scroll
+  setTimeout(()=>{
+    function outside(e){
+      if(!dd.contains(e.target)&&e.target.id!=='dpMonthDropBtn'&&!e.target.closest('#dpMonthDropBtn')){
+        closeDrop(false);
+        document.removeEventListener('mousedown',outside);
+      }
+    }
+    document.addEventListener('mousedown',outside);
+  },80);
+}
 
-  // ── Category table ──
+// ── Deployment panel builders (each returns a .card HTML string) ──
+
+function bDeployBar(sc, dep, isViewer){
+  if(isViewer) return '';
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const isEditing=!!EDIT_MODE;
+  const loaded=!!dep;
+  const fname=ST.files.deployment?ST.files.deployment.split('/').pop().split('\\').pop():'';
+  const statusColor=loaded?sc.good:sc.faint;
+  const statusTxt=loaded?`✓ ${fname} · ${dep.plan.length} plan · ${dep.actual.length} actual`:'No file loaded';
+  const selMs=ST.dpMonths||[];
+  const periodLabel=getDpMonthLabel();
+  const periodN=selMs.length;
+
+  return`<div class="upl-bar" id="dpBarWrap">
+
+    <!-- ── Expanded panel ── -->
+    <div class="upl-expanded">
+      <div class="upl-actions-col">
+        <button class="upl-btn upl-btn-primary" onclick="document.getElementById('dpFileInput').click()">
+          ${UPL_ICONS.upload} ${loaded?'Replace File':'Upload EPCM'}
+        </button>
+        ${loaded?`<button class="upl-btn upl-btn-danger" onclick="clearDeployment()" style="font-size:10px">
+          ${UPL_ICONS.trash} Clear Deployment
+        </button>`:''}
+        ${isSA?`<button id="btnEditDP" class="upl-btn upl-btn-ghost" onclick="toggleEditMode()" style="${isEditing?'color:#f59e0b;border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)':''}">
+          ${UPL_ICONS.layout} ${isEditing?'Exit Edit':'Edit Layout'}
+        </button>`:''}
+      </div>
+      <div class="upl-vsep"></div>
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:4px;flex:1">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};text-transform:uppercase">EPCM Deployment</div>
+        <div style="font-size:11px;font-weight:600;color:${statusColor}">${statusTxt}</div>
+      </div>
+      ${loaded?`<div class="upl-vsep"></div>
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:6px;padding:0 4px">
+        <span style="font-size:10px;font-weight:700;letter-spacing:.06em;color:${sc.muted};text-transform:uppercase">Analysis Period</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button id="dpMonthDropBtnExp" onclick="toggleDpMonthDrop(this)"
+            style="display:flex;align-items:center;gap:8px;background:${sc.bg};border:1px solid ${sc.border};border-radius:6px;
+                   color:${sc.text};font-size:11px;padding:5px 12px;cursor:pointer;min-width:160px">
+            <span id="dpMonthLabelExp" style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${periodLabel}</span>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="flex-shrink:0"><path d="M1 3l4 4 4-4" stroke="${sc.muted}" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <span id="dpMonthCountExp" style="font-size:10px;color:${periodN?sc.accent:sc.faint};font-weight:600;white-space:nowrap">${periodN} selected</span>
+        </div>
+      </div>`:''}
+    </div>
+
+    <!-- ── Status row ── -->
+    <div class="upl-status-row">
+      <span style="font-size:9.5px;color:${sc.faint}">Manpower Deployment Status — EPCM Personnel</span>
+    </div>
+
+    <!-- ── Collapsed strip ── -->
+    <div class="upl-strip">
+      <button class="upl-strip-btn" onclick="document.getElementById('dpFileInput').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="${loaded?'Replace EPCM File':'Upload EPCM File'}">
+        ${UPL_ICONS.upload}
+      </button>
+      ${loaded?`<button class="upl-strip-btn" onclick="clearDeployment()" style="background:rgba(244,63,94,.1);color:#f87171" title="Clear Deployment">
+        ${UPL_ICONS.trash}
+      </button>`:''}
+      ${isSA?`<div class="upl-strip-sep"></div>
+      <button class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
+        ${UPL_ICONS.layout}
+      </button>`:''}
+      <div class="upl-strip-sep"></div>
+      <div class="upl-strip-status">
+        <span style="color:${statusColor}">${loaded?`✓ ${fname}`:'No file loaded'}</span>
+      </div>
+      ${loaded?`<div class="upl-strip-sep"></div>
+      <span style="font-size:9.5px;color:#6b7280;font-weight:600;white-space:nowrap;padding:0 2px">Period:</span>
+      <button id="dpMonthDropBtn" onclick="toggleDpMonthDrop(this)"
+        style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:5px;
+               color:#d1d5db;font-size:10px;padding:3px 10px;cursor:pointer;height:28px;max-width:220px">
+        <span id="dpMonthLabel" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${periodLabel}</span>
+        <svg width="9" height="9" viewBox="0 0 10 10" fill="none" style="flex-shrink:0"><path d="M1 3l4 4 4-4" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <span id="dpMonthCount" style="font-size:9.5px;color:${periodN?'#f59e0b':'#6b7280'};font-weight:600;white-space:nowrap">${periodN} selected</span>`:''}
+    </div>
+    <input type="file" id="dpFileInput" accept=".xlsx,.xls" style="display:none">
+  </div>`;
+}
+
+function clearDeployment(){
+  if(!confirm('Clear the EPCM Deployment data?')) return;
+  ST.data.deployment=null; ST.files.deployment=null;
+  render();
+}
+
+function bDPUploadPanel(sc, dep, isViewer){
+  if(isViewer) return `<div class="card" style="display:flex;align-items:center;padding:14px 18px">
+    <span style="font-size:11px;color:${sc.faint}">
+      ${dep?`✅ ${ST.files.deployment||'Loaded'} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows`:'No deployment file loaded'}
+    </span></div>`;
+  // File input + upload button now live in bDeployBar; this panel just shows status
+  return `<div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px">
+    <span style="font-size:12px;color:${sc.muted};font-weight:600">EPCM Deployment File</span>
+    ${dep
+      ?`<span style="font-size:11px;color:${sc.good}">✅ ${ST.files.deployment||'Loaded'} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows</span>`
+      :`<span style="font-size:11px;color:${sc.faint}">No file loaded — use the bar above to upload EPCM_Deployment.xlsx</span>`}
+  </div>`;
+}
+
+function bDPCtrlPanel(sc, dep){
+  const selMs=ST.dpMonths||[];
+  if(!dep) return `<div class="card" style="display:flex;align-items:center;padding:14px 18px">
+    <span style="font-size:11px;color:${sc.faint}">Upload deployment file to enable month selector</span></div>`;
+  const n=selMs.length;
+  const periodLbl=n===0?'No period selected':n===1?fmtDeployMonth(selMs[0])
+    :`${fmtDeployMonth(selMs[0])} – ${fmtDeployMonth(selMs[n-1])} · ${n} months`;
+  return `<div class="card" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px">
+    <span style="font-size:11px;color:${sc.muted};font-weight:600;white-space:nowrap">Analysis Period:</span>
+    <span style="font-size:11px;color:${n?sc.accent:sc.faint};font-weight:600">${periodLbl}</span>
+    <span style="font-size:10px;color:${sc.faint}">— use the floating bar above to change selection</span>
+  </div>`;
+}
+
+function bDPCatsPanel(sc, dep){
+  const selMs=ST.dpMonths||[];
+  const selIdxs=dep?selMs.map(m=>dep.months.indexOf(m)).filter(i=>i>=0):[];
   const cats=['Category I','Category II','Category III','Category IV'];
-  const catRows=dep?cats.map(cat=>{
-    const pv=dep.plan.filter(r=>r.cat===cat).reduce((s,r)=>s+(r.vals[monthIdx]>=0?r.vals[monthIdx]:0),0);
-    const av=dep.actual.filter(r=>r.cat===cat).reduce((s,r)=>s+(r.vals[monthIdx]>=0?r.vals[monthIdx]:0),0);
-    const st=dpStatus(pv,av,selMonth);
-    return`<tr class="${cats.indexOf(cat)%2?'tr-alt':''}">
+  const periodLbl=selMs.length===0?'No period selected':selMs.length===1?fmtDeployMonth(selMs[0])
+    :`${fmtDeployMonth(selMs[0])} – ${fmtDeployMonth(selMs[selMs.length-1])}`;
+  const peakVals=(rows,filterFn)=>selIdxs.length?Math.max(...selIdxs.map(mi=>rows.filter(filterFn).reduce((s,r)=>s+(r.vals[mi]||0),0))):0;
+  const catRows=dep?cats.map((cat,i)=>{
+    const pv=peakVals(dep.plan,r=>r.cat===cat);
+    const av=peakVals(dep.actual,r=>r.cat===cat);
+    const st=dpStatusMulti(pv,av,selMs);
+    return`<tr class="${i%2?'tr-alt':''}">
       <td class="td tl cs1">${cat}</td>
-      <td class="td">${pv||'—'}</td>
-      <td class="td">${av||'—'}</td>
+      <td class="td">${pv||'—'}</td><td class="td">${av||'—'}</td>
       <td class="td" style="color:${av-pv<0?sc.bad:av-pv>0?sc.good:sc.muted}">${pv>0||av>0?(av-pv>0?'+':'')+(av-pv):'—'}</td>
-      <td class="td">${dpStatusBadge(st,sc)}</td>
-    </tr>`;
+      <td class="td">${dpStatusBadge(st,sc)}</td></tr>`;
   }).join(''):`<tr><td colspan="5" class="td tl cm" style="padding:14px;color:${sc.faint}">Upload EPCM Deployment file to view data</td></tr>`;
+  return `<div class="card" style="display:flex;flex-direction:column;height:100%">
+    <div class="slbl">By Category${dep?` · <span style="font-weight:400;font-size:10px">${periodLbl}</span>`:''}${dep?`<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">all locations${selMs.length>1?' · aggregated':''}</span>`:''}</div>
+    <div class="ox" style="flex:1"><table class="tbl"><thead><tr>
+      ${['CATEGORY','PLAN','ACTUAL','VARIANCE','STATUS'].map((h,i)=>`<th style="background:${sc.card};color:${sc.muted};font-size:11px;font-weight:700;padding:7px 10px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:${i===0?'left':'center'};white-space:nowrap;letter-spacing:.06em">${h}</th>`).join('')}
+    </tr></thead><tbody>${catRows}</tbody></table></div>
+  </div>`;
+}
 
-  // ── Role table ──
-  const roleSet=dep?[...new Set([...dep.plan.map(r=>r.role),...dep.actual.map(r=>r.role)])].sort():[];
+function roleGroup(r){
+  const l=r.toLowerCase();
+  if(l.includes('manager')) return 0;                          // Site QC/QA Manager
+  if(r.startsWith('Sr.')||l.startsWith('sr.')) return 1;      // Seniors
+  if(l.includes('engineer')||l.includes('coordinator')) return 2; // Engineers
+  if(l.includes('inspector')) return 3;                        // Inspectors
+  return 4;
+}
+
+function bDPRolesPanel(sc, dep){
+  const selMs=ST.dpMonths||[];
+  const selIdxs=dep?selMs.map(m=>dep.months.indexOf(m)).filter(i=>i>=0):[];
+  const roleSet=dep?[...new Set([...dep.plan.map(r=>r.role),...dep.actual.map(r=>r.role)])]
+    .sort((a,b)=>roleGroup(a)-roleGroup(b)||a.localeCompare(b)):[];
+  const periodLbl=selMs.length===0?'No period selected':selMs.length===1?fmtDeployMonth(selMs[0])
+    :`${fmtDeployMonth(selMs[0])} – ${fmtDeployMonth(selMs[selMs.length-1])}`;
+  const peakVals=(rows,filterFn)=>selIdxs.length?Math.max(...selIdxs.map(mi=>rows.filter(filterFn).reduce((s,r)=>s+(r.vals[mi]||0),0))):0;
   const roleRows=dep?roleSet.map((role,i)=>{
-    const pv=dep.plan.filter(r=>r.role===role).reduce((s,r)=>s+(r.vals[monthIdx]>=0?r.vals[monthIdx]:0),0);
-    const av=dep.actual.filter(r=>r.role===role).reduce((s,r)=>s+(r.vals[monthIdx]>=0?r.vals[monthIdx]:0),0);
-    const st=dpStatus(pv,av,selMonth);
+    const pv=peakVals(dep.plan,r=>r.role===role);
+    const av=peakVals(dep.actual,r=>r.role===role);
+    const st=dpStatusMulti(pv,av,selMs);
     return`<tr class="${i%2?'tr-alt':''}">
       <td class="td tl">${role}</td>
-      <td class="td">${pv||'—'}</td>
-      <td class="td">${av||'—'}</td>
+      <td class="td">${pv||'—'}</td><td class="td">${av||'—'}</td>
       <td class="td" style="color:${av-pv<0?sc.bad:av-pv>0?sc.good:sc.muted}">${pv>0||av>0?(av-pv>0?'+':'')+(av-pv):'—'}</td>
-      <td class="td">${dpStatusBadge(st,sc)}</td>
-    </tr>`;
+      <td class="td">${dpStatusBadge(st,sc)}</td></tr>`;
   }).join(''):`<tr><td colspan="5" class="td tl cm" style="padding:14px;color:${sc.faint}">Upload EPCM Deployment file to view data</td></tr>`;
+  return `<div class="card" style="display:flex;flex-direction:column;height:100%">
+    <div class="slbl">By Role${dep?` · <span style="font-weight:400;font-size:10px">${periodLbl}</span>`:''}${dep?`<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">all locations${selMs.length>1?' · aggregated':''}</span>`:''}</div>
+    <div class="ox" style="flex:1"><table class="tbl"><thead><tr>
+      ${['ROLE','PLAN','ACTUAL','VARIANCE','STATUS'].map((h,i)=>`<th style="background:${sc.card};color:${sc.muted};font-size:11px;font-weight:700;padding:7px 10px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:${i===0?'left':'center'};white-space:nowrap;letter-spacing:.06em">${h}</th>`).join('')}
+    </tr></thead><tbody>${roleRows}</tbody></table></div>
+  </div>`;
+}
 
-  const uploadSlot=isViewer?'':(`
-    <div class="card" style="margin-bottom:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <span style="font-size:12px;color:${sc.muted};font-weight:600">EPCM Deployment File</span>
-      ${dep
-        ?`<span style="font-size:11px;color:${sc.good}">✅ ${ST.files.deployment||'Loaded'} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows</span>
-           <button onclick="document.getElementById('dpFileInput').click()" style="margin-left:auto;background:${sc.card};border:1px solid ${sc.border};border-radius:6px;color:${sc.muted};font-size:11px;padding:5px 12px;cursor:pointer">Replace</button>`
-        :`<span style="font-size:11px;color:${sc.faint}">No file loaded — upload EPCM_Deployment.xlsx</span>
-           <button onclick="document.getElementById('dpFileInput').click()" style="margin-left:auto;background:${sc.loginGrad};border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:600;padding:6px 14px;cursor:pointer">Upload File</button>`}
-      <input type="file" id="dpFileInput" accept=".xlsx,.xls" style="display:none">
-    </div>`);
+function bDPChart6mPanel(sc){
+  return `<div class="card" style="display:flex;flex-direction:column;height:100%">
+    <div class="slbl">6-Month Outlook<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">current month + 5</span></div>
+    <div style="flex:1;min-height:180px;position:relative"><canvas id="dpChart6m"></canvas></div>
+  </div>`;
+}
 
-  const ctrlBar=dep?`
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-      <span style="font-size:11px;color:${sc.muted};font-weight:600">Selected Month:</span>
-      <select id="dpMonthSel" onchange="ST.dpMonth=this.value;render()"
-        style="background:${sc.card};border:1px solid ${sc.border};border-radius:6px;color:${sc.text};
-               font-size:12px;padding:5px 10px;cursor:pointer">
-        ${monthOpts}
-      </select>
-      <span style="font-size:10px;color:${sc.faint};margin-left:4px">Showing headcount for ${fmtDeployMonth(selMonth)}</span>
-    </div>`:'';
 
-  return`<div style="padding:16px 20px 32px 78px;min-height:100vh;background:${sc.bg}">
-    <div style="max-width:1400px">
-      <div style="margin-bottom:18px">
-        <div style="font-size:18px;font-weight:700;color:${sc.text}">Manpower Deployment Status</div>
-        <div style="font-size:11px;color:${sc.faint};margin-top:3px">EPCM Personnel — Planned vs. Actual Headcount</div>
+function bDPHiringPanel(sc){
+  return `<div class="card" style="display:flex;flex-direction:column;height:100%">
+    <div class="slbl" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div>Hiring Status — Full Project Plan, Actual &amp; Recovery Trends
+        <span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">dotted amber = monthly hires to reach peak · hover markers for role breakdown</span>
       </div>
-
-      ${uploadSlot}
-      ${ctrlBar}
-
-      <!-- Tables row -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-        <div class="card" style="display:flex;flex-direction:column">
-          <div class="slbl">By Category${dep?` · ${fmtDeployMonth(selMonth)}`:''}${dep?`<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">all locations</span>`:''}</div>
-          <div class="ox"><table class="tbl"><thead><tr>
-            <th class="th tl">Category</th><th class="th">Plan</th><th class="th">Actual</th><th class="th">Variance</th><th class="th">Status</th>
-          </tr></thead><tbody>${catRows}</tbody></table></div>
-        </div>
-        <div class="card" style="display:flex;flex-direction:column">
-          <div class="slbl">By Role${dep?` · ${fmtDeployMonth(selMonth)}`:''}${dep?`<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">summed across all locations</span>`:''}</div>
-          <div class="ox" style="max-height:340px"><table class="tbl"><thead><tr>
-            <th class="th tl">Role</th><th class="th">Plan</th><th class="th">Actual</th><th class="th">Variance</th><th class="th">Status</th>
-          </tr></thead><tbody>${roleRows}</tbody></table></div>
-        </div>
-      </div>
-
-      <!-- Charts row -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="card" style="display:flex;flex-direction:column">
-          <div class="slbl">6-Month Outlook<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">current month + 5</span></div>
-          <div style="flex:1;min-height:220px;position:relative"><canvas id="dpChart6m"></canvas></div>
-        </div>
-        <div class="card" style="display:flex;flex-direction:column">
-          <div class="slbl">Full Project Scope<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">Oct 2025 – Jan 2029</span></div>
-          <div style="flex:1;min-height:220px;position:relative"><canvas id="dpChartFull"></canvas></div>
-        </div>
-      </div>
+      <button onclick="exportHiringChart()" title="Export to Excel"
+        style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#9ca3af;font-size:10px;font-weight:600;padding:3px 10px;cursor:pointer;letter-spacing:.03em;white-space:nowrap">
+        ${UPL_ICONS.save} Export Excel
+      </button>
     </div>
+    <div style="flex:1;min-height:200px;position:relative"><canvas id="dpHiringChart"></canvas></div>
   </div>`;
 }
 
@@ -1543,6 +2092,320 @@ function fmtDeployMonth(str){
   if(!str||str.length<7) return str||'';
   const d=new Date(str+'-01');
   return isNaN(d)?str:d.toLocaleString(undefined,{month:'short',year:'numeric'});
+}
+
+function bDPLocRolePanel(sc, dep){
+  if(!dep) return `<div class="card" style="display:flex;align-items:center;justify-content:center;height:100%;color:${sc.faint};font-size:12px">Upload EPCM Deployment file to view location &amp; role breakdown</div>`;
+
+  const selMs=ST.dpMonths||[];
+  const selIdxs=selMs.map(m=>dep.months.indexOf(m)).filter(i=>i>=0);
+
+  const LOC_ORDER=['GENERAL','CENTRAL','SECTION 1','SECTION 2','SECTION 3','TUNNEL','JD'];
+
+  // Collect all locs in sheet order (plan first, then actual supplements),
+  // then re-sort: known LOC_ORDER entries by index, unknowns keep their sheet order.
+  const _locSeen=new Set();
+  const allLocs=[];
+  [...dep.plan,...dep.actual].forEach(r=>{
+    const l=(r.loc||'').toUpperCase();
+    if(l&&!_locSeen.has(l)){ _locSeen.add(l); allLocs.push(l); }
+  });
+  allLocs.sort((a,b)=>{
+    const ia=LOC_ORDER.indexOf(a), ib=LOC_ORDER.indexOf(b);
+    if(ia>=0&&ib>=0) return ia-ib;
+    if(ia>=0) return -1;
+    if(ib>=0) return 1;
+    return 0; // unknown locs: preserve sheet order
+  });
+
+  // Peak headcount across selected months (headcount is concurrent, not additive)
+  function peakVals(rows,filterFn){
+    if(!selIdxs.length) return 0;
+    return Math.max(...selIdxs.map(mi=>rows.filter(filterFn).reduce((s,r)=>s+(r.vals[mi]||0),0)));
+  }
+
+  // Row background alternation — two clearly distinct shades
+  const ROW_EVEN='rgba(255,255,255,0.000)'; // transparent → falls back to tbody bg
+  const ROW_ODD ='rgba(255,255,255,0.045)'; // visible step up
+  const SUB_BG  =sc.cb+'2e';               // translucent chart-primary (~18% opacity) — tracks theme
+
+  // Grand total: peak across selected months over ALL rows (computed independently)
+  const grandPv=peakVals(dep.plan,()=>true);
+  const grandAv=peakVals(dep.actual,()=>true);
+
+  const bodyRows=allLocs.map(loc=>{
+    const matchLoc=r=>(r.loc||'').toUpperCase()===loc;
+
+    // Unique roles at this location, in sheet order (plan drives order, actual supplements)
+    const roles=[];
+    const _roleSeen=new Set();
+    [...dep.plan.filter(matchLoc),...dep.actual.filter(matchLoc)].forEach(r=>{
+      if(r.role&&!_roleSeen.has(r.role)){ _roleSeen.add(r.role); roles.push(r.role); }
+    });
+
+    // Subtotal: peak headcount at this location across selected months
+    const subPv=peakVals(dep.plan,matchLoc);
+    const subAv=peakVals(dep.actual,matchLoc);
+    const subVar=subAv-subPv;
+    const subSt=dpStatusMulti(subPv,subAv,selMs);
+
+    const rowspan=roles.length+1;
+
+    const subtotalRow=`<tr style="background:${SUB_BG}">
+      <td rowspan="${rowspan}" style="text-align:center;vertical-align:middle;
+        background:${sc.card};color:${sc.text};
+        font-size:11px;font-weight:700;letter-spacing:.04em;
+        padding:4px 8px;border:1px solid ${sc.border};
+        white-space:nowrap;min-width:60px;max-width:80px;word-break:break-word">${loc}</td>
+      <td style="font-size:12px;font-weight:700;color:${sc.text};padding:6px 12px;
+        border:1px solid ${sc.border};white-space:nowrap;letter-spacing:.03em">Subtotal</td>
+      <td style="text-align:center;font-size:12px;font-weight:700;color:${sc.text};padding:6px 10px;border:1px solid ${sc.border}">${subPv||'—'}</td>
+      <td style="text-align:center;font-size:12px;font-weight:700;color:${sc.text};padding:6px 10px;border:1px solid ${sc.border}">${subAv||'—'}</td>
+      <td style="text-align:center;font-size:12px;font-weight:700;padding:6px 10px;border:1px solid ${sc.border};
+        color:${subVar<0?sc.bad:subVar>0?sc.good:sc.muted}">${subPv>0||subAv>0?(subVar>0?'+':'')+subVar:'—'}</td>
+      <td style="text-align:center;padding:6px 8px;border:1px solid ${sc.border}">${dpStatusBadge(subSt,sc)}</td>
+    </tr>`;
+
+    const roleRows=roles.map((role,ri)=>{
+      const matchLocRole=r=>matchLoc(r)&&r.role===role;
+      const pv=peakVals(dep.plan,matchLocRole);
+      const av=peakVals(dep.actual,matchLocRole);
+      const vr=av-pv;
+      const st=dpStatusMulti(pv,av,selMs);
+      const rowBg=ri%2===0?ROW_EVEN:ROW_ODD;
+      return `<tr style="background:${rowBg}">
+        <td style="font-size:11px;color:${sc.text};padding:4px 12px 4px 22px;border:1px solid ${sc.border};white-space:nowrap">${role}</td>
+        <td style="text-align:center;font-size:11px;color:${sc.muted};padding:4px 10px;border:1px solid ${sc.border}">${pv||'—'}</td>
+        <td style="text-align:center;font-size:11px;color:${sc.muted};padding:4px 10px;border:1px solid ${sc.border}">${av||'—'}</td>
+        <td style="text-align:center;font-size:11px;padding:4px 10px;border:1px solid ${sc.border};
+          color:${vr<0?sc.bad:vr>0?sc.good:sc.muted}">${pv>0||av>0?(vr>0?'+':'')+vr:'—'}</td>
+        <td style="text-align:center;padding:4px 8px;border:1px solid ${sc.border}">${dpStatusBadge(st,sc)}</td>
+      </tr>`;
+    }).join('');
+
+    return subtotalRow+roleRows;
+  }).join('');
+
+  // Grand total
+  const grandVar=grandAv-grandPv;
+  const grandSt=dpStatusMulti(grandPv,grandAv,selMs);
+  const grandRow=`<tr style="background:${SUB_BG}">
+    <td colspan="2" style="font-size:12px;font-weight:800;color:${sc.text};padding:6px 12px;
+      border:1px solid ${sc.border};letter-spacing:.05em">GRAND TOTAL</td>
+    <td style="text-align:center;font-size:12px;font-weight:800;color:${sc.text};padding:6px 10px;border:1px solid ${sc.border}">${grandPv||'—'}</td>
+    <td style="text-align:center;font-size:12px;font-weight:800;color:${sc.text};padding:6px 10px;border:1px solid ${sc.border}">${grandAv||'—'}</td>
+    <td style="text-align:center;font-size:12px;font-weight:800;padding:6px 10px;border:1px solid ${sc.border};
+      color:${grandVar<0?sc.bad:grandVar>0?sc.good:sc.muted}">${grandPv>0||grandAv>0?(grandVar>0?'+':'')+grandVar:'—'}</td>
+    <td style="text-align:center;padding:6px 8px;border:1px solid ${sc.border}">${dpStatusBadge(grandSt,sc)}</td>
+  </tr>`;
+
+  const periodLbl=selMs.length===0?'No period selected'
+    :selMs.length===1?fmtDeployMonth(selMs[0])
+    :`${fmtDeployMonth(selMs[0])} – ${fmtDeployMonth(selMs[selMs.length-1])}`;
+
+  const thStyle=`background:${sc.card};color:${sc.muted};font-size:11px;font-weight:700;padding:7px 10px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:center;letter-spacing:.06em`;
+  return `<div class="card" style="display:flex;flex-direction:column;height:100%">
+    <div class="slbl">By Location &amp; Role
+      ${dep?` · <span style="font-weight:400;font-size:10px">${periodLbl}</span>`:''}
+      ${selMs.length>1?`<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">aggregated across ${selMs.length} months</span>`:''}
+    </div>
+    <div style="overflow:auto;flex:1">
+      <table style="border-collapse:collapse;width:100%;font-family:system-ui,-apple-system,sans-serif">
+        <thead><tr>
+          <th style="${thStyle};min-width:60px;max-width:80px;text-align:left;padding-left:8px">LOCATION</th>
+          <th style="${thStyle};min-width:180px;text-align:left;padding-left:22px">ROLE</th>
+          <th style="${thStyle};min-width:65px">PLAN</th>
+          <th style="${thStyle};min-width:65px">ACTUAL</th>
+          <th style="${thStyle};min-width:75px">VARIANCE</th>
+          <th style="${thStyle};min-width:80px">STATUS</th>
+        </tr></thead>
+        <tbody>${bodyRows}${grandRow}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function bPersonnelTable(sc, dep){
+  if(!dep) return `<div class="card" style="margin-top:14px;padding:28px;text-align:center;color:${sc.faint};font-size:12px">Upload EPCM Deployment file to view personnel mobilization status</div>`;
+
+  // Cap display at Dec 2027
+  const months = dep.months.filter(m=>m<='2027-12');
+  const monthOrigIdx = months.map(m=>dep.months.indexOf(m));
+  const now = new Date();
+  const curM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  // Location accent colours (match Excel banding)
+  const LOC_COLORS = {
+    'CENTRAL':    '#6B4FA0',
+    'SECTION 1':  '#2E7D45',
+    'SECTION 2':  '#B22222',
+    'SECTION 3':  '#C07000',
+    'TUNNEL':     '#456080',
+    'JD':         '#7D6608'
+  };
+  const LOC_ORDER = ['GENERAL','JD','MPS','IPS','MOT/TNL','PPL SEC01','PPL SEC02','PPL SEC03','ADCOP','MOL'];
+
+  // Plan lookup keyed by "loc|role" (lowercased) — plan has no person names,
+  // and multiple actuals may share the same loc+role (one per deployed person).
+  const planLookup = {};
+  dep.plan.forEach(r=>{
+    const k=(r.loc+'|'+r.role).toLowerCase();
+    planLookup[k]=r.vals;
+  });
+
+  // Cell status colour pairs  [background, text]
+  const STATUS_STYLE = {
+    met:     ['rgba(40,167,69,0.38)',  '#5ddd80'],
+    partial: ['rgba(255,193,7,0.50)',  '#ffe066'],
+    missed:  ['rgba(220,53,69,0.45)',  '#ff8a95'],
+    pending: ['rgba(100,149,237,0.28)','#a0b8f0'],
+    neutral: ['transparent',           sc.faint]
+  };
+
+  function cellSt(row, mi){
+    const oi=monthOrigIdx[mi];
+    const av=row.vals[oi]||0;
+    const k=(row.loc+'|'+row.role).toLowerCase();
+    const pv=planLookup[k]?planLookup[k][oi]||0:0;
+    return dpStatus(pv, av, months[mi]);
+  }
+
+  // Merge strategy:
+  // 1. All actual rows are shown as-is (multiple people per role is valid).
+  // 2. For any loc+role that exists in the plan but has NO actual deployment at all,
+  //    inject exactly one placeholder row (name='—') so the role is still visible.
+  const actualLocRoles=new Set(dep.actual.map(r=>(r.loc+'|'+r.role).toLowerCase()));
+  const planPlaceholderSeen=new Set();
+  const merged=[...dep.actual];
+  dep.plan.forEach(r=>{
+    const k=(r.loc+'|'+r.role).toLowerCase();
+    if(!actualLocRoles.has(k)&&!planPlaceholderSeen.has(k)){
+      planPlaceholderSeen.add(k);
+      merged.push({...r,name:'',_fromPlan:true});
+    }
+  });
+
+  // Sort: loc order → role group → role name → person name
+  const sorted=merged.sort((a,b)=>{
+    const la=LOC_ORDER.indexOf(a.loc.toUpperCase());
+    const lb=LOC_ORDER.indexOf(b.loc.toUpperCase());
+    if(la!==lb) return (la<0?999:la)-(lb<0?999:lb);
+    if(a.role!==b.role){ const rg=roleGroup(a.role)-roleGroup(b.role); if(rg!==0) return rg; return a.role.localeCompare(b.role); }
+    return (a.name||'').localeCompare(b.name||'');
+  });
+
+  // Monthly totals (sum of actual per month)
+  const monthTotals=months.map((_,mi)=>dep.actual.reduce((s,r)=>s+(r.vals[monthOrigIdx[mi]]||0),0));
+
+  // Group rows by loc for rowspan
+  const groups=[];
+  sorted.forEach(row=>{
+    const loc=(row.loc||'').toUpperCase();
+    if(!groups.length||groups[groups.length-1].loc!==loc) groups.push({loc,rows:[]});
+    groups[groups.length-1].rows.push(row);
+  });
+
+  const selMs=ST.dpMonths||[];
+  const SEL_AMBER='rgba(245,158,11,0.7)';
+
+  // For a month at display index mi, compute which edges of the selection range it sits on
+  function selEdges(mi){
+    const isSel=selMs.includes(months[mi]);
+    if(!isSel) return {isSel:false};
+    const prevSel=mi>0&&selMs.includes(months[mi-1]);
+    const nextSel=mi<months.length-1&&selMs.includes(months[mi+1]);
+    return {isSel:true, leftEdge:!prevSel, rightEdge:!nextSel};
+  }
+
+  // Build header month cells
+  const mW=36;
+  const monthThs=months.map((m,mi)=>{
+    const parts=fmtDeployMonth(m).split(' ');
+    const isPast=m<curM, isCur=m===curM;
+    const {isSel,leftEdge,rightEdge}=selEdges(mi);
+    const bg=isSel?`rgba(245,158,11,0.13)`:isCur?`rgba(100,149,237,0.10)`:isPast?sc.bg:sc.card;
+    const color=isSel?`#f59e0b`:sc.muted;
+    const borderStyle=isSel
+      ?`border-top:2px solid ${SEL_AMBER};border-bottom:none;border-left:${leftEdge?`2px solid ${SEL_AMBER}`:`1px solid ${sc.border}`};border-right:${rightEdge?`2px solid ${SEL_AMBER}`:`none`}`
+      :`border:1px solid ${sc.border}`;
+    return `<th style="min-width:${mW}px;max-width:${mW}px;text-align:center;background:${bg};color:${color};font-size:11px;font-weight:${isSel?800:700};padding:5px 2px;${borderStyle};white-space:nowrap;position:sticky;top:0;z-index:2">${parts[0]}<br>${parts[1]||''}</th>`;
+  }).join('');
+
+  // Total row
+  const totalCells=months.map((m,mi)=>{
+    const v=monthTotals[mi];
+    const isPast=m<curM, isCur=m===curM;
+    const {isSel,leftEdge,rightEdge}=selEdges(mi);
+    const bg=isSel?`rgba(245,158,11,0.13)`:isCur?`rgba(100,149,237,0.13)`:isPast?sc.bg:sc.card;
+    const borderStyle=isSel
+      ?`border-top:none;border-bottom:none;border-left:${leftEdge?`2px solid ${SEL_AMBER}`:`1px solid ${sc.border}`};border-right:${rightEdge?`2px solid ${SEL_AMBER}`:`none`}`
+      :`border:1px solid ${sc.border}`;
+    return `<td style="text-align:center;font-size:11px;font-weight:700;color:${v>0?(isSel?'#f59e0b':sc.text):sc.faint};padding:4px 2px;background:${bg};${borderStyle};position:sticky;top:40px;z-index:1">${v||''}</td>`;
+  }).join('');
+
+  // Body rows
+  const bodyRows=groups.map((grp,gi)=>{
+    const lc=grp.loc;
+    const lColor=LOC_COLORS[lc]||sc.accent;
+    return grp.rows.map((row,ri)=>{
+      // Prominent separator line between location groups (skip very first group)
+      const isSepRow = ri===0 && gi>0;
+      const SEP = 'border-top:2px solid rgba(255,255,255,0.13)';
+      const locCell=ri===0
+        ?`<td rowspan="${grp.rows.length}" style="text-align:center;vertical-align:middle;background:${sc.card};color:${sc.text};font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 8px;border:1px solid ${sc.border};${isSepRow?SEP:''};white-space:nowrap;min-width:60px;max-width:80px;word-break:break-word">${lc}</td>`
+        :'';
+      const catRoman=(row.cat||'').replace('Category ','');
+      const mCells=months.map((_,mi)=>{
+        const av=row.vals[monthOrigIdx[mi]]||0;
+        const st=av>0?cellSt(row,mi):'neutral';
+        const [bg,tc]=STATUS_STYLE[st]||STATUS_STYLE.neutral;
+        const isPast=months[mi]<curM, isCur=months[mi]===curM;
+        const {isSel,leftEdge,rightEdge}=selEdges(mi);
+        const baseBg=isSel?`rgba(245,158,11,0.07)`:isCur?`rgba(100,149,237,0.07)`:isPast?'transparent':'rgba(255,255,255,0.03)';
+        const mBorderStyle=isSel
+          ?`border-top:${isSepRow?'2px solid rgba(255,255,255,0.13)':'none'};border-bottom:none;border-left:${leftEdge?`2px solid ${SEL_AMBER}`:`1px solid ${sc.border}`};border-right:${rightEdge?`2px solid ${SEL_AMBER}`:`none`}`
+          :`border:1px solid ${sc.border};${isSepRow?SEP:''}`;
+        return `<td style="text-align:center;font-size:11px;font-weight:600;padding:4px 2px;background:${av>0?bg:baseBg};${mBorderStyle};min-width:${mW}px;max-width:${mW}px;color:${av>0?tc:'transparent'}">${av>0?av:''}</td>`;
+      }).join('');
+      const rowBg=ri%2?'rgba(255,255,255,0.04)':'rgba(255,255,255,0.000)';
+      return `<tr style="background:${rowBg};height:32px">
+        ${locCell}
+        <td style="font-size:10px;color:${sc.muted};padding:4px 7px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${row.role}</td>
+        <td style="font-size:10px;color:${sc.text};font-weight:500;padding:4px 8px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${row.name||'—'}</td>
+        <td style="font-size:9px;color:${sc.faint};text-align:center;padding:4px 4px;border:1px solid ${sc.border};${isSepRow?SEP:''}">${catRoman}</td>
+        ${mCells}
+      </tr>`;
+    }).join('');
+  }).join('');
+
+  // Legend
+  const legend=[['met','Met'],['partial','Partial'],['missed','Missed'],['pending','Pending']].map(([k,lbl])=>{
+    const [bg,tc]=STATUS_STYLE[k];
+    return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:${sc.muted}"><span style="display:inline-block;width:11px;height:11px;background:${bg};border:1px solid ${sc.border};border-radius:2px"></span>${lbl}</span>`;
+  }).join('');
+
+  return `<div class="card" style="display:flex;flex-direction:column;height:100%">
+    <div class="slbl">Personnel Mobilization Status<span style="font-size:9px;font-weight:400;margin-left:8px;color:${sc.faint}">actual deployment by individual · full project scope</span></div>
+    <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">${legend}</div>
+    <div style="flex:1;min-height:0;overflow:auto">
+      <table style="border-collapse:collapse;min-width:max-content;width:100%;font-family:system-ui,-apple-system,sans-serif">
+        <thead>
+          <tr>
+            <th style="min-width:20px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 6px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:center">LOC</th>
+            <th style="min-width:130px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 10px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:left">ROLE</th>
+            <th style="min-width:160px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 10px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:left">NAME</th>
+            <th style="min-width:34px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 4px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:center">CAT</th>
+            ${monthThs}
+          </tr>
+          <tr>
+            <td colspan="4" style="font-size:10px;font-weight:700;color:${sc.muted};padding:4px 8px;border:1px solid ${sc.border};white-space:nowrap;background:${sc.bg};position:sticky;top:40px;z-index:2">Total Man-Months</td>
+            ${totalCells}
+          </tr>
+        </thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>
+  </div>`;
 }
 
 function bindDeploymentEvents(){
@@ -1559,63 +2422,271 @@ function initDeploymentCharts(dep, sc){
 
   const now=new Date();
   const nowStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const curIdx=Math.max(0,dep.months.indexOf(nowStr));
 
-  const totalPlan=dep.months.map((_,i)=>dep.plan.reduce((s,r)=>s+(r.vals[i]||0),0));
+  const totalPlan  =dep.months.map((_,i)=>dep.plan.reduce((s,r)=>s+(r.vals[i]||0),0));
   const totalActual=dep.months.map((_,i)=>dep.actual.reduce((s,r)=>s+(r.vals[i]||0),0));
 
-  // Point color per month: missed=bad, met=good, pending=warn, neutral/future=accent
-  function ptColor(months, plan, actual){
+  function ptColor(months,plan,actual){
     return months.map((m,i)=>{
-      const p=plan[i], a=actual[i];
-      const st=dpStatus(p,a,m);
-      if(st==='missed') return sc.bad;
+      const st=dpStatus(plan[i],actual[i],m);
+      if(st==='missed')  return sc.bad;
       if(st==='partial') return sc.warn;
-      if(st==='met') return sc.good;
+      if(st==='met')     return sc.good;
       if(st==='pending') return sc.ca;
       return sc.faint;
     });
   }
 
-  const commonOpts=(title)=>({
+  const commonOpts=()=>({
     responsive:true, maintainAspectRatio:false,
     plugins:{
       legend:{position:'bottom',labels:{boxWidth:10,padding:14,font:{size:11}}},
-      tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y}`}},
+      tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y}`},mode:'index',intersect:false},
       title:{display:false}
     },
     scales:{
       x:{grid:{color:sc.chartGrid},ticks:{font:{size:9},maxRotation:45,minRotation:30}},
-      y:{grid:{color:sc.chartGrid},ticks:{font:{size:10}},beginAtZero:true,title:{display:true,text:'Headcount',font:{size:10}}}
+      y:{grid:{color:sc.chartGrid},ticks:{font:{size:10}},beginAtZero:true,
+         title:{display:true,text:'Headcount',font:{size:10}}}
     }
   });
 
-  // ── 6-month chart ──
-  const curIdx=Math.max(0,dep.months.indexOf(nowStr));
-  const sliceEnd=Math.min(dep.months.length, curIdx+6);
-  const m6=dep.months.slice(curIdx,sliceEnd);
-  const p6=totalPlan.slice(curIdx,sliceEnd);
-  const a6=totalActual.slice(curIdx,sliceEnd);
-  const ptc6=ptColor(m6,p6,a6);
-
-  const el6=document.getElementById('dpChart6m');
+  // ── 6-month chart ──────────────────────────────────────────────────────────
+  const sliceEnd=Math.min(dep.months.length,curIdx+6);
+  const m6   =dep.months.slice(curIdx,sliceEnd);
+  const p6   =totalPlan.slice(curIdx,sliceEnd);
+  const a6   =totalActual.slice(curIdx,sliceEnd);
+  const ptc6 =ptColor(m6,p6,a6);
+  const el6  =document.getElementById('dpChart6m');
   if(el6) CHARTS.dp6m=new Chart(el6,{type:'line',data:{
     labels:m6.map(fmtDeployMonth),
     datasets:[
-      {label:'Plan',data:p6,borderColor:sc.accent,backgroundColor:sc.accent+'22',pointBackgroundColor:sc.accent,tension:.3,fill:true,pointRadius:5},
-      {label:'Actual',data:a6,borderColor:sc.cb,backgroundColor:sc.cb+'22',pointBackgroundColor:ptc6,pointBorderColor:ptc6,tension:.3,fill:true,pointRadius:5}
+      {label:'Plan',  data:p6,borderColor:sc.accent,backgroundColor:sc.accent+'22',pointBackgroundColor:sc.accent,tension:.3,fill:true,pointRadius:5},
+      {label:'Actual',data:a6,borderColor:sc.cb,    backgroundColor:sc.cb+'22',    pointBackgroundColor:ptc6,pointBorderColor:ptc6,tension:.3,fill:true,pointRadius:5},
     ]
-  },options:commonOpts('6-Month')});
+  },options:commonOpts()});
 
-  // ── Full scope chart ──
-  const ptcFull=ptColor(dep.months,totalPlan,totalActual);
-  const elFull=document.getElementById('dpChartFull');
-  if(elFull) CHARTS.dpFull=new Chart(elFull,{type:'line',data:{
-    labels:dep.months.map(fmtDeployMonth),
+  // ── Recovery Plan chart ────────────────────────────────────────────────────
+  initHiringChart(dep, sc, curIdx, nowStr, totalPlan, totalActual);
+}
+
+// ── Recovery Plan chart: full scope base + dotted recovery hiring line ────────
+function initHiringChart(dep, sc, curIdx, nowStr, totalPlan, totalActual){
+  const el=document.getElementById('dpHiringChart');
+  if(!el) return;
+
+  const months=dep.months;
+  const n=months.length;
+
+  // Recovery window: 10 months from current month (realistic hiring ramp)
+  const targetIdx=Math.min(n-1, curIdx+10);
+
+  // Last non-zero actual headcount as the recovery baseline
+  let curActual=0;
+  for(let i=Math.min(curIdx,n-1);i>=0;i--){
+    if(totalActual[i]>0){curActual=totalActual[i];break;}
+  }
+
+  // Actual capped at current month — future months are null so the line ends cleanly
+  const actualCapped=months.map((_,i)=>i<=curIdx?(totalActual[i]||null):null);
+
+  // Recovery line: blends from curActual into the plan curve's own shape.
+  // t=0 at curIdx (= curActual), t=1 at targetIdx (= plan value).
+  // The blend picks up the plan curve's momentum rather than a flat ramp.
+  const recoveryData=months.map((_,i)=>{
+    if(i<curIdx) return null;
+    if(i>targetIdx) return null;
+    const steps=Math.max(1,targetIdx-curIdx);
+    const t=(i-curIdx)/steps;
+    return Math.round(curActual*(1-t)+totalPlan[i]*t);
+  });
+
+  // Monthly new hires needed along the recovery line (delta between consecutive points)
+  // Used in tooltip to show "hire X people this month"
+  const monthlyHires=months.map((_,i)=>{
+    if(i<curIdx||i>targetIdx) return 0;
+    if(i===curIdx) return 0; // baseline month, no hire count
+    const prev=recoveryData[i-1]??curActual;
+    return Math.max(0, Math.round((recoveryData[i]||0)-prev));
+  });
+
+  // Per-role share of hires for each month — proportional to plan role gaps
+  // hireByRole[mi][role] = hires needed from that role in month i
+  const hireByRole=months.map((_,i)=>{
+    const hires=monthlyHires[i];
+    if(!hires) return {};
+    // Gap at this month by role
+    const roleGap={};
+    let totalGap=0;
+    dep.plan.forEach(planRow=>{
+      const pv=planRow.vals[i]||0;
+      if(!pv) return;
+      const av=dep.actual.filter(r=>r.loc===planRow.loc&&r.role===planRow.role)
+        .reduce((s,r)=>s+(r.vals[i]||0),0);
+      const gap=Math.max(0,pv-av);
+      if(gap>0){ roleGap[planRow.role]=(roleGap[planRow.role]||0)+gap; totalGap+=gap; }
+    });
+    if(!totalGap) return {};
+    // Largest-remainder method: guarantees role allocations sum exactly to hires
+    const entries=Object.entries(roleGap);
+    const floats=entries.map(([role,g])=>({role,float:(g/totalGap)*hires}));
+    const floors=floats.map(o=>({...o,floor:Math.floor(o.float),rem:o.float-Math.floor(o.float)}));
+    let remainder=hires-floors.reduce((s,o)=>s+o.floor,0);
+    floors.sort((a,b)=>b.rem-a.rem);
+    floors.forEach(o=>{if(remainder>0){o.floor++;remainder--;}});
+    const scaled={};
+    floors.forEach(o=>{if(o.floor>0) scaled[o.role]=o.floor;});
+    return scaled;
+  });
+
+  const opts={
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom',labels:{boxWidth:10,padding:14,font:{size:11},
+        filter:item=>item.datasetIndex!==2}}, // hide recovery from legend, shown by label
+      tooltip:{
+        mode:'index', intersect:false,
+        callbacks:{
+          label:ctx=>{
+            if(ctx.parsed.y==null) return null;
+            return `${ctx.dataset.label}: ${ctx.parsed.y}`;
+          },
+          afterBody:items=>{
+            // Show hire breakdown only on the recovery line dataset (index 2)
+            const recItem=items.find(it=>it.datasetIndex===2);
+            if(!recItem||recItem.parsed.y==null) return [];
+            const mi=recItem.dataIndex;
+            const hires=monthlyHires[mi];
+            if(!hires) return [];
+            const byRole=hireByRole[mi]||{};
+            const roles=Object.entries(byRole).sort(([,a],[,b])=>b-a);
+            return[
+              '',
+              `New hires this month: ${hires}`,
+              ...(roles.length?['By role:']:[] ),
+              ...roles.slice(0,14).map(([r,v])=>`  ${r}: ${v}`),
+              ...(roles.length>14?[`  … +${roles.length-14} more`]:[]),
+            ];
+          }
+        },
+        bodyFont:{size:11}, padding:10,
+      },
+      title:{display:false},
+    },
+    scales:{
+      x:{grid:{color:sc.chartGrid},ticks:{font:{size:9},maxRotation:45,minRotation:30}},
+      y:{grid:{color:sc.chartGrid},ticks:{font:{size:10}},beginAtZero:true,
+         title:{display:true,text:'Headcount (people)',font:{size:10}}}
+    }
+  };
+
+  const ptcFull=months.map((_,i)=>(totalActual[i]||0)>=(totalPlan[i]||0)?sc.good:sc.bad);
+
+  CHARTS.dpHiring=new Chart(el,{type:'line',data:{
+    labels:months.map(fmtDeployMonth),
     datasets:[
-      {label:'Plan',data:totalPlan,borderColor:sc.accent,backgroundColor:sc.accent+'15',pointBackgroundColor:sc.accent,tension:.3,fill:true,pointRadius:3},
-      {label:'Actual',data:totalActual,borderColor:sc.cb,backgroundColor:sc.cb+'15',pointBackgroundColor:ptcFull,pointBorderColor:ptcFull,tension:.3,fill:true,pointRadius:3}
+      {
+        label:'Plan',
+        data:totalPlan,
+        borderColor:sc.accent, backgroundColor:sc.accent+'15',
+        pointBackgroundColor:sc.accent, tension:.3, fill:true,
+        pointRadius:3, order:3,
+      },
+      {
+        label:'Actual',
+        data:actualCapped,
+        borderColor:sc.cb, backgroundColor:sc.cb+'15',
+        pointBackgroundColor:ptcFull, pointBorderColor:ptcFull,
+        spanGaps:false,
+        tension:.3, fill:true, pointRadius:3, order:2,
+      },
+      {
+        label:'Recovery Plan',
+        data:recoveryData,
+        borderColor:'#f59e0b',
+        borderDash:[6,4],
+        borderWidth:2.5,
+        backgroundColor:'transparent',
+        pointStyle:'circle',
+        pointRadius:months.map((_,i)=>(i>=curIdx&&i<=targetIdx)?6:0),
+        pointHoverRadius:9,
+        pointBackgroundColor:'#f59e0b',
+        pointBorderColor:'#f59e0b',
+        tension:.3, fill:false, spanGaps:false, order:1,
+      },
     ]
-  },options:commonOpts('Full Scope')});
+  },options:opts});
+
+  // Attach export data to chart instance for use by exportHiringChart()
+  CHARTS.dpHiring._exportData={months, totalPlan, totalActual, recoveryData, monthlyHires, hireByRole, dep, curIdx, targetIdx};
+}
+
+function exportHiringChart(){
+  const d=CHARTS.dpHiring?._exportData;
+  if(!d) return;
+  const {months,totalPlan,totalActual,recoveryData,monthlyHires,hireByRole,dep,curIdx,targetIdx}=d;
+
+  // Collect all roles that appear in plan
+  const allRoles=[...new Set(dep.plan.map(r=>r.role))].sort((a,b)=>roleGroup(a)-roleGroup(b)||a.localeCompare(b));
+
+  // Month headers (only recovery window for recovery section, full range for plan/actual)
+  const mLabels=months.map(fmtDeployMonth);
+
+  const aoa=[];
+
+  // ── PLAN section ──────────────────────────────────────────────────────────
+  aoa.push(['PLAN HEADCOUNT',...mLabels]);
+  allRoles.forEach(role=>{
+    const row=[role];
+    months.forEach((_,i)=>{
+      const v=dep.plan.filter(r=>r.role===role).reduce((s,r)=>s+(r.vals[i]||0),0);
+      row.push(v||'');
+    });
+    aoa.push(row);
+  });
+  aoa.push(['TOTAL',...months.map((_,i)=>totalPlan[i]||'')]);
+  aoa.push([]);
+
+  // ── ACTUAL section ────────────────────────────────────────────────────────
+  aoa.push(['ACTUAL HEADCOUNT',...mLabels]);
+  allRoles.forEach(role=>{
+    const row=[role];
+    months.forEach((_,i)=>{
+      const v=dep.actual.filter(r=>r.role===role).reduce((s,r)=>s+(r.vals[i]||0),0);
+      row.push(i<=curIdx?(v||''):'');
+    });
+    aoa.push(row);
+  });
+  aoa.push(['TOTAL',...months.map((_,i)=>i<=curIdx?(totalActual[i]||''):'')]);
+  aoa.push([]);
+
+  // ── RECOVERY section (new hires per month) ────────────────────────────────
+  aoa.push(['RECOVERY — NEW HIRES REQUIRED',...mLabels]);
+  allRoles.forEach(role=>{
+    const row=[role];
+    months.forEach((_,i)=>{
+      const v=(hireByRole[i]||{})[role];
+      row.push(v||'');
+    });
+    aoa.push(row);
+  });
+  aoa.push(['TOTAL',...months.map((_,i)=>monthlyHires[i]||'')]);
+  aoa.push([]);
+
+  // ── RECOVERY CUMULATIVE headcount ─────────────────────────────────────────
+  aoa.push(['RECOVERY — PROJECTED CUMULATIVE HEADCOUNT',...mLabels]);
+  aoa.push(['Total',...months.map((_,i)=>recoveryData[i]!=null?recoveryData[i]:'')]);
+
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  // Bold the section header rows
+  [0, allRoles.length+2, 2*(allRoles.length+2)+1, 3*(allRoles.length+2)+2].forEach(r=>{
+    const cell=ws[XLSX.utils.encode_cell({r,c:0})];
+    if(cell) cell.s={font:{bold:true}};
+  });
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Hiring Status');
+  XLSX.writeFile(wb,'Hiring_Status_Report.xlsx');
 }
 
 // ═══════════════════════════════════════════════════
@@ -2403,9 +3474,9 @@ const SCHEMES = {
   slate: {
     name:'Slate & Amber',
     bg:'#1e2130', card:'#252a3a', border:'#2d3348', hdr:'#181b28',
-    accent:'#f59e0b', good:'#14b8a6', warn:'#fb923c', bad:'#f43f5e',
+    accent:'#f59e0b', good:'#14b8a6', warn:'#f97316', bad:'#f43f5e',
     text:'#f1f0e8', muted:'#7a809a', faint:'#4a5068',
-    cb:'#f59e0b', clb:'#fbbf24', cg:'#14b8a6', cr:'#f43f5e', ca:'#fb923c',
+    cb:'#f59e0b', clb:'#fde047', cg:'#14b8a6', cr:'#f43f5e', ca:'#f97316',
     cs1:'#f59e0b', cs2:'#a78bfa', cs3:'#14b8a6',
     chartGrid:'rgba(45,51,72,.5)', progTrack:'#1e2130',
     loginBg:'#1e2130', loginGrad:'linear-gradient(135deg,#b45309,#f59e0b)',
@@ -2469,6 +3540,7 @@ function applyScheme(key){
   r.setProperty('--text',    s.text);
   r.setProperty('--muted',   s.muted);
   r.setProperty('--faint',   s.faint);
+  r.setProperty('--cb',      s.cb);
   // Apply directly to body and key elements via style injection
   const styleId = 'scheme-dynamic';
   let el = document.getElementById(styleId);
@@ -2483,18 +3555,19 @@ function applyScheme(key){
     .hdr-btn.mgmt{border-color:${s.accent}44!important;color:${s.accent}!important}
     .hdr-divider{background:${s.border}!important}
     .upl-bar{background:${s.hdr}!important;border-color:${s.border}!important}
-    .upl-slot{border-color:${s.border}!important}
-    .upl-slot:hover{border-color:${s.accent}!important;background:${s.accent}11!important}
-    .upl-slot.loaded{border-color:${s.good}66!important;background:${s.good}11!important}
-    .upl-slot.unsaved{border-color:${s.accent}88!important;background:${s.accent}11!important}
-    .upl-slot.err{border-color:${s.bad}66!important}
-    .upl-slot-lbl{color:${s.muted}!important}
-    .upl-slot.loaded .upl-slot-lbl{color:${s.good}!important}
-    .upl-slot-cnt{color:${s.accent}!important}
+    .upl-card{background:${s.bg}!important;border-color:${s.border}!important}
+    .upl-card.ok::before{background:${s.good}!important}
+    .upl-card.unsaved::before{background:${s.accent}!important}
+    .upl-card.ok .upl-card-name{color:${s.good}!important}
+    .upl-card.unsaved .upl-card-name{color:${s.accent}!important}
+    .upl-card.ok .upl-card-rows{color:${s.good}!important}
+    .upl-card.unsaved .upl-card-rows{color:${s.accent}!important}
+    .upl-card-file{color:${s.faint}!important}
+    .upl-strip{background:${s.hdr}!important}
     .viewer-bar{background:${s.hdr}!important;border-color:${s.card}!important;color:${s.faint}!important}
     .card{background:${s.card}!important;border-color:${s.border}!important}
     .slbl{color:${s.muted}!important}
-    th.th{color:${s.muted}!important;border-color:${s.border}!important}
+    th.th{color:${s.muted}!important;border-color:${s.border}!important;background:${s.card}!important}
     td.td{border-color:${s.border}44!important;color:${s.text}!important}
     td.tf{border-color:${s.border}!important;color:${s.text}!important}
     .kpi-card{background:${s.card}!important;border-color:${s.border}!important}
@@ -2803,7 +3876,7 @@ const UNIT_MIN = 7;           // floor for px per grid unit, so cells never get 
 // instead of sitting in a fixed-size box in the corner of the screen.
 let UNIT = 60;
 function recalcUnit(){
-  const c=document.getElementById('dashCanvas');
+  const c=document.getElementById(ACTIVE_CANVAS_ID);
   const containerW=(c&&c.parentElement)?c.parentElement.clientWidth:window.innerWidth;
   // No flooring — a fractional UNIT lets the grid span the container width
   // exactly (canvasWidth() = COLS*(UNIT+GAP)+GAP), eliminating the leftover
@@ -2838,14 +3911,105 @@ const DEFAULT_LAYOUT = DEFAULT_LAYOUT_BASE.map(p=>({
 // Mutable layout (copy of default, user can modify)
 let CANVAS_LAYOUT = DEFAULT_LAYOUT.map(p=>({...p}));
 
+// ── Deployment page canvas layout ──
+// Layout stored in canvas units directly (not multiplied by GRID_SCALE)
+const DEFAULT_DP_LAYOUT_BASE = [
+  {id:'dpUpload',    col:0,  row:0,  w:30, h:12},
+  {id:'dpCtrl',      col:0,  row:0,  w:38, h:4},
+  {id:'dpCats',      col:38, row:0,  w:34, h:8},
+  {id:'dpRoles',     col:38, row:8,  w:34, h:27},
+  {id:'dpChart6m',   col:0,  row:4,  w:38, h:11},
+  {id:'dpHiring',    col:0,  row:15, w:38, h:48},
+  {id:'dpLocRole',   col:38, row:35, w:34, h:28},
+  {id:'dpPersonnel', col:0,  row:64, w:72, h:37},
+];
+const DEFAULT_DP_LAYOUT = DEFAULT_DP_LAYOUT_BASE.map(p=>({...p}));
+let DP_CANVAS_LAYOUT = DEFAULT_DP_LAYOUT.map(p=>({...p}));
+
+// Which canvas is currently active ('dashCanvas' or 'dpCanvas')
+let ACTIVE_CANVAS_ID = 'dashCanvas';
+function getActiveLayout(){ return ACTIVE_CANVAS_ID==='dpCanvas'?DP_CANVAS_LAYOUT:CANVAS_LAYOUT; }
+function getActiveLayoutKey(){ return ACTIVE_CANVAS_ID==='dpCanvas'?DP_LAYOUT_KEY:LAYOUT_KEY; }
+function setActiveLayout(arr){ if(ACTIVE_CANVAS_ID==='dpCanvas') DP_CANVAS_LAYOUT=arr; else CANVAS_LAYOUT=arr; }
+
 // Saved layout (persists in localStorage per session).
 // LAYOUT_KEY is versioned to GRID_SCALE — a layout saved at the old 12-col
 // resolution would render tiny/squished on the new 36-col grid, so bumping
 // the key when the grid resolution changes makes old saves simply not match
 // (falling back to DEFAULT_LAYOUT) instead of rendering incorrectly.
 const LAYOUT_KEY = `wep_canvas_layout_g${GRID_SCALE}`;
-function saveLayout(){ try{ localStorage.setItem(LAYOUT_KEY, JSON.stringify(CANVAS_LAYOUT)); }catch(e){} }
-function loadLayout(){ try{ const s=localStorage.getItem(LAYOUT_KEY); if(s) CANVAS_LAYOUT=JSON.parse(s); }catch(e){} }
+const DP_LAYOUT_KEY = `wep_dp_canvas_layout_g${GRID_SCALE}_v5`;
+function saveLayout(){ try{ localStorage.setItem(getActiveLayoutKey(), JSON.stringify(getActiveLayout())); }catch(e){} }
+function loadLayout(){ try{ const s=localStorage.getItem(getActiveLayoutKey()); if(s) setActiveLayout(JSON.parse(s)); }catch(e){} }
+
+// ── Panel visibility (hide/show in edit mode) ─────────
+const PANEL_NAMES={
+  rfiPeriod:'Period RFI',rfiDonut:'RFI Donut',rfiCumul:'Cumulative RFI',
+  ndtPeriod:'Period NDT',ndtCumul:'Cumulative NDT',
+  fjcPeriod:'Period FJC',fjcCumul:'Cumulative FJC',
+  welders:'Welder Activity',progress:'Progress',
+  ncrTable:'NCR Table',ncrBar:'NCR Bar',
+  sorTable:'SOR Table',sorScatter:'SOR Scatter',
+  dpUpload:'File Upload',dpCtrl:'Month Selector',
+  dpCats:'By Category',dpRoles:'By Role',
+  dpChart6m:'6-Month Chart',
+  dpHiring:'Hiring Status',
+  dpLocRole:'Location & Role',dpPersonnel:'Personnel Table',
+};
+const HIDDEN_KEY_DASH='wep_hidden_dash';
+const HIDDEN_KEY_DP='wep_hidden_dp';
+function getHiddenKey(){ return ACTIVE_CANVAS_ID==='dpCanvas'?HIDDEN_KEY_DP:HIDDEN_KEY_DASH; }
+function getHiddenPanels(){ try{return new Set(JSON.parse(localStorage.getItem(getHiddenKey())||'[]'));}catch{return new Set();} }
+function saveHiddenPanels(s){ localStorage.setItem(getHiddenKey(),JSON.stringify([...s])); }
+function hidePanel(id){
+  const h=getHiddenPanels(); h.add(id); saveHiddenPanels(h);
+  document.querySelector(`.cp[data-id="${id}"]`)?.remove();
+  const canvas=document.getElementById(ACTIVE_CANVAS_ID);
+  if(canvas) canvas.style.height=canvasHeight()+'px';
+  refreshHiddenMenu();
+  markLayoutDirty();
+}
+function showPanel(id){
+  const h=getHiddenPanels(); h.delete(id); saveHiddenPanels(h);
+  render();
+  markLayoutDirty();
+}
+function refreshHiddenMenu(){
+  const wrap=document.getElementById('hiddenMenuWrap');
+  if(!wrap) return;
+  const h=getHiddenPanels();
+  wrap.style.display=h.size?'flex':'none';
+  const btn=document.getElementById('hiddenMenuBtn');
+  if(btn) btn.textContent=`Hidden ▾ ${h.size}`;
+}
+function toggleHiddenDrop(){
+  const existing=document.getElementById('hiddenDrop');
+  if(existing){ existing.remove(); return; }
+  const h=getHiddenPanels();
+  if(!h.size) return;
+  const btn=document.getElementById('hiddenMenuBtn');
+  const br=btn?.getBoundingClientRect()||{right:300,bottom:80};
+  const drop=document.createElement('div');
+  drop.id='hiddenDrop';
+  drop.style.cssText=`position:fixed;right:${window.innerWidth-br.right}px;top:${br.bottom+4}px;
+    background:#1e2130;border:1px solid rgba(245,158,11,.35);border-radius:6px;
+    padding:6px 0;z-index:9999;min-width:190px;box-shadow:0 8px 24px rgba(0,0,0,.6)`;
+  h.forEach(id=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:5px 12px;gap:12px;font-size:11px;color:#a8afc7';
+    const name=document.createElement('span');
+    name.textContent=PANEL_NAMES[id]||id;
+    const sb=document.createElement('button');
+    sb.textContent='Show';
+    sb.style.cssText='font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid rgba(245,158,11,.4);background:none;color:#f59e0b;cursor:pointer;flex:none';
+    sb.onclick=()=>{ drop.remove(); showPanel(id); };
+    row.appendChild(name); row.appendChild(sb);
+    drop.appendChild(row);
+  });
+  document.body.appendChild(drop);
+  const outside=ev=>{ if(!drop.contains(ev.target)&&ev.target.id!=='hiddenMenuBtn'){ drop.remove(); document.removeEventListener('mousedown',outside); } };
+  setTimeout(()=>document.addEventListener('mousedown',outside),0);
+}
 
 function colToX(col){ return col*(UNIT+GAP)+GAP; }
 function rowToY(row){ return row*(UNIT+GAP)+GAP; }
@@ -2854,12 +4018,14 @@ function hToPx(h)   { return h*UNIT+(h-1)*GAP; }
 function xToCol(x)  { return Math.round((x-GAP)/(UNIT+GAP)); }
 function yToRow(y)  { return Math.round((y-GAP)/(UNIT+GAP)); }
 function pxToW(px)  { return Math.max(1,Math.round((px+GAP)/(UNIT+GAP))); }
-function pxToH(px)  { return Math.max(1,Math.round((px+GAP)/(UNIT+GAP))); }
+const pxToH=pxToW;
 
 // Canvas total width = 12 cols + gaps + left/right padding (20px each side)
 function canvasWidth(){ return COLS*(UNIT+GAP)+GAP; }
 function canvasHeight(){
-  const maxRow=Math.max(...CANVAS_LAYOUT.map(p=>p.row+p.h));
+  const hidden=getHiddenPanels();
+  const visible=getActiveLayout().filter(p=>!hidden.has(p.id));
+  const maxRow=visible.length?Math.max(...visible.map(p=>p.row+p.h)):1;
   return rowToY(maxRow)+GAP+40;
 }
 // Canvas origin in viewport coordinates — getBoundingClientRect() already
@@ -2870,7 +4036,7 @@ function canvasHeight(){
 // (which ignores ancestor scroll, e.g. #app's overflow-x:auto) is what made
 // drops land away from the cursor.
 function canvasOrigin(){
-  const c=document.getElementById('dashCanvas');
+  const c=document.getElementById(ACTIVE_CANVAS_ID);
   if(!c) return{x:0,y:0};
   const r=c.getBoundingClientRect();
   return{x:r.left,y:r.top};
@@ -2879,18 +4045,18 @@ function canvasOrigin(){
 function pageToCanvas(px,py){ const o=canvasOrigin(); return{x:px-o.x,y:py-o.y}; }
 
 function renderCanvas(htmlMap){
-  const canvas=document.getElementById('dashCanvas');
+  const canvas=document.getElementById(ACTIVE_CANVAS_ID);
   if(!canvas) return;
   loadLayout();
-  recalcUnit(); // grid columns fill the available width — no dead zone on the right
-  // Set explicit dimensions so coordinate math is reliable
+  recalcUnit();
   canvas.style.width=canvasWidth()+'px';
   canvas.style.height=canvasHeight()+'px';
-  // Keep the edit-mode dot grid in sync with the actual snap pitch (UNIT+GAP)
   canvas.style.backgroundSize=`${UNIT+GAP}px ${UNIT+GAP}px`;
   canvas.innerHTML='';
 
-  CANVAS_LAYOUT.forEach(p=>{
+  const _hidden=getHiddenPanels();
+  getActiveLayout().forEach(p=>{
+    if(_hidden.has(p.id)) return;
     const html = htmlMap[p.id];
     if(!html) return;
     const div = document.createElement('div');
@@ -2913,6 +4079,25 @@ function renderCanvas(htmlMap){
 }
 
 // ── Edit mode ────────────────────────────────────────
+let _layoutDirty=false;
+function markLayoutDirty(){
+  _layoutDirty=true;
+  const btn=document.getElementById('layoutSaveBtn');
+  if(btn){
+    btn.textContent='💾 Save Layout';
+    btn.style.cssText='font-size:9px;padding:2px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.65);background:rgba(245,158,11,.12);color:#f59e0b;cursor:pointer;opacity:1';
+  }
+}
+function doSaveLayout(){
+  saveLayout();
+  _layoutDirty=false;
+  const btn=document.getElementById('layoutSaveBtn');
+  if(btn){
+    btn.textContent='✓ Saved';
+    btn.style.cssText='font-size:9px;padding:2px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.2);background:none;color:rgba(245,158,11,.45);cursor:default;opacity:1';
+  }
+}
+
 function toggleEditMode(){
   EDIT_MODE=!EDIT_MODE;
   const btn=document.getElementById('btnEdit');
@@ -2927,16 +4112,21 @@ function toggleEditMode(){
     bar.classList.toggle('on',EDIT_MODE);
     bar.innerHTML=EDIT_MODE
       ?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-        Edit Layout — drag panels to move · drag ◢ corner to resize width+height · drag → edge for width · drag ↓ edge for height
+        Edit Layout — drag to move · ◢/edges to resize · ✕ to hide
         <button onclick="resetLayout()" style="margin-left:auto;font-size:9px;padding:2px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.4);background:none;color:#f59e0b;cursor:pointer">↺ Reset Layout</button>
+        <span id="hiddenMenuWrap" style="display:none;align-items:center;gap:6px">
+          <button id="hiddenMenuBtn" onclick="toggleHiddenDrop()" style="font-size:9px;padding:2px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;cursor:pointer">Hidden ▾ 0</button>
+        </span>
+        <button id="layoutSaveBtn" onclick="doSaveLayout()" style="font-size:9px;padding:2px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.2);background:none;color:rgba(245,158,11,.45);cursor:default;opacity:1">✓ Saved</button>
+        <button onclick="toggleEditMode()" style="font-size:9px;padding:2px 10px;border-radius:4px;border:1px solid rgba(241,240,232,.2);background:none;color:rgba(241,240,232,.55);cursor:pointer">✕ Exit Edit Mode</button>
         <span style="color:${sc.faint};font-weight:400;text-transform:none;letter-spacing:0;margin-right:8px">Super Admin only</span>`
       :'';
   }
-  if(EDIT_MODE) activateEditMode(); else deactivateEditMode();
+  if(EDIT_MODE){ activateEditMode(); refreshHiddenMenu(); } else deactivateEditMode();
 }
 
 function activateEditMode(){
-  const canvas=document.getElementById('dashCanvas');
+  const canvas=document.getElementById(ACTIVE_CANVAS_ID);
   if(!canvas) return;
   canvas.classList.add('edit-mode');
   canvas.querySelectorAll('.cp').forEach(cp=>{
@@ -2962,6 +4152,13 @@ function activateEditMode(){
       er.addEventListener('mousedown',e=>startPanelResize(e,'e'));
       cp.appendChild(er);
     }
+    // W resize (width from left)
+    if(!cp.querySelector('.cp-res.w')){
+      const wr=document.createElement('div');
+      wr.className='cp-res w'; wr.title='Drag to resize width from left';
+      wr.addEventListener('mousedown',e=>startPanelResize(e,'w'));
+      cp.appendChild(wr);
+    }
     // S resize (height only)
     if(!cp.querySelector('.cp-res.s')){
       const sr=document.createElement('div');
@@ -2969,22 +4166,34 @@ function activateEditMode(){
       sr.addEventListener('mousedown',e=>startPanelResize(e,'s'));
       cp.appendChild(sr);
     }
+    // Hide button
+    if(!cp.querySelector('.cp-close')){
+      const cl=document.createElement('div');
+      cl.className='cp-close'; cl.title='Hide panel (restore via Hidden menu)';
+      cl.textContent='✕';
+      cl.addEventListener('click',ev=>{ ev.stopPropagation(); hidePanel(cp.dataset.id); });
+      cp.appendChild(cl);
+    }
   });
+  refreshHiddenMenu();
 }
 
 function deactivateEditMode(){
-  const canvas=document.getElementById('dashCanvas');
+  const canvas=document.getElementById(ACTIVE_CANVAS_ID);
   if(!canvas) return;
   canvas.classList.remove('edit-mode');
   canvas.querySelectorAll('.cp').forEach(cp=>{
     cp.classList.remove('editable');
-    cp.querySelectorAll('.cp-drag,.cp-res').forEach(el=>el.remove());
+    cp.querySelectorAll('.cp-drag,.cp-res,.cp-close').forEach(el=>el.remove());
   });
 }
 
 function resetLayout(){
-  CANVAS_LAYOUT=DEFAULT_LAYOUT.map(p=>({...p}));
-  saveLayout();
+  saveHiddenPanels(new Set());
+  setActiveLayout(ACTIVE_CANVAS_ID==='dpCanvas'
+    ? DEFAULT_DP_LAYOUT.map(p=>({...p}))
+    : DEFAULT_LAYOUT.map(p=>({...p})));
+  doSaveLayout();
   render();
 }
 
@@ -3003,9 +4212,11 @@ function getAllPanelEdges(excludeId){
     edges.left.push(r.left); edges.right.push(r.right);
     edges.top.push(r.top);   edges.bottom.push(r.bottom);
   });
-  // Add grid column snap lines (viewport coords)
+  // Add grid snap lines (viewport coords)
   const o=canvasOrigin();
   for(let c=0;c<=COLS;c++) edges.left.push(o.x+colToX(c));
+  const maxRow=Math.max(...getActiveLayout().map(p=>p.row+p.h),40);
+  for(let r=0;r<=maxRow;r++) edges.top.push(o.y+rowToY(r));
   return edges;
 }
 function nearestSnap(val,candidates){ let best=null,bd=SNAP; for(const c of candidates){const d=Math.abs(val-c);if(d<bd){bd=d;best=c;}} return best; }
@@ -3068,17 +4279,17 @@ function endPanelDrag(e){
   const newCol=Math.max(0,Math.min(COLS-1,xToCol(pos.x)));
   const newRow=Math.max(0,yToRow(Math.max(0,pos.y)));
 
-  const p=CANVAS_LAYOUT.find(p=>p.id===id);
+  const p=getActiveLayout().find(p=>p.id===id);
   if(p){
     p.col=newCol; p.row=newRow;
     if(p.col+p.w>COLS) p.w=COLS-p.col;
-    saveLayout();
+    markLayoutDirty();
   }
 
   cp.style.left=colToX(newCol)+'px';
   cp.style.top=rowToY(newRow)+'px';
 
-  const canvas=document.getElementById('dashCanvas');
+  const canvas=document.getElementById(ACTIVE_CANVAS_ID);
   if(canvas){ canvas.style.width=canvasWidth()+'px'; canvas.style.height=canvasHeight()+'px'; }
   setTimeout(()=>Object.values(CHARTS).forEach(c=>{try{c.resize();}catch(er){}}),50);
   window.removeEventListener('mousemove',onPanelDrag);
@@ -3093,45 +4304,69 @@ function startPanelResize(e,dir){
   const cp=e.currentTarget.parentElement;
   const id=cp.dataset.id;
   const r=cp.getBoundingClientRect();
+  const p=getActiveLayout().find(p=>p.id===id);
   cp.classList.add('is-dragging');
-  _pr={cp,id,dir,startX:e.clientX,startY:e.clientY,startW:r.width,startH:r.height};
+  _pr={cp,id,dir,startX:e.clientX,startY:e.clientY,startW:r.width,startH:r.height,
+       startLeft:parseFloat(cp.style.left)||0,
+       startRightCol:(p?p.col+p.w:0)};
   window.addEventListener('mousemove',onPanelResize);
   window.addEventListener('mouseup',endPanelResize);
 }
 function onPanelResize(e){
   if(!_pr) return;
-  const {cp,id,dir,startX,startY,startW,startH}=_pr;
+  const {cp,id,dir,startX,startY,startW,startH,startLeft,startRightCol}=_pr;
   const dx=e.clientX-startX, dy=e.clientY-startY;
-  const p=CANVAS_LAYOUT.find(p=>p.id===id);
-  // Snap the live preview to the same grid units endPanelResize will commit to,
-  // so the panel visibly locks to column/row boundaries as you drag instead of
-  // following the cursor in free pixels and then jumping at release.
+  const p=getActiveLayout().find(p=>p.id===id);
+  const edges=getAllPanelEdges(id);
+  const o=canvasOrigin();
   let w=p?p.w:1, h=p?p.h:1;
-  if(dir==='se'||dir==='e') w=Math.max(1,Math.min(p?COLS-p.col:COLS,pxToW(startW+dx)));
-  if(dir==='se'||dir==='s') h=Math.max(1,pxToH(startH+dy));
-  cp.style.width=wToPx(w)+'px';
-  cp.style.height=hToPx(h)+'px';
+  if(dir==='se'||dir==='e'){
+    w=Math.max(1,Math.min(p?COLS-p.col:COLS,pxToW(startW+dx)));
+    cp.style.width=wToPx(w)+'px';
+    const sl=nearestSnap(o.x+parseFloat(cp.style.left)+parseFloat(cp.style.width),[...edges.left,...edges.right]);
+    if(sl!=null) showSgV(sl); else sgV()?.classList.remove('on');
+  }
+  if(dir==='se'||dir==='s'){
+    h=Math.max(1,pxToH(startH+dy));
+    cp.style.height=hToPx(h)+'px';
+    const sh=nearestSnap(o.y+parseFloat(cp.style.top)+parseFloat(cp.style.height),[...edges.top,...edges.bottom]);
+    if(sh!=null) showSgH(sh); else sgH()?.classList.remove('on');
+  }
+  if(dir==='w'){
+    const newLeftPx=startLeft+dx;
+    const newCol=Math.max(0,Math.min(startRightCol-1,xToCol(newLeftPx)));
+    w=startRightCol-newCol;
+    cp.style.left=colToX(newCol)+'px';
+    cp.style.width=wToPx(w)+'px';
+    const sl=nearestSnap(o.x+colToX(newCol),[...edges.left,...edges.right]);
+    if(sl!=null) showSgV(sl); else sgV()?.classList.remove('on');
+  }
   const tip=cp.querySelector('.cp-span-tip');
   if(tip) tip.textContent=`${w}×${h}`;
 }
 function endPanelResize(e){
   if(!_pr) return;
-  const {cp,id,dir,startX,startY,startW,startH}=_pr;
+  const {cp,id,dir,startX,startY,startW,startH,startLeft,startRightCol}=_pr;
   cp.classList.remove('is-dragging');
   hideSg();
   const dx=e.clientX-startX, dy=e.clientY-startY;
-  const p=CANVAS_LAYOUT.find(p=>p.id===id);
+  const p=getActiveLayout().find(p=>p.id===id);
   if(p){
-    const rawW=startW+dx, rawH=startH+dy;
-    if(dir==='se'||dir==='e') p.w=Math.max(1,Math.min(COLS-p.col,pxToW(rawW)));
-    if(dir==='se'||dir==='s') p.h=Math.max(1,pxToH(rawH));
+    if(dir==='se'||dir==='e') p.w=Math.max(1,Math.min(COLS-p.col,pxToW(startW+dx)));
+    if(dir==='se'||dir==='s') p.h=Math.max(1,pxToH(startH+dy));
+    if(dir==='w'){
+      const newCol=Math.max(0,Math.min(startRightCol-1,xToCol(startLeft+dx)));
+      p.w=startRightCol-newCol;
+      p.col=newCol;
+      cp.style.left=colToX(newCol)+'px';
+    }
     cp.style.width=wToPx(p.w)+'px';
     cp.style.height=hToPx(p.h)+'px';
     const tip=cp.querySelector('.cp-span-tip');
     if(tip) tip.textContent=`${p.w}×${p.h}`;
-    saveLayout();
+    markLayoutDirty();
   }
-  const canvas=document.getElementById('dashCanvas');
+  const canvas=document.getElementById(ACTIVE_CANVAS_ID);
   if(canvas){ canvas.style.width=canvasWidth()+'px'; canvas.style.height=canvasHeight()+'px'; }
   setTimeout(()=>Object.values(CHARTS).forEach(c=>{try{c.resize();}catch(er){}}),50);
   window.removeEventListener('mousemove',onPanelResize);
