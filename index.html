@@ -23,7 +23,7 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .sidenav-toggle svg{width:18px;height:18px;flex:none}
 .sidenav-link{display:flex;align-items:center;gap:10px;padding:11px 22px;color:#a8afc7;font-size:13px;
   font-weight:500;text-decoration:none;border-left:3px solid transparent;white-space:nowrap;
-  transition:background .15s ease,color .15s ease}
+  transition:background .18s ease,color .18s ease,border-left-color .18s ease}
 .sidenav-link:hover{background:#212640;color:#f1f0e8;border-left-color:#388bfd}
 .sidenav-link:focus,.sidenav-link:focus-visible{outline:none}
 #sidenavExtra{display:flex;flex-direction:column;flex:1;min-height:0}
@@ -76,7 +76,6 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .d-inp:disabled{opacity:.4;cursor:not-allowed}
 .filter-tag{font-size:10px;color:#f59e0b;background:#2a2010;padding:2px 8px;border-radius:4px;white-space:nowrap;border:1px solid rgba(245,158,11,.3)}
 .filter-tag.live{background:#0f2420;color:#14b8a6;border:1px solid rgba(20,184,166,.3)}
-.hdr-divider{width:1px;height:24px;background:#2d3348;margin:0 4px}
 .hdr-user{display:flex;align-items:center;gap:8px}
 .hdr-uname{font-size:11px;color:#7a809a;font-family:monospace}
 .hdr-btn{background:#252a3a;border:1px solid #2d3348;border-radius:5px;color:#f1f0e8;font-size:11px;padding:4px 10px;cursor:pointer;transition:all .2s;white-space:nowrap}
@@ -116,13 +115,10 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .upl-card-name{font-size:10px;font-weight:700;letter-spacing:.06em;color:#9ca3af;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .upl-card.ok .upl-card-name{color:#14b8a6}
 .upl-card.unsaved .upl-card-name{color:#f59e0b}
-.upl-card-file{font-size:8.5px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.upl-card.ok .upl-card-file{color:#0d6b60}
 .upl-card-rows{font-size:9px;font-weight:600;margin-top:3px}
 .upl-card.ok .upl-card-rows{color:#14b8a6}
 .upl-card.unsaved .upl-card-rows{color:#f59e0b}
 .upl-card.err .upl-card-rows{color:#f43f5e}
-/* Status row */
 /* Collapsed strip */
 .upl-strip{position:absolute;bottom:0;left:0;right:0;height:44px;display:flex;align-items:center;padding:0 20px;gap:6px;opacity:0;transform:translateY(7px);transition:opacity .28s ease,transform .35s cubic-bezier(.4,0,.2,1);pointer-events:none}
 .upl-bar.collapsed .upl-strip{opacity:1;transform:translateY(0);pointer-events:all}
@@ -130,10 +126,8 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .upl-strip-btn:disabled{opacity:.3;cursor:not-allowed}
 .upl-strip-sep{width:1px;height:20px;background:rgba(255,255,255,.08);margin:0 2px}
 .upl-strip-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600}
-/* Legacy compat */
 .upl-err-row{display:flex;gap:10px;flex-wrap:wrap;padding:0 20px 6px}
 .upl-err-item{font-size:10px;color:#f43f5e}
-.viewer-bar{background:#181b28;border-bottom:1px solid #252a3a;padding:5px 20px;font-size:10px;color:#4a5068;display:flex;align-items:center;gap:8px}
 .card{background:#252a3a;border:1px solid #2d3348;border-radius:8px;padding:12px 14px}
 .slbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a809a;margin-bottom:8px}
 .tbl{width:100%;border-collapse:collapse}
@@ -160,7 +154,6 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a809a;text-align:left}
 .kpi-val{font-size:32px;font-weight:800;line-height:1;font-family:monospace;text-align:center;flex:1;display:flex;align-items:center;justify-content:center}
 .kpi-goal{font-size:10px;color:#7a809a;text-align:center;margin-top:2px}
-.kpi-stack{display:flex;flex-direction:column;gap:10px}
 .kpi-inline{display:grid;gap:8px;margin-top:10px;border-top:1px solid #2d3348;padding-top:10px}
 .kpi-inline .kpi-card{border-radius:6px;padding:10px 12px;min-height:75px}
 .kpi-inline .kpi-val{font-size:26px}
@@ -178,7 +171,6 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{display:inline-block;animation:spin 1s linear infinite}
 /* ── Neon nav-link variants ── */
-.sidenav-link{transition:background .18s ease,color .18s ease,border-left-color .18s ease}
 .sidenav-link svg{transition:filter .22s ease}
 .snav-pipeline:hover,.snav-pipeline.snav-active{background:linear-gradient(90deg,#38bdf80d,transparent)!important;border-left-color:#38bdf8!important;color:#e2e8f0!important}
 .snav-pipeline:hover svg,.snav-pipeline.snav-active svg{filter:drop-shadow(0 0 5px #38bdf8) drop-shadow(0 0 11px #38bdf866)}
@@ -219,7 +211,6 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .login-first-cred{background:rgba(20,184,166,.06);border:1px solid rgba(20,184,166,.2);border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:11px;color:#7a809a}
 .login-first-cred b{color:#14b8a6}
 .login-cred-row{display:flex;justify-content:space-between;margin-top:4px}
-.login-spin{display:inline-block;animation:spin 1s linear infinite;margin-right:6px}
 .login-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#2a2e40;font-size:10px;text-transform:uppercase;letter-spacing:.1em}
 .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
 .login-guest-btn{width:100%;background:none;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#4a5068;font-size:13px;font-weight:600;padding:11px;cursor:pointer;transition:border-color .2s,color .2s}
@@ -266,7 +257,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .exp-note{font-size:10px;color:#7a809a;margin-top:8px;line-height:1.5}
 @media print{
   .hdr{position:relative!important}
-  .upl-bar,.viewer-bar{display:none!important}
+  .upl-bar{display:none!important}
   #loginOverlay,#userMgmtModal,#wrongFileModal{display:none!important}
   body{min-width:unset!important}
   .row{break-inside:avoid}
@@ -317,6 +308,90 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
   background:rgba(0,0,0,.5);padding:1px 5px;border-radius:3px}
 .cp.editable:hover .cp-span-tip{opacity:.9}
 @media print{.cp-drag,.cp-res,.sg,.canvas-mode-bar{display:none!important}}
+
+/* ── Mobile hamburger (hidden on desktop/tablet) ── */
+.hdr-mob-menu{display:none;align-items:center;justify-content:center;width:32px;height:32px;
+  background:transparent;border:1px solid #2d3348;border-radius:7px;cursor:pointer;flex-shrink:0;padding:0}
+.hdr-mob-menu:hover{background:#252a3a}
+.hdr-mob-menu svg{flex:none}
+
+/* ── Mobile bottom tab bar (hidden on desktop/tablet) ── */
+#mobTabBar{display:none;position:fixed;bottom:0;left:0;right:0;height:54px;
+  background:#181b28;border-top:1px solid #2d3348;z-index:1100;
+  align-items:center;justify-content:space-around;padding:0 8px}
+.mob-tab{display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 14px;border-radius:8px;cursor:pointer;background:none;border:none;transition:background .18s}
+.mob-tab.active{background:rgba(56,189,248,.08)}
+.mob-tab svg{width:20px;height:20px;flex:none}
+.mob-tab-lbl{font-size:9px;font-weight:600;letter-spacing:.04em;color:#4a5068;white-space:nowrap}
+.mob-tab.active .mob-tab-lbl{color:#38bdf8}
+
+/* ════════════════════════════════════════════════════════
+   TABLET  641px – 1024px
+════════════════════════════════════════════════════════ */
+@media (min-width:641px) and (max-width:1024px){
+  body{min-width:unset}
+
+  /* 2-column grid canvas */
+  #dashCanvas,#dpCanvas{
+    display:grid!important;grid-template-columns:1fr 1fr!important;
+    align-content:start!important;width:auto!important;height:auto!important;
+    min-height:unset!important;padding:10px 10px 40px!important;gap:8px!important;
+    background-image:none!important}
+
+  .cp{position:relative!important;left:auto!important;top:auto!important;
+    width:auto!important;height:auto!important;min-height:200px}
+  .cp>.card,.cp>.kpi-card{height:auto!important;overflow:visible!important}
+
+  /* Full-width panels */
+  .cp[data-id="rfiPeriod"]{grid-column:span 2}
+  .cp[data-id="progress"]{grid-column:span 2}
+}
+
+/* ════════════════════════════════════════════════════════
+   MOBILE  ≤ 640px
+════════════════════════════════════════════════════════ */
+@media (max-width:640px){
+  body{min-width:unset;overflow-x:hidden}
+  #app{margin-left:0}
+
+  /* Sidenav: off-screen drawer, slides in */
+  .sidenav{transform:translateX(-100%);width:240px;box-shadow:none;
+    transition:transform .3s ease,box-shadow .3s ease}
+  .sidenav.open{transform:translateX(0);width:240px;box-shadow:8px 0 32px rgba(0,0,0,.6)}
+  /* Labels always visible inside the drawer */
+  .sidenav .snav-lbl{opacity:1;max-width:200px}
+  .sidenav .sidenav-link{padding:11px 22px;justify-content:flex-start;gap:10px}
+  .sidenav .sidenav-signout{margin:6px 14px 16px;padding:11px 14px;justify-content:flex-start}
+  .sidenav .sidenav-divider,.sidenav .sidenav-userinfo{opacity:1;transform:none;pointer-events:auto;display:flex}
+
+  /* Backdrop covers full screen on mobile */
+  .sidenav-backdrop{left:0}
+
+  /* Header: full-width, show hamburger */
+  .hdr{padding:8px 12px}
+  .hdr-mob-menu{display:flex}
+
+  /* Upload bar: full-width */
+  .upl-bar{left:0}
+
+  /* Canvas mode bar: full-width */
+  .canvas-mode-bar{left:0}
+
+  /* Single-column stacked canvas */
+  #dashCanvas,#dpCanvas{
+    display:flex!important;flex-direction:column!important;
+    width:auto!important;height:auto!important;min-height:unset!important;
+    padding:8px 8px 80px!important;gap:8px!important;
+    background-image:none!important}
+
+  .cp{position:relative!important;left:auto!important;top:auto!important;
+    width:100%!important;height:auto!important;min-height:160px}
+  .cp>.card,.cp>.kpi-card{height:auto!important;overflow:visible!important}
+
+  /* Show mobile tab bar */
+  #mobTabBar{display:flex}
+}
 </style>
 </head>
 <body>
@@ -564,6 +639,22 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 
 <div id="app">
   <div id="dashCanvas"></div>
+</div>
+
+<!-- Mobile bottom tab bar -->
+<div id="mobTabBar">
+  <button class="mob-tab active" data-view="dashboard" onclick="switchView('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="12" rx="9" ry="9" stroke="#38bdf8" stroke-width="1.4" opacity=".25"/><ellipse cx="12" cy="12" rx="6" ry="6" stroke="#38bdf8" stroke-width="1.4" opacity=".55"/><ellipse cx="12" cy="12" rx="3" ry="3" stroke="#38bdf8" stroke-width="1.5"/><line x1="3" y1="12" x2="6" y2="12" stroke="#38bdf8" stroke-width="1.2" opacity=".45"/><line x1="18" y1="12" x2="21" y2="12" stroke="#38bdf8" stroke-width="1.2" opacity=".45"/></svg>
+    <span class="mob-tab-lbl">Pipeline</span>
+  </button>
+  <button class="mob-tab" data-view="deployment" onclick="switchView('deployment')">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="2.5" stroke="#00ff9d" stroke-width="1.4"/><path d="M4 19c0-3 2.2-5 5-5s5 2 5 5" stroke="#00ff9d" stroke-width="1.4" stroke-linecap="round"/><circle cx="17" cy="8" r="1.8" stroke="#00ff9d" stroke-width="1.2" opacity=".7"/></svg>
+    <span class="mob-tab-lbl">Manpower</span>
+  </button>
+  <button class="mob-tab" data-view="export" onclick="openExportOptions()">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v11" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round"/><path d="M8 10l4 4 4-4" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <span class="mob-tab-lbl">Export</span>
+  </button>
 </div>
 <!-- Single multi-file input for bulk upload -->
 <input type="file" id="fileMulti"  accept=".xlsx,.xls" multiple style="display:none">
@@ -1080,20 +1171,6 @@ function bNDTTable(secRows, title, live, kpis){
   </table></div>${kpiHtml}</div>`;
 }
 
-function bKPI(label, value, goal, unit=''){
-  const blank=value==null||isNaN(value);
-  const over=!blank&&goal!=null&&value>goal;
-  const color=blank?'#8b949e':over?'#f85149':'#3fb950';
-  const status=blank?'warn':over?'bad':'good';
-  const diff=(!blank&&goal!=null)?+((value-goal)/goal*100).toFixed(1):null;
-  const valStr=blank?'—':`${typeof value==='number'?value.toFixed(value<10?2:1):value}${unit}`;
-  return`<div class="kpi-card" data-status="${status}">
-    <div class="kpi-lbl">${label}</div>
-    <div class="kpi-val" style="color:${color}">${valStr}</div>
-    ${goal!=null?`<div class="kpi-goal">Goal ≤ ${goal}${unit}${diff!=null?` <span style="color:${color}">(${diff>0?'+':''}${diff}%)</span>`:''}</div>`:'<div class="kpi-goal">&nbsp;</div>'}
-  </div>`;
-}
-
 function bKPIinline(label, value, goal, unit=''){
   const blank=value==null||isNaN(value);
   const over=!blank&&goal!=null&&value>goal;
@@ -1402,6 +1479,9 @@ function bHeader(){
       </div>`;
 
   return`<div class="hdr">
+    <button class="hdr-mob-menu" onclick="toggleSidenav()" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.7" stroke-linecap="round" width="18" height="18"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/></svg>
+    </button>
     <div><div class="hdr-title">WEEKLY QA/QC DASHBOARD</div><div class="hdr-sub">P30312 — WEST TO EAST PIPELINE PROJECT</div></div>
     ${dateSection}
   </div>`;
@@ -1672,7 +1752,14 @@ let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment'
 
 function switchView(v){
   APP_VIEW = v;
+  toggleSidenav(false);
   render();
+  updateMobTabBar();
+}
+function updateMobTabBar(){
+  document.querySelectorAll('#mobTabBar .mob-tab').forEach(t=>{
+    t.classList.toggle('active', t.dataset.view===APP_VIEW);
+  });
 }
 
 // ═══════════════════════════════════════════════════
@@ -3680,11 +3767,10 @@ function applyScheme(key){
     body{background:${s.bg}!important;color:${s.text}!important}
     .hdr{background:${s.hdr}!important;border-color:${s.border}!important}
     .hdr-title{color:${s.text}!important}
-    .hdr-sub,Hdr-uname{color:${s.muted}!important}
+    .hdr-sub,.hdr-uname{color:${s.muted}!important}
     .hdr-btn{background:${s.card}!important;border-color:${s.border}!important;color:${s.text}!important}
     .hdr-btn:hover{border-color:${s.accent}!important;color:${s.accent}!important}
     .hdr-btn.mgmt{border-color:${s.accent}44!important;color:${s.accent}!important}
-    .hdr-divider{background:${s.border}!important}
     .upl-bar{background:${s.hdr}!important;border-color:${s.border}!important}
     .upl-card{background:${s.bg}!important;border-color:${s.border}!important}
     .upl-card.ok::before{background:${s.good}!important}
@@ -3693,9 +3779,7 @@ function applyScheme(key){
     .upl-card.unsaved .upl-card-name{color:${s.accent}!important}
     .upl-card.ok .upl-card-rows{color:${s.good}!important}
     .upl-card.unsaved .upl-card-rows{color:${s.accent}!important}
-    .upl-card-file{color:${s.faint}!important}
     .upl-strip{background:${s.hdr}!important}
-    .viewer-bar{background:${s.hdr}!important;border-color:${s.card}!important;color:${s.faint}!important}
     .card{background:${s.card}!important;border-color:${s.border}!important}
     .slbl{color:${s.muted}!important}
     th.th{color:${s.muted}!important;border-color:${s.border}!important;background:${s.card}!important}
