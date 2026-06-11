@@ -21,7 +21,10 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
   transition:background .15s ease}
 .sidenav-toggle:hover{background:#252a3a}
 .sidenav-toggle svg{width:18px;height:18px;flex:none}
-.sidenav-link{display:flex;align-items:center;gap:10px;padding:11px 22px;color:#a8afc7;font-size:13px;
+/* Fixed left padding centres the 17px icon in the 58px rail (3px border + 18px pad).
+   Identical in every state so icons never shift on expand/collapse — only the
+   bar width animates and labels fade via .snav-lbl. */
+.sidenav-link{display:flex;align-items:center;gap:10px;padding:11px 18px;color:#a8afc7;font-size:13px;
   font-weight:500;text-decoration:none;border-left:3px solid transparent;white-space:nowrap;
   transition:background .18s ease,color .18s ease,border-left-color .18s ease}
 .sidenav-link:hover{background:#212640;color:#f1f0e8;border-left-color:#388bfd}
@@ -37,12 +40,8 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .sidenav.open .sidenav-divider,.sidenav.open .sidenav-userinfo{
   opacity:1;transform:translateY(0);pointer-events:auto}
 .sidenav.open .sidenav-userinfo{transition-delay:.18s}
-/* Sign-out: always visible, icon-only when collapsed */
-.sidenav-signout{transition:box-shadow .25s,border-color .25s,background .2s}
-.sidenav:not(.open) .sidenav-signout{margin:6px 11px 16px;padding:9px 0;justify-content:center;border-radius:8px}
+/* Sign-out: always visible, icon-only when collapsed (label fades via .snav-lbl) */
 .sidenav:not(.open) .sidenav-signout .snav-lbl{opacity:0;max-width:0;overflow:hidden}
-/* Collapsed: centre icons in the 58px rail */
-.sidenav:not(.open) .sidenav-link{padding:11px 0;justify-content:center;gap:0}
 /* Collapsed tooltips */
 .sidenav:not(.open) .sidenav-link[data-tip],
 .sidenav:not(.open) .sidenav-signout[data-tip]{position:relative}
@@ -62,72 +61,58 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .sidenav-uirow{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .sidenav-uilbl{font-size:10px;color:#7a809a;text-transform:uppercase;letter-spacing:.05em}
 .sidenav-uival{font-size:12px;color:#f1f0e8;font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidenav-signout{margin:6px 14px 16px;padding:11px 14px;border-radius:8px;background:#252a3a;border:1px solid #2d3348;
-  color:#f85149;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;
+/* Same fixed-geometry rule as .sidenav-link: 11px margin + 1px border + 10px pad
+   centres the 15px icon in the 58px rail; identical in every state. */
+.sidenav-signout{margin:6px 11px 16px;padding:11px 10px;border-radius:8px;background:#252a3a;border:1px solid #2d3348;
+  color:#f85149;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:flex-start;
   gap:8px;white-space:nowrap;transition:box-shadow .25s,border-color .25s,background .2s}
 .sidenav-signout:hover{border-color:rgba(244,63,94,.45);background:rgba(244,63,94,.08);box-shadow:0 0 12px 2px rgba(244,63,94,.55)}
 .sidenav-backdrop{display:none;position:fixed;inset:0;left:58px;background:rgba(0,0,0,.4);z-index:1050}
 .sidenav-backdrop.open{display:block}
-.hdr{background:#181b28;border-bottom:1px solid #2d3348;padding:10px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .hdr-title{font-size:15px;font-weight:700;letter-spacing:.02em;color:#f1f0e8}
 .hdr-sub{font-size:10px;color:#7a809a;margin-top:2px}
 .date-row{display:flex;align-items:center;gap:8px}
 .d-inp{background:#252a3a;border:1px solid #2d3348;border-radius:5px;color:#f1f0e8;padding:4px 8px;font-size:12px;font-family:monospace;outline:none}
 .d-inp:disabled{opacity:.4;cursor:not-allowed}
-.filter-tag{font-size:10px;color:#f59e0b;background:#2a2010;padding:2px 8px;border-radius:4px;white-space:nowrap;border:1px solid rgba(245,158,11,.3)}
-.filter-tag.live{background:#0f2420;color:#14b8a6;border:1px solid rgba(20,184,166,.3)}
-.hdr-user{display:flex;align-items:center;gap:8px}
-.hdr-uname{font-size:11px;color:#7a809a;font-family:monospace}
-.hdr-btn{background:#252a3a;border:1px solid #2d3348;border-radius:5px;color:#f1f0e8;font-size:11px;padding:4px 10px;cursor:pointer;transition:all .2s;white-space:nowrap}
-.hdr-btn:hover{border-color:#f59e0b;color:#f59e0b}
-.hdr-btn.danger:hover{border-color:#f43f5e;color:#f43f5e}
-.hdr-btn.mgmt{border-color:rgba(245,158,11,.4);color:#f59e0b}
-.hdr-btn.mgmt:hover{background:rgba(245,158,11,.08);border-color:#f59e0b}
 .btn-x{background:none;border:none;cursor:pointer;color:#7a809a;padding:0;font-size:16px;line-height:1;margin-left:auto}
 .btn-x:hover{color:#f1f0e8}
-/* ── Upload Bar v2 ── */
-.upl-bar{position:fixed;top:52px;left:58px;right:0;z-index:150;background:#181b28;border-bottom:1px solid #2d3348;overflow:hidden;transition:height .4s cubic-bezier(.4,0,.2,1),top .4s cubic-bezier(.4,0,.2,1),box-shadow .4s ease;box-shadow:0 2px 12px rgba(0,0,0,.3)}
-.upl-bar.collapsed{top:0;box-shadow:0 4px 24px rgba(0,0,0,.65)}
-/* Expanded panel */
-.upl-expanded{display:flex;align-items:stretch;padding:5px 14px;gap:0;transition:opacity .28s ease,transform .35s cubic-bezier(.4,0,.2,1);opacity:1;transform:translateY(0)}
-.upl-bar.collapsed .upl-expanded{opacity:0;transform:translateY(-7px);pointer-events:none}
-/* Actions column */
-.upl-actions-col{display:flex;flex-direction:column;gap:4px;justify-content:center;min-width:200px}
-.upl-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:6px 13px;border-radius:7px;font-size:11px;font-weight:600;letter-spacing:.03em;border:none;cursor:pointer;white-space:nowrap;transition:opacity .15s,background .15s}
-.upl-btn:disabled{opacity:.35;cursor:not-allowed}
-.upl-btn-primary{background:#f59e0b;color:#0e101a}
-.upl-btn-primary:hover:not(:disabled){background:#fbbf24}
-.upl-btn-ghost{background:rgba(255,255,255,.06);color:#9ca3af;border:1px solid rgba(255,255,255,.09)}
-.upl-btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.1);color:#d1d5db}
-.upl-btn-danger{background:rgba(244,63,94,.1);color:#f87171;border:1px solid rgba(244,63,94,.2)}
-.upl-btn-danger:hover:not(:disabled){background:rgba(244,63,94,.18)}
-/* Divider */
-.upl-vsep{width:1px;background:rgba(255,255,255,.07);margin:0 16px;align-self:stretch}
-/* Dataset cards */
-.upl-cards{display:flex;gap:7px;flex:1;flex-wrap:wrap;align-items:flex-start;align-content:flex-start}
-.upl-card{position:relative;background:#0e101a;border:1px solid #1e2235;border-radius:8px;padding:5px 10px 5px 13px;min-width:100px;overflow:hidden;cursor:pointer;transition:border-color .2s,background .2s}
-.upl-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:8px 0 0 8px;transition:background .3s}
-.upl-card.ok{cursor:default}.upl-card.ok::before{background:#14b8a6}
-.upl-card.unsaved::before{background:#f59e0b}
-.upl-card.err::before{background:#f43f5e}
-.upl-card.empty::before{background:#2d3348}
-.upl-card:not(.ok):not(.unsaved):hover{border-color:#f59e0b;background:rgba(245,158,11,.04)}
-.upl-card-name{font-size:10px;font-weight:700;letter-spacing:.06em;color:#9ca3af;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.upl-card.ok .upl-card-name{color:#14b8a6}
-.upl-card.unsaved .upl-card-name{color:#f59e0b}
-.upl-card-rows{font-size:9px;font-weight:600;margin-top:3px}
-.upl-card.ok .upl-card-rows{color:#14b8a6}
-.upl-card.unsaved .upl-card-rows{color:#f59e0b}
-.upl-card.err .upl-card-rows{color:#f43f5e}
-/* Collapsed strip */
-.upl-strip{position:absolute;bottom:0;left:0;right:0;height:44px;display:flex;align-items:center;padding:0 20px;gap:6px;opacity:0;transform:translateY(7px);transition:opacity .28s ease,transform .35s cubic-bezier(.4,0,.2,1);pointer-events:none}
-.upl-bar.collapsed .upl-strip{opacity:1;transform:translateY(0);pointer-events:all}
+/* ── Top Bar v3 — single fixed strip bar, REQUIRED on every page (see bTopBar) ── */
+.upl-bar{position:fixed;top:0;left:58px;right:0;z-index:150;height:60px;display:flex;align-items:center;
+  padding:0 50px 0 20px;background:#181b28;border-bottom:1px solid #2d3348;box-shadow:0 4px 24px rgba(0,0,0,.45)}
+.tb-title{flex-shrink:0;margin-right:20px}
+.tb-date{flex-shrink:0;margin-right:80px}
+.tb-logo{height:34px;width:auto;flex-shrink:0;display:block}
+#uplBarSpacer,#dpBarSpacer{height:60px}
+/* Action strip (page-specific buttons) */
+.upl-strip{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
 .upl-strip-btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;border:none;cursor:pointer;transition:background .15s,opacity .15s;flex-shrink:0}
 .upl-strip-btn:disabled{opacity:.3;cursor:not-allowed}
+/* Saving in progress — icon glow pulses until saveAllToDB finishes */
+@keyframes savePulse{
+  0%,100%{filter:drop-shadow(0 0 2px rgba(52,211,153,.3));opacity:.55}
+  50%{filter:drop-shadow(0 0 7px rgba(52,211,153,.95)) drop-shadow(0 0 14px rgba(52,211,153,.45));opacity:1}
+}
+.upl-strip-btn.saving{opacity:1;background:rgba(20,184,166,.16)!important;color:#14b8a6}
+.upl-strip-btn.saving svg{animation:savePulse 1.1s ease-in-out infinite}
 .upl-strip-sep{width:1px;height:20px;background:rgba(255,255,255,.08);margin:0 2px}
-.upl-strip-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600}
-.upl-err-row{display:flex;gap:10px;flex-wrap:wrap;padding:0 20px 6px}
-.upl-err-item{font-size:10px;color:#f43f5e}
+/* Dataset status dots — green: loaded · amber: loaded but unsaved · grey: empty.
+   Clickable: each dot opens a single-file picker for its own dataset (uploadSlot).
+   NO transform on the dot itself — the ::after tooltip would inherit it. */
+.upl-dots{display:flex;align-items:center;gap:5px;margin:0 8px;flex-shrink:0}
+.upl-dot{position:relative;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);cursor:pointer;transition:background .2s,box-shadow .18s}
+.upl-dot:hover{box-shadow:0 0 0 3px rgba(255,255,255,.14)}
+.upl-dot.ok{background:#14b8a6;border-color:#14b8a6;box-shadow:0 0 6px rgba(20,184,166,.55)}
+.upl-dot.ok:hover{box-shadow:0 0 0 3px rgba(20,184,166,.28),0 0 8px rgba(20,184,166,.6)}
+.upl-dot.unsaved{background:#f59e0b;border-color:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,.55)}
+.upl-dot.unsaved:hover{box-shadow:0 0 0 3px rgba(245,158,11,.28),0 0 8px rgba(245,158,11,.6)}
+/* Instant smooth tooltip (no native title delay): fade + drop-in below the dot */
+.upl-dot::after{content:attr(data-tip);position:absolute;top:calc(100% + 9px);left:50%;
+  transform:translate(-50%,-5px);background:#1e2235;border:1px solid #2d3348;color:#e2e8f0;
+  font-size:11px;font-weight:500;white-space:nowrap;padding:5px 10px;border-radius:6px;
+  box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;pointer-events:none;z-index:2000;
+  transition:opacity .14s ease,transform .18s cubic-bezier(.2,.9,.3,1.2)}
+.upl-dot:hover::after{opacity:1;transform:translate(-50%,0)}
+.upl-strip-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;padding-right:14px;white-space:nowrap;overflow:hidden}
 .card{background:#252a3a;border:1px solid #2d3348;border-radius:8px;padding:12px 14px}
 .slbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a809a;margin-bottom:8px}
 .tbl{width:100%;border-collapse:collapse}
@@ -183,6 +168,27 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .snav-theme:hover svg{filter:drop-shadow(0 0 5px #e879f9) drop-shadow(0 0 11px #e879f966)}
 .snav-users:hover{background:linear-gradient(90deg,#60a5fa0d,transparent)!important;border-left-color:#60a5fa!important;color:#e2e8f0!important}
 .snav-users:hover svg{filter:drop-shadow(0 0 5px #60a5fa) drop-shadow(0 0 11px #60a5fa66)}
+.snav-kpi:hover,.snav-kpi.snav-active{background:linear-gradient(90deg,#f974160d,transparent)!important;border-left-color:#f97416!important;color:#e2e8f0!important}
+.snav-kpi:hover svg,.snav-kpi.snav-active svg{filter:drop-shadow(0 0 5px #f97416) drop-shadow(0 0 11px #f9741666)}
+/* ── KPI Page (canvas-based — cards rendered as .cp panels) ── */
+.kpi-ed{background:#090912;border:1px solid #161929;border-radius:12px;overflow:hidden;transition:transform .15s,box-shadow .2s,border-color .2s}
+.kpi-ed:hover{transform:translateY(-2px)}
+.kpi-ed.good{--kc:#00ff9d}.kpi-ed.warn{--kc:#fbbf24}.kpi-ed.bad{--kc:#f43f5e}.kpi-ed.na{--kc:#3b4260}
+.kpi-ed:hover{border-color:color-mix(in srgb,var(--kc,#2d3348) 28%,transparent);box-shadow:0 10px 28px rgba(0,0,0,.5),0 0 20px color-mix(in srgb,var(--kc,#000) 8%,transparent)}
+.kpi-ed-head{padding:10px 13px 8px;border-bottom:1px solid rgba(255,255,255,.035);display:flex;justify-content:space-between;align-items:flex-start}
+.kpi-ed-lbl{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#4a5068;line-height:1.3}
+.kpi-ed-id{font-size:8.5px;color:#2d3348;font-weight:600;letter-spacing:.06em;font-family:'Courier New',monospace;flex-shrink:0;margin-left:4px}
+.kpi-ed-body{padding:10px 13px 8px}
+.kpi-ed-num{font-size:34px;font-weight:900;letter-spacing:-.03em;line-height:1;color:var(--kc,#4a5068);text-shadow:0 0 12px color-mix(in srgb,var(--kc,#000) 30%,transparent),0 0 28px color-mix(in srgb,var(--kc,#000) 12%,transparent)}
+.kpi-ed-unit{font-size:12px;color:#4a5068;font-weight:500;margin-left:3px}
+.kpi-ed-row{display:flex;align-items:center;gap:7px;margin-top:6px}
+.kpi-ed-pill{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--kc,#2d3348) 13%,transparent);color:var(--kc,#4a5068);border:1px solid color-mix(in srgb,var(--kc,#2d3348) 22%,transparent);white-space:nowrap}
+.kpi-ed-vs{font-size:9.5px;color:#3b4260;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-ed-foot{background:rgba(0,0,0,.22);padding:7px 13px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.025)}
+.kpi-ed-spark{display:flex;align-items:flex-end;gap:3px;height:20px}
+.kpi-ed-bar{width:5px;border-radius:2px 2px 0 0;background:rgba(255,255,255,.06)}
+.kpi-ed-bar.hi{background:var(--kc,#2d3348);box-shadow:0 0 5px color-mix(in srgb,var(--kc,#000) 45%,transparent)}
+.kpi-ed-period{font-size:9px;color:#3b4260;letter-spacing:.04em}
 /* spinning SVG arc */
 .svg-spin{animation:spin .9s linear infinite;transform-origin:center;display:block}
 /* ── Login overlay — Option C full-bleed illustration ── */
@@ -218,6 +224,18 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .login-guest-note{font-size:10px;color:#2d3348;margin-top:10px;text-align:center;line-height:1.5}
 #userMgmtModal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8888;display:none;align-items:center;justify-content:center}
 #userMgmtModal.open{display:flex}
+#idleWarningModal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;display:none;align-items:center;justify-content:center}
+#idleWarningModal.open{display:flex}
+.idle-card{background:#161c2c;border:1px solid #2d3a58;border-radius:14px;padding:36px 40px;max-width:420px;width:90%;box-shadow:0 28px 90px rgba(0,0,0,.75);text-align:center}
+.idle-icon{font-size:36px;margin-bottom:14px}
+.idle-title{font-size:16px;font-weight:700;color:#e6edf3;margin-bottom:8px}
+.idle-sub{font-size:13px;color:#8b949e;line-height:1.65;margin-bottom:22px}
+.idle-countdown{font-size:28px;font-weight:800;color:#38bdf8;margin-bottom:24px;font-variant-numeric:tabular-nums}
+.idle-btns{display:flex;gap:12px;justify-content:center}
+.idle-stay{background:linear-gradient(135deg,#1d6fa4,#388bfd);border:none;border-radius:7px;color:#fff;font-size:13px;font-weight:700;padding:10px 30px;cursor:pointer;transition:opacity .15s}
+.idle-stay:hover{opacity:.88}
+.idle-out{background:transparent;border:1px solid #30363d;border-radius:7px;color:#8b949e;font-size:13px;font-weight:600;padding:10px 22px;cursor:pointer;transition:border-color .15s,color .15s}
+.idle-out:hover{border-color:#e06c75;color:#e06c75}
 .umg-card{background:#252a3a;border:1px solid #2d3348;border-radius:12px;width:580px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6)}
 .umg-hdr{padding:18px 22px 14px;border-bottom:1px solid #2d3348;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .umg-title{font-size:14px;font-weight:700;color:#f1f0e8}
@@ -256,19 +274,21 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .exp-chk input{accent-color:#f59e0b;cursor:pointer;width:14px;height:14px;flex-shrink:0}
 .exp-note{font-size:10px;color:#7a809a;margin-top:8px;line-height:1.5}
 @media print{
-  .hdr{position:relative!important}
-  .upl-bar{display:none!important}
-  #loginOverlay,#userMgmtModal,#wrongFileModal{display:none!important}
+  .upl-bar{position:relative!important;left:0!important;box-shadow:none!important}
+  .upl-strip{display:none!important}
+  #uplBarSpacer,#dpBarSpacer{display:none!important}
+  #loginOverlay,#userMgmtModal,#wrongFileModal,#idleWarningModal{display:none!important}
   body{min-width:unset!important}
   .row{break-inside:avoid}
   .card,.kpi-card{break-inside:avoid}
 }
 
 /* ── FREE CANVAS LAYOUT ── */
-#dashCanvas,#dpCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
+#dashCanvas,#dpCanvas,#kpiCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
 .cp{position:absolute;box-sizing:border-box;padding:4px}
-.cp>.card,.cp>.kpi-card{width:100%;height:100%;box-sizing:border-box;overflow:auto}
-#dashCanvas.edit-mode,#dpCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
+.cp>.card,.cp>.kpi-card,.cp>.kpi-ed{width:100%;height:100%;box-sizing:border-box;overflow:auto}
+.cp>.kpi-ed{border-radius:0}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#kpiCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
 .cp.editable{cursor:default}.cp.editable:hover{z-index:100}
 .cp-drag{position:absolute;top:0;left:0;right:28px;height:24px;cursor:grab;z-index:20;
   border-radius:8px 8px 0 0;display:flex;align-items:center;padding-left:8px;opacity:0;transition:opacity .2s}
@@ -294,7 +314,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .cp-clone{position:fixed;pointer-events:none;z-index:9999;opacity:.78;border-radius:8px;box-shadow:0 16px 48px rgba(0,0,0,.5)}
 .sg{position:fixed;z-index:9998;pointer-events:none;background:#378ADD;opacity:0;transition:opacity .08s}
 .sg.h{left:0;right:0;height:1px}.sg.v{top:0;bottom:0;width:1px}.sg.on{opacity:1}
-.canvas-mode-bar{display:none;position:fixed;top:52px;left:58px;right:0;z-index:200;
+.canvas-mode-bar{display:none;position:fixed;top:60px;left:58px;right:0;z-index:200;
   padding:10px 20px;font-size:10px;font-weight:600;letter-spacing:.06em;
   text-transform:uppercase;align-items:center;gap:12px;
   background:rgba(14,16,26,.96);border-bottom:2px solid rgba(245,158,11,.55);
@@ -302,18 +322,29 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
   box-shadow:0 4px 24px rgba(0,0,0,.6)}
 .canvas-mode-bar.on{display:flex}
 /* Push canvas content below the edit bar when active */
-#dashCanvas.edit-mode,#dpCanvas.edit-mode{margin-top:36px}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#kpiCanvas.edit-mode{margin-top:36px}
 .cp-span-tip{position:absolute;top:2px;right:30px;font-size:9px;color:var(--accent,#f59e0b);
   opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:none;
   background:rgba(0,0,0,.5);padding:1px 5px;border-radius:3px}
 .cp.editable:hover .cp-span-tip{opacity:.9}
 @media print{.cp-drag,.cp-res,.sg,.canvas-mode-bar{display:none!important}}
 
-/* ── Mobile hamburger (hidden on desktop/tablet) ── */
-.hdr-mob-menu{display:none;align-items:center;justify-content:center;width:32px;height:32px;
-  background:transparent;border:1px solid #2d3348;border-radius:7px;cursor:pointer;flex-shrink:0;padding:0}
-.hdr-mob-menu:hover{background:#252a3a}
-.hdr-mob-menu svg{flex:none}
+/* ── Sidebar: auto-expand on hover (desktop only) ──
+   .drop-open is added by syncSidenavPin() while the Export/Theme
+   submenu is open — keeps the bar expanded until the submenu closes */
+@media (min-width:1025px){
+  /* Add a short delay before collapsing so the shrinking edge
+     doesn't re-trigger :hover as the cursor crosses it */
+  .sidenav{transition:width .25s ease .12s}
+  .sidenav:hover,.sidenav.drop-open{width:278px;transition-delay:0s}
+  .sidenav:hover .snav-lbl,.sidenav.drop-open .snav-lbl{opacity:1;max-width:200px;transition-delay:.12s}
+  .sidenav:hover .sidenav-divider,.sidenav.drop-open .sidenav-divider,
+  .sidenav:hover .sidenav-userinfo,.sidenav.drop-open .sidenav-userinfo{opacity:1;transform:translateY(0);pointer-events:auto}
+  .sidenav:hover .sidenav-userinfo,.sidenav.drop-open .sidenav-userinfo{transition-delay:.18s}
+  /* Suppress tooltips while labels are visible */
+  .sidenav:hover .sidenav-link[data-tip]::after,.sidenav.drop-open .sidenav-link[data-tip]::after,
+  .sidenav:hover .sidenav-signout[data-tip]::after,.sidenav.drop-open .sidenav-signout[data-tip]::after{opacity:0!important;pointer-events:none}
+}
 
 /* ── Mobile bottom tab bar (hidden on desktop/tablet) ── */
 #mobTabBar{display:none;position:fixed;bottom:0;left:0;right:0;height:54px;
@@ -327,13 +358,32 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .mob-tab.active .mob-tab-lbl{color:#38bdf8}
 
 /* ════════════════════════════════════════════════════════
+   SHARED: mobile + tablet  ≤ 1024px
+   Compact top bar; sidebar always icon-only rail
+════════════════════════════════════════════════════════ */
+@media (max-width:1024px){
+  body{min-width:unset}
+
+  /* ── Lock sidebar as 58px icon-only rail, never opens ── */
+  .sidenav{width:58px!important}
+  .sidenav.open{width:58px!important}
+  .sidenav-toggle{display:none!important}       /* hide the expand toggle */
+  .sidenav-backdrop{display:none!important}     /* no backdrop needed */
+
+  /* ── Compact top bar ── */
+  .upl-bar{padding:0 16px 0 14px}
+  .tb-date{margin-right:24px}
+  .tb-logo{height:24px}
+  .upl-strip-status{display:none}
+  .upl-strip{overflow-x:auto;margin-right:10px}
+}
+
+/* ════════════════════════════════════════════════════════
    TABLET  641px – 1024px
 ════════════════════════════════════════════════════════ */
 @media (min-width:641px) and (max-width:1024px){
-  body{min-width:unset}
-
   /* 2-column grid canvas */
-  #dashCanvas,#dpCanvas{
+  #dashCanvas,#dpCanvas,#kpiCanvas{
     display:grid!important;grid-template-columns:1fr 1fr!important;
     align-content:start!important;width:auto!important;height:auto!important;
     min-height:unset!important;padding:10px 10px 40px!important;gap:8px!important;
@@ -341,7 +391,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 
   .cp{position:relative!important;left:auto!important;top:auto!important;
     width:auto!important;height:auto!important;min-height:200px}
-  .cp>.card,.cp>.kpi-card{height:auto!important;overflow:visible!important}
+  .cp>.card,.cp>.kpi-card,.cp>.kpi-ed{height:auto!important;overflow:visible!important}
 
   /* Full-width panels */
   .cp[data-id="rfiPeriod"]{grid-column:span 2}
@@ -352,42 +402,25 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
    MOBILE  ≤ 640px
 ════════════════════════════════════════════════════════ */
 @media (max-width:640px){
-  body{min-width:unset;overflow-x:hidden}
-  #app{margin-left:0}
+  body{overflow-x:hidden}
 
-  /* Sidenav: off-screen drawer, slides in */
-  .sidenav{transform:translateX(-100%);width:240px;box-shadow:none;
-    transition:transform .3s ease,box-shadow .3s ease}
-  .sidenav.open{transform:translateX(0);width:240px;box-shadow:8px 0 32px rgba(0,0,0,.6)}
-  /* Labels always visible inside the drawer */
-  .sidenav .snav-lbl{opacity:1;max-width:200px}
-  .sidenav .sidenav-link{padding:11px 22px;justify-content:flex-start;gap:10px}
-  .sidenav .sidenav-signout{margin:6px 14px 16px;padding:11px 14px;justify-content:flex-start}
-  .sidenav .sidenav-divider,.sidenav .sidenav-userinfo{opacity:1;transform:none;pointer-events:auto;display:flex}
-
-  /* Backdrop covers full screen on mobile */
-  .sidenav-backdrop{left:0}
-
-  /* Header: full-width, show hamburger */
-  .hdr{padding:8px 12px}
-  .hdr-mob-menu{display:flex}
-
-  /* Upload bar: full-width */
-  .upl-bar{left:0}
-
-  /* Canvas mode bar: full-width */
-  .canvas-mode-bar{left:0}
+  /* Minimal top bar: icons + logo only */
+  .tb-date{display:none}
+  .tb-title{margin-right:10px}
+  .tb-title .hdr-sub{display:none}
+  .tb-title .hdr-title{font-size:12px}
+  .tb-logo{height:20px}
 
   /* Single-column stacked canvas */
-  #dashCanvas,#dpCanvas{
+  #dashCanvas,#dpCanvas,#kpiCanvas{
     display:flex!important;flex-direction:column!important;
     width:auto!important;height:auto!important;min-height:unset!important;
-    padding:8px 8px 80px!important;gap:8px!important;
+    padding:8px 8px 72px!important;gap:8px!important;
     background-image:none!important}
 
   .cp{position:relative!important;left:auto!important;top:auto!important;
     width:100%!important;height:auto!important;min-height:160px}
-  .cp>.card,.cp>.kpi-card{height:auto!important;overflow:visible!important}
+  .cp>.card,.cp>.kpi-card,.cp>.kpi-ed{height:auto!important;overflow:visible!important}
 
   /* Show mobile tab bar */
   #mobTabBar{display:flex}
@@ -523,7 +556,15 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
         <div style="margin-top:4px;color:#484f58">Change your password after first login via User Management.</div>
       </div>
       <div class="login-field"><label class="login-lbl" for="loginUser">Username</label><input class="login-inp" id="loginUser" type="text" placeholder="Enter username" autocomplete="username"></div>
-      <div class="login-field"><label class="login-lbl" for="loginPass">Password</label><input class="login-inp" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password"></div>
+      <div class="login-field">
+        <label class="login-lbl" for="loginPass">Password</label>
+        <div style="position:relative">
+          <input class="login-inp" id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password" style="padding-right:38px">
+          <button type="button" id="loginPassToggle" onclick="toggleLoginPass()" style="position:absolute;right:0;top:0;bottom:0;width:38px;background:none;border:none;cursor:pointer;color:#4a5068;display:flex;align-items:center;justify-content:center;transition:color .15s" onmouseover="this.style.color='#7a809a'" onmouseout="this.style.color='#4a5068'">
+            <svg id="loginPassEye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="12" rx="4" ry="2.8"/><path d="M2 12c2.5-5 5.5-7.5 10-7.5s7.5 2.5 10 7.5c-2.5 5-5.5 7.5-10 7.5S4.5 17 2 12z"/></svg>
+          </button>
+        </div>
+      </div>
       <button class="login-btn" id="loginBtn" onclick="attemptLogin()">Sign In</button>
       <div class="login-err" id="loginErr"></div>
       <div class="login-divider">or</div>
@@ -579,6 +620,20 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
     <button onclick="document.getElementById('wrongFileModal').style.display='none'"
       style="margin-top:20px;background:linear-gradient(135deg,#1d6fa4,#388bfd);border:none;border-radius:6px;
              color:#fff;font-size:13px;font-weight:600;padding:9px 28px;cursor:pointer">OK</button>
+  </div>
+</div>
+
+<!-- IDLE WARNING MODAL -->
+<div id="idleWarningModal">
+  <div class="idle-card">
+    <div class="idle-icon">⏱️</div>
+    <div class="idle-title">Still there?</div>
+    <div class="idle-sub">You've been inactive for 20 minutes.<br>You'll be signed out automatically in:</div>
+    <div class="idle-countdown" id="idleCountdown">2:00</div>
+    <div class="idle-btns">
+      <button class="idle-stay" onclick="idleStaySignedIn()">Stay Signed In</button>
+      <button class="idle-out" onclick="logout()">Sign Out Now</button>
+    </div>
   </div>
 </div>
 
@@ -651,6 +706,10 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
     <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="2.5" stroke="#00ff9d" stroke-width="1.4"/><path d="M4 19c0-3 2.2-5 5-5s5 2 5 5" stroke="#00ff9d" stroke-width="1.4" stroke-linecap="round"/><circle cx="17" cy="8" r="1.8" stroke="#00ff9d" stroke-width="1.2" opacity=".7"/></svg>
     <span class="mob-tab-lbl">Manpower</span>
   </button>
+  <button class="mob-tab" data-view="kpi" onclick="switchView('kpi')">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V14" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/><path d="M9 20V9" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/><path d="M14 20V12" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/><path d="M19 20V5" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/><path d="M4 14l5-5 5 3 5-7" stroke="#f97416" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg>
+    <span class="mob-tab-lbl">KPIs</span>
+  </button>
   <button class="mob-tab" data-view="export" onclick="openExportOptions()">
     <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v11" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round"/><path d="M8 10l4 4 4-4" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/></svg>
     <span class="mob-tab-lbl">Export</span>
@@ -658,7 +717,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 </div>
 <!-- Single multi-file input for bulk upload -->
 <input type="file" id="fileMulti"  accept=".xlsx,.xls" multiple style="display:none">
-<!-- Single-file input for individual slot re-upload (data-key set dynamically) -->
+<!-- Single-file input for per-dataset upload via status dots (data-key set by uploadSlot) -->
 <input type="file" id="fileSingle" accept=".xlsx,.xls" style="display:none">
 
 <script>
@@ -673,6 +732,7 @@ function toggleSidenav(force){
     if(document.activeElement&&nav.contains(document.activeElement)) document.activeElement.blur();
     const ed=document.getElementById('exportDrop'); if(ed) ed.style.display='none';
     const sd=document.getElementById('schemeDropdown'); if(sd) sd.style.display='none';
+    nav.classList.remove('drop-open');
   }
 }
 
@@ -712,15 +772,14 @@ const ST = {
   files: {
     rfi:'', daily1:'', daily2:'', daily3:'', welders:'', sor:'', ncr:'', deployment:''
   },
-  dpMonth: null,  // selected month on deployment page (YYYY-MM)
+  dpMonths: null, // selected months on deployment page (array of YYYY-MM)
   errors: {},
   processing: {}
 };
 
 const CHARTS = {};
 const fn = v => (v == null || v === '') ? '—' : Number(v).toLocaleString();
-const pct = (n,d) => d ? (n/d*100).toFixed(2)+'%' : '—';
-const sumK = (rows,keys) => keys.reduce((t,k)=>({...t,[k]:rows.reduce((s,r)=>s+(+r[k]||0),0)}),{});
+const sumK = (rows,keys)=>{ const t={}; keys.forEach(k=>t[k]=rows.reduce((a,r)=>a+(+r[k]||0),0)); return t; };
 
 // ═══════════════════════════════════════════════════
 // DATE HELPERS
@@ -801,6 +860,9 @@ function parseDaily(ab){
       fjcAccepted:n(r[24]),
       fjcRepair:  n(r[25]),
       fjcBalance: n(r[26]),
+      // TODO: confirm column indices for coating data in the daily sheet
+      coatTotal:    n(r[27]),
+      coatRejected: n(r[28]),
     });
   }
   return rows;
@@ -1358,107 +1420,71 @@ const UPL_ICONS={
   spin:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="svg-spin"><circle cx="12" cy="12" r="9" stroke="#1e2940" stroke-width="1.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/></svg>`,
 };
 
+// Open the single-file picker for one dataset (status-dot click)
+function uploadSlot(key){
+  const si=document.getElementById('fileSingle');
+  if(!si) return;
+  si.dataset.key=key;
+  si.click();
+}
+
 function bUploadBar(){
   const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
-  if(isViewer) return '';
+  if(isViewer) return bTopBar('');
 
-  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
   const loadedCount=Object.values(ST.data).filter(v=>v!==null).length;
   const anyProcessing=Object.values(ST.processing).some(v=>v);
   const hasRFI=!!ST.data.rfi;
   const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
   const isEditing=!!EDIT_MODE;
-
-  // ── Dataset cards ──
-  const cardsHtml=SLOT_DEFS.map(s=>{
-    const loaded=ST.data[s.key]!==null;
-    const processing=ST.processing[s.key];
-    const errMsg=ST.errors[s.key];
-    const unsaved=loaded&&ST.unsaved.has(s.key);
-    const isWrongFile=errMsg&&errMsg.startsWith('WRONG_FILE|');
-    const rowCount=loaded&&Array.isArray(ST.data[s.key])?fn(ST.data[s.key].length)+' rows':loaded?'loaded':'';
-    const fname=ST.files[s.key]?ST.files[s.key].split('/').pop().split('\\').pop():'';
-    let errDisplay='',errTitle='';
-    if(isWrongFile){const p=errMsg.split('|');errDisplay='Wrong file';errTitle=`Expected: ${p[1]||''} — Got: ${(p[2]||'').split('/').pop()}`;}
-    else if(errMsg){errDisplay=errMsg.slice(0,22);errTitle=errMsg;}
-    const stateClass=errMsg?'err':unsaved?'unsaved':loaded?'ok':'empty';
-    const icon=processing?UPL_ICONS.spin:unsaved?UPL_ICONS.warn:loaded?UPL_ICONS.check:errMsg?UPL_ICONS.err:'';
-    return`<div class="upl-card ${stateClass}" id="slot_${s.key}" data-key="${s.key}"
-      title="${loaded?fname+(unsaved?' — UNSAVED':' — click to replace'):errTitle||'Click to upload'}">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
-        <span class="upl-card-name">${s.label}</span>
-        <span style="flex-shrink:0">${icon}</span>
-      </div>
-      ${rowCount?`<div class="upl-card-rows">${rowCount}${unsaved?' · unsaved':''}</div>`:''}
-      ${errMsg&&!loaded?`<div class="upl-card-rows" style="color:#f43f5e">${errDisplay}</div>`:''}
-    </div>`;
-  }).join('');
-
-  const errHtml=Object.entries(ST.errors).filter(([,v])=>v).map(([k,v])=>`<span class="upl-err-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" style="display:inline-block;vertical-align:middle;margin-right:3px"><path d="M10.5 4.2L2.7 18a1.7 1.7 0 0 0 1.5 2.5h15.6a1.7 1.7 0 0 0 1.5-2.5L13.5 4.2a1.7 1.7 0 0 0-3 0z" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9.5" x2="12" y2="13.5" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="#fbbf24"/></svg>${k}: ${v}</span>`).join('');
-
   const anyUnsaved=ST.unsaved.size>0;
 
-  // ── Collapsed strip ──
-  const stripUploadStyle=`background:rgba(245,158,11,.15);color:#f59e0b`;
-  const stripGhostStyle=`background:rgba(255,255,255,.06);color:#6b7280`;
-  const stripDangerStyle=`background:rgba(244,63,94,.1);color:#f87171`;
+  // Upload errors → one warning chip with a tooltip listing them
+  const errList=Object.entries(ST.errors).filter(([,v])=>v).map(([k,v])=>{
+    if(v.startsWith('WRONG_FILE|')){const p=v.split('|');return`${k}: wrong file — expected ${p[1]||''}, got ${(p[2]||'').split('/').pop()}`;}
+    return`${k}: ${v}`;
+  });
 
-  return`<div class="upl-bar" id="uplBarWrap">
+  // One status dot per dataset: green = loaded · amber = loaded but unsaved · grey = empty.
+  // Click = upload/replace just that dataset (single-file picker via uploadSlot).
+  const dots=SLOT_DEFS.map(s=>{
+    const loaded=ST.data[s.key]!==null;
+    const unsaved=loaded&&ST.unsaved.has(s.key);
+    const fname=ST.files[s.key]?ST.files[s.key].split('/').pop().split('\\').pop():'';
+    const tip=`${s.label} — ${loaded?(fname||'loaded')+(unsaved?' · UNSAVED':'')+' · click to replace':'not loaded · click to upload'}`;
+    return`<span class="upl-dot ${unsaved?'unsaved':loaded?'ok':''}" data-tip="${tip}" onclick="uploadSlot('${s.key}')"></span>`;
+  }).join('');
 
-    <!-- ── Expanded panel ── -->
-    <div class="upl-expanded">
-      <div class="upl-actions-col">
-        <button id="btnUploadAll" class="upl-btn upl-btn-primary" onclick="document.getElementById('fileMulti').click()" ${anyProcessing?'disabled':''}>
-          ${UPL_ICONS.upload} ${anyProcessing?'Processing…':'Upload All'}
-        </button>
-        <button id="btnSave" class="upl-btn upl-btn-ghost" onclick="saveAllToDB()" ${!anyUnsaved?'disabled':''}
-          style="${anyUnsaved?`color:#14b8a6;border-color:rgba(20,184,166,.35);background:rgba(20,184,166,.08)`:''}">
-          ${UPL_ICONS.save} Save
-        </button>
-        <div style="display:flex;gap:5px">
-          <button id="btnClearFiles" class="upl-btn upl-btn-danger" onclick="clearAllFiles()" ${!loadedCount?'disabled':''} style="flex:1">
-            ${UPL_ICONS.trash} Clear
-          </button>
-          <button class="upl-btn upl-btn-ghost" onclick="clearPeriod()" ${!hasRFI?'disabled':''} style="flex:1">
-            ${UPL_ICONS.calX} Period
-          </button>
-          ${isSA?`<button id="btnEdit" class="upl-btn upl-btn-ghost" onclick="toggleEditMode()" style="flex:1;${isEditing?'color:#f59e0b;border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)':''}">
-            ${UPL_ICONS.layout} ${isEditing?'Exit Edit':'Edit Layout'}
-          </button>`:''}
-        </div>
-      </div>
-      <div class="upl-vsep"></div>
-      <div class="upl-cards">${cardsHtml}</div>
-    </div>
-
-    <!-- ── Collapsed strip ── -->
-    <div class="upl-strip">
-      <button class="upl-strip-btn" onclick="document.getElementById('fileMulti').click()" style="${stripUploadStyle}" title="Upload All Files" ${anyProcessing?'disabled':''}>
-        ${UPL_ICONS.upload}
-      </button>
-      <button class="upl-strip-btn" onclick="saveAllToDB()" style="${anyUnsaved?`background:rgba(20,184,166,.1);color:#14b8a6`:'background:rgba(255,255,255,.05);color:#374151'}" title="Save" ${!anyUnsaved?'disabled':''}>
-        ${UPL_ICONS.save}
-      </button>
-      <button class="upl-strip-btn" onclick="clearAllFiles()" style="${stripDangerStyle}" title="Clear Dashboard" ${!loadedCount?'disabled':''}>
-        ${UPL_ICONS.trash}
-      </button>
-      <button class="upl-strip-btn" onclick="clearPeriod()" style="${stripGhostStyle}" title="Clear Period" ${!hasRFI?'disabled':''}>
-        ${UPL_ICONS.calX}
-      </button>
-      ${isSA?`<div class="upl-strip-sep"></div>
-      <button class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
-        ${UPL_ICONS.layout}
-      </button>`:''}
-    </div>
-
-    ${errHtml?`<div class="upl-err-row">${errHtml}</div>`:''}
-  </div>`;
+  return bTopBar(`
+    <button class="upl-strip-btn" onclick="document.getElementById('fileMulti').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="Upload All Files" ${anyProcessing?'disabled':''}>
+      ${anyProcessing?UPL_ICONS.spin:UPL_ICONS.upload}
+    </button>
+    <div class="upl-dots">${dots}</div>
+    <button id="btnSave" class="upl-strip-btn" onclick="saveAllToDB()" style="${anyUnsaved?`background:rgba(20,184,166,.1);color:#14b8a6`:'background:rgba(255,255,255,.05);color:#374151'}" title="Save" ${!anyUnsaved?'disabled':''}>
+      ${UPL_ICONS.save}
+    </button>
+    <button id="btnClearFiles" class="upl-strip-btn" onclick="clearAllFiles()" style="background:rgba(244,63,94,.1);color:#f87171" title="Clear Dashboard" ${!loadedCount?'disabled':''}>
+      ${UPL_ICONS.trash}
+    </button>
+    <button class="upl-strip-btn" onclick="clearPeriod()" style="background:rgba(255,255,255,.06);color:#6b7280" title="Clear Period" ${!hasRFI?'disabled':''}>
+      ${UPL_ICONS.calX}
+    </button>
+    ${isSA?`<div class="upl-strip-sep"></div>
+    <button id="btnEdit" class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
+      ${UPL_ICONS.layout}
+    </button>`:''}
+    ${errList.length?`<div class="upl-strip-sep"></div>
+    <span class="upl-strip-btn" style="background:rgba(244,63,94,.12);color:#f43f5e;cursor:help" title="${errList.join('&#10;')}">${UPL_ICONS.err}</span>`:''}
+  `);
 }
 
 // ═══════════════════════════════════════════════════
-// HEADER
+// TOP BAR — single fixed bar, REQUIRED on every page
+// Title · page action strip · date selector · ENPPI logo.
+// Pages emit bTopBar(stripHtml) (directly or via bUploadBar/bDeployBar)
+// followed by a spacer div (#uplBarSpacer / #dpBarSpacer).
 // ═══════════════════════════════════════════════════
-function bHeader(){
+function bTopBar(stripHtml){
   const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
   const isAdmin=!isViewer; // superadmin + admin both get controls
 
@@ -1471,19 +1497,20 @@ function bHeader(){
         <input type="date" id="dStart" class="d-inp" value="${ST.start}" title="Period start date">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="5" y1="12" x2="19" y2="12" stroke="#475569" stroke-width="1.8" stroke-linecap="round"/><path d="M14 7l5 5-5 5" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <input type="date" id="dEnd"   class="d-inp" value="${ST.end}"   title="Period end date">
-        <span class="filter-tag live">Period filter active</span>
       </div>`
     : `<div style="font-size:11px;color:#8b949e;padding:4px 10px;background:#0d1117;border:1px solid #21262d;border-radius:6px">
         Reporting Duration &nbsp;From: <span style="color:#e6edf3;font-family:monospace">${fmtDisp(ST.start)}</span>
         &nbsp;To: <span style="color:#e6edf3;font-family:monospace">${fmtDisp(ST.end)}</span>
       </div>`;
 
-  return`<div class="hdr">
-    <button class="hdr-mob-menu" onclick="toggleSidenav()" aria-label="Open menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.7" stroke-linecap="round" width="18" height="18"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/></svg>
-    </button>
-    <div><div class="hdr-title">WEEKLY QA/QC DASHBOARD</div><div class="hdr-sub">P30312 — WEST TO EAST PIPELINE PROJECT</div></div>
-    ${dateSection}
+  return`<div class="upl-bar">
+    <div class="tb-title">
+      <div class="hdr-title">WEEKLY QA/QC DASHBOARD</div>
+      <div class="hdr-sub">P30312 — WEST TO EAST PIPELINE PROJECT</div>
+    </div>
+    <div class="upl-strip">${stripHtml}</div>
+    <div class="tb-date">${dateSection}</div>
+    <img class="tb-logo" src="Enppi_Logo.png" alt="ENPPI">
   </div>`;
 }
 
@@ -1535,6 +1562,7 @@ function bSidenavExtra(){
 
   const isDash=APP_VIEW==='dashboard';
   const isDep=APP_VIEW==='deployment';
+  const isKPI=APP_VIEW==='kpi';
   return `
     <!-- Page Navigation -->
     <button class="sidenav-link snav-pipeline${isDash?' snav-active':''}" data-tip="Pipeline Dashboard" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('dashboard')">
@@ -1550,7 +1578,8 @@ function bSidenavExtra(){
       <span class="snav-lbl">Pipeline Dashboard</span>
     </button>
 
-    <button class="sidenav-link snav-stations" data-tip="Stations Dashboard — coming soon" style="width:100%;background:none;border:none" disabled>
+    ${isSA?`
+    <button class="sidenav-link snav-stations" data-tip="Stations Dashboard — SA preview" style="width:100%;background:none;border:none;cursor:not-allowed;opacity:.5" disabled>
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
         <rect x="3" y="3" width="5" height="5" rx="1" stroke="#c084fc" stroke-width="1.4"/>
         <rect x="9.5" y="3" width="5" height="5" rx="1" stroke="#c084fc" stroke-width="1.4" opacity=".6"/>
@@ -1565,8 +1594,20 @@ function bSidenavExtra(){
         <line x1="5.5" y1="8" x2="5.5" y2="16" stroke="#c084fc" stroke-width="1" opacity=".3"/>
         <line x1="18.5" y1="8" x2="18.5" y2="16" stroke="#c084fc" stroke-width="1" opacity=".3"/>
       </svg>
-      <span class="snav-lbl">Stations Dashboard <span style="font-size:9px;font-weight:600;letter-spacing:.04em;opacity:.7">· soon</span></span>
+      <span class="snav-lbl">Stations Dashboard <span style="font-size:9px;font-weight:600;letter-spacing:.04em;opacity:.7">· SA only</span></span>
     </button>
+
+    <button class="sidenav-link snav-kpi${isKPI?' snav-active':''}" data-tip="Quality KPIs — SA preview" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('kpi')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
+        <path d="M4 20V14" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M9 20V9"  stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M14 20V12" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M19 20V5"  stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M4 14l5-5 5 3 5-7" stroke="#f97416" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/>
+      </svg>
+      <span class="snav-lbl">Quality KPIs <span style="font-size:9px;font-weight:600;letter-spacing:.04em;opacity:.7">· SA only</span></span>
+    </button>
+    `:''}
 
     <button class="sidenav-link snav-manpower${isDep?' snav-active':''}" data-tip="Manpower Deployment" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('deployment')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
@@ -1751,74 +1792,31 @@ function getPeriodKPIs(){
 let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment'
 
 function switchView(v){
+  // SA-only pages: block non-SA users even if called directly
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  if((v==='kpi')&&!isSA) return;
   APP_VIEW = v;
   toggleSidenav(false);
   render();
   updateMobTabBar();
 }
 function updateMobTabBar(){
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
   document.querySelectorAll('#mobTabBar .mob-tab').forEach(t=>{
     t.classList.toggle('active', t.dataset.view===APP_VIEW);
+    // Hide SA-only tabs from non-SA users
+    if(t.dataset.view==='kpi') t.style.display=isSA?'':'none';
   });
 }
 
 // ═══════════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════════
-// ── Generic collapsible bar controller ──
-// Each page calls initCollapsibleBar(barId, spacerId, stateKey)
-// stateKey keeps collapse state across re-renders per page independently.
-const _barCollapseState={};
-
-function initCollapsibleBar(barId, spacerId, stateKey){
-  const bar=document.getElementById(barId);
-  const spacer=document.getElementById(spacerId);
-  if(!bar) return;
-
-  const collapsed=!!_barCollapseState[stateKey];
-  const collapsedH=44;
-
-  // Measure natural expanded height
-  bar.style.height='';
-  bar.classList.remove('collapsed');
-  const expandedH=bar.scrollHeight;
-
-  // Apply saved state
-  if(collapsed){
-    bar.style.height=collapsedH+'px';
-    bar.classList.add('collapsed');
-  } else {
-    bar.style.height=expandedH+'px';
-  }
-  if(spacer) spacer.style.height=expandedH+'px';
-
-  function setCollapsed(yes){
-    if(yes===_barCollapseState[stateKey]) return;
-    _barCollapseState[stateKey]=yes;
-    bar.style.height=(yes?collapsedH:expandedH)+'px';
-    bar.classList.toggle('collapsed',yes);
-  }
-
-  // Collapse exactly when the spacer bottom (= bottom of expanded bar) scrolls past the bar bottom.
-  // threshold = expandedH - collapsedH: at this scroll position the first panel top touches the bar.
-  const threshold = expandedH - collapsedH;
-  const listenerKey='_barScrollFn_'+stateKey;
-  if(window[listenerKey]) window.removeEventListener('scroll',window[listenerKey],{passive:true});
-  window[listenerKey]=()=>{
-    const sy=window.scrollY||document.documentElement.scrollTop;
-    if(sy >= threshold + 2) setCollapsed(true);
-    else if(sy <= threshold - 2) setCollapsed(false);
-  };
-  window.addEventListener('scroll',window[listenerKey],{passive:true});
-}
-
-function initUploadBarScroll(){ initCollapsibleBar('uplBarWrap','uplBarSpacer','dash'); }
-function initDPBarScroll(){ initCollapsibleBar('dpBarWrap','dpBarSpacer','dp'); }
-
 function render(){
   Object.values(CHARTS).forEach(c=>{try{c.destroy();}catch(e){}});
   Object.keys(CHARTS).forEach(k=>delete CHARTS[k]);
   if(APP_VIEW==='deployment'){ ACTIVE_CANVAS_ID='dpCanvas'; renderDeployment(); return; }
+  if(APP_VIEW==='kpi'){ ACTIVE_CANVAS_ID='kpiCanvas'; renderKPI(); return; }
   ACTIVE_CANVAS_ID='dashCanvas';
 
   const rfiData=getRFIData();
@@ -1834,10 +1832,6 @@ function render(){
   const sorRecs=ST.data.sor;
   const ncrRecs=ST.data.ncr;
 
-  // Use FJC defaults if no daily data
-  const fjcPeriodRows = fjcPeriod;
-  const fjcCumRows = fjcCum;
-
   // Build all panel HTML strings
   const PANELS_HTML = {
     rfiPeriod:   bRFITable(rfiData.period?.rows||null, rfiData.period?.totals||null, 'Period RFI Status', rfiLive),
@@ -1845,8 +1839,8 @@ function render(){
     rfiCumul:    bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive),
     ndtPeriod:   bNDTTable(ndtPeriod, 'Period NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:pWeldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:pNdtBacklog,goal:pNdtBacklogGoal,unit:''}]),
     ndtCumul:    bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:weldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:ndtBacklog,goal:ndtBacklogGoal,unit:''}]),
-    fjcPeriod:   bFJCTable(fjcPeriodRows, 'Period FJC Status', dailyLive, [{label:'FJC Repair Rate',value:pFjcRepair,goal:1,unit:'%'}]),
-    fjcCumul:    bFJCTable(fjcCumRows, 'Cumulative FJC Status', dailyLive, [{label:'FJC Repair Rate',value:fjcRepair,goal:1,unit:'%'}]),
+    fjcPeriod:   bFJCTable(fjcPeriod, 'Period FJC Status', dailyLive, [{label:'FJC Repair Rate',value:pFjcRepair,goal:1,unit:'%'}]),
+    fjcCumul:    bFJCTable(fjcCum, 'Cumulative FJC Status', dailyLive, [{label:'FJC Repair Rate',value:fjcRepair,goal:1,unit:'%'}]),
     welders:     bWelderChart(welderData),
     progress:    bProgress(dailyLive),
     ncrTable:    bNCRTable(ncrRecs, !!ncrRecs),
@@ -1855,9 +1849,8 @@ function render(){
     sorScatter:  bSORScatter(),
   };
 
-  // Render header + upload bar into app
+  // Render top bar into app
   document.getElementById('app').innerHTML=`
-    ${bHeader()}
     ${bUploadBar()}
     <div id="uplBarSpacer"></div>
     <div id="dashCanvas"></div>
@@ -1877,8 +1870,6 @@ function render(){
   bindEvents();
   // Re-apply edit mode if active
   if(EDIT_MODE) activateEditMode();
-  // Init collapsible upload bar
-  initUploadBarScroll();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1906,7 +1897,8 @@ function renderDeployment(){
   // ── Viewer / Guest: mobilization table only ──────────────────
   if(isViewer){
     document.getElementById('app').innerHTML=`
-      ${bHeader()}
+      ${bTopBar('')}
+      <div id="dpBarSpacer"></div>
       ${bViewerMonthStrip(sc, dep)}
       <div style="height:calc(100vh - 110px);overflow:auto;padding:10px 14px 20px">
         ${bPersonnelTable(sc, dep)}
@@ -1919,8 +1911,7 @@ function renderDeployment(){
   }
 
   document.getElementById('app').innerHTML=`
-    ${bHeader()}
-    ${bDeployBar(sc, dep, isViewer)}
+    ${bDeployBar(sc, dep)}
     <div id="dpBarSpacer"></div>
     <div id="dpCanvas"></div>
   `;
@@ -1944,7 +1935,6 @@ function renderDeployment(){
   bindDeploymentEvents();
   if(dep) initDeploymentCharts(dep, sc);
   if(EDIT_MODE) activateEditMode();
-  initDPBarScroll();
 }
 
 function dpStatus(planVal, actualVal, monthStr){
@@ -1994,8 +1984,8 @@ function getDpMonthLabel(){
 function updateDpCtrlLabel(){
   const lbl=getDpMonthLabel();
   const cnt=(ST.dpMonths||[]).length+' selected';
-  ['dpMonthLabel','dpMonthLabelExp'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=lbl;});
-  ['dpMonthCount','dpMonthCountExp'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=cnt;});
+  const lblEl=document.getElementById('dpMonthLabel'); if(lblEl) lblEl.textContent=lbl;
+  const cntEl=document.getElementById('dpMonthCount'); if(cntEl) cntEl.textContent=cnt;
 }
 function dpMonthToggle(m, checked){
   if(!ST.dpMonths) ST.dpMonths=[];
@@ -2024,7 +2014,7 @@ function toggleDpMonthDrop(btn){
   if(!dep) return;
   const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
   const selMs=ST.dpMonths||[];
-  if(!btn) btn=document.getElementById('dpMonthDropBtn')||document.getElementById('dpMonthDropBtnExp');
+  if(!btn) btn=document.getElementById('dpMonthDropBtn');
   if(!btn) return;
   // Snapshot selection so click-outside/scroll can discard without re-render
   const _snapshot=[...selMs];
@@ -2090,88 +2080,40 @@ function bViewerMonthStrip(sc, dep){
   </div>`;
 }
 
-function bDeployBar(sc, dep, isViewer){
-  if(isViewer) return '';
+function bDeployBar(sc, dep){
   const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
   const isEditing=!!EDIT_MODE;
   const loaded=!!dep;
   const fname=ST.files.deployment?ST.files.deployment.split('/').pop().split('\\').pop():'';
   const statusColor=loaded?sc.good:sc.faint;
-  const statusTxt=loaded?`✓ ${fname} · ${dep.plan.length} plan · ${dep.actual.length} actual`:'No file loaded';
-  const selMs=ST.dpMonths||[];
   const periodLabel=getDpMonthLabel();
-  const periodN=selMs.length;
+  const periodN=(ST.dpMonths||[]).length;
 
-  return`<div class="upl-bar" id="dpBarWrap">
-
-    <!-- ── Expanded panel ── -->
-    <div class="upl-expanded">
-      <div class="upl-actions-col">
-        <button class="upl-btn upl-btn-primary" onclick="document.getElementById('dpFileInput').click()">
-          ${UPL_ICONS.upload} ${loaded?'Replace File':'Upload EPCM'}
-        </button>
-        <div style="display:flex;gap:5px">
-          ${loaded?`<button class="upl-btn upl-btn-danger" onclick="clearDeployment()" style="flex:1;font-size:10px">
-            ${UPL_ICONS.trash} Clear
-          </button>`:''}
-          ${isSA?`<button id="btnEditDP" class="upl-btn upl-btn-ghost" onclick="toggleEditMode()" style="flex:1;${isEditing?'color:#f59e0b;border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)':''}">
-            ${UPL_ICONS.layout} ${isEditing?'Exit Edit':'Edit Layout'}
-          </button>`:''}
-        </div>
-      </div>
-      <div class="upl-vsep"></div>
-      <div style="display:flex;flex-direction:column;justify-content:center;gap:4px;flex:1">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};text-transform:uppercase">EPCM Deployment</div>
-        <div style="font-size:11px;font-weight:600;color:${statusColor}">${statusTxt}</div>
-      </div>
-      ${loaded?`<div class="upl-vsep"></div>
-      <div style="display:flex;flex-direction:column;justify-content:center;gap:6px;padding:0 4px">
-        <span style="font-size:10px;font-weight:700;letter-spacing:.06em;color:${sc.muted};text-transform:uppercase">Analysis Period</span>
-        <div style="display:flex;align-items:center;gap:8px">
-          <button id="dpMonthDropBtnExp" onclick="toggleDpMonthDrop(this)"
-            style="display:flex;align-items:center;gap:8px;background:${sc.bg};border:1px solid ${sc.border};border-radius:6px;
-                   color:${sc.text};font-size:11px;padding:5px 12px;cursor:pointer;min-width:160px">
-            <span id="dpMonthLabelExp" style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${periodLabel}</span>
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="flex-shrink:0"><path d="M1 3l4 4 4-4" stroke="${sc.muted}" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </button>
-          <span id="dpMonthCountExp" style="font-size:10px;color:${periodN?sc.accent:sc.faint};font-weight:600;white-space:nowrap">${periodN} selected</span>
-        </div>
-      </div>`:''}
-    </div>
-
-    <!-- ── Status row ── -->
-    <div class="upl-status-row">
-      <span style="font-size:9.5px;color:${sc.faint}">Manpower Deployment Status — EPCM Personnel</span>
-    </div>
-
-    <!-- ── Collapsed strip ── -->
-    <div class="upl-strip">
-      <button class="upl-strip-btn" onclick="document.getElementById('dpFileInput').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="${loaded?'Replace EPCM File':'Upload EPCM File'}">
-        ${UPL_ICONS.upload}
-      </button>
-      ${loaded?`<button class="upl-strip-btn" onclick="clearDeployment()" style="background:rgba(244,63,94,.1);color:#f87171" title="Clear Deployment">
-        ${UPL_ICONS.trash}
-      </button>`:''}
-      ${isSA?`<div class="upl-strip-sep"></div>
-      <button class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
-        ${UPL_ICONS.layout}
-      </button>`:''}
-      <div class="upl-strip-sep"></div>
-      <div class="upl-strip-status">
-        <span style="color:${statusColor}">${loaded?`✓ ${fname}`:'No file loaded'}</span>
-      </div>
-      ${loaded?`<div class="upl-strip-sep"></div>
-      <span style="font-size:9.5px;color:#6b7280;font-weight:600;white-space:nowrap;padding:0 2px">Period:</span>
-      <button id="dpMonthDropBtn" onclick="toggleDpMonthDrop(this)"
-        style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:5px;
-               color:#d1d5db;font-size:10px;padding:3px 10px;cursor:pointer;height:28px;max-width:220px">
-        <span id="dpMonthLabel" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${periodLabel}</span>
-        <svg width="9" height="9" viewBox="0 0 10 10" fill="none" style="flex-shrink:0"><path d="M1 3l4 4 4-4" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </button>
-      <span id="dpMonthCount" style="font-size:9.5px;color:${periodN?'#f59e0b':'#6b7280'};font-weight:600;white-space:nowrap">${periodN} selected</span>`:''}
+  return bTopBar(`
+    <button class="upl-strip-btn" onclick="document.getElementById('dpFileInput').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="${loaded?'Replace EPCM File':'Upload EPCM File'}">
+      ${UPL_ICONS.upload}
+    </button>
+    ${loaded?`<button class="upl-strip-btn" onclick="clearDeployment()" style="background:rgba(244,63,94,.1);color:#f87171" title="Clear Deployment">
+      ${UPL_ICONS.trash}
+    </button>`:''}
+    ${isSA?`<div class="upl-strip-sep"></div>
+    <button id="btnEdit" class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
+      ${UPL_ICONS.layout}
+    </button>`:''}
+    ${loaded?`<div class="upl-strip-sep"></div>
+    <span style="font-size:9.5px;color:#6b7280;font-weight:600;white-space:nowrap;padding:0 2px">Period:</span>
+    <button id="dpMonthDropBtn" onclick="toggleDpMonthDrop(this)"
+      style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:5px;
+             color:#d1d5db;font-size:10px;padding:3px 10px;cursor:pointer;height:28px;max-width:220px">
+      <span id="dpMonthLabel" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${periodLabel}</span>
+      <svg width="9" height="9" viewBox="0 0 10 10" fill="none" style="flex-shrink:0"><path d="M1 3l4 4 4-4" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <span id="dpMonthCount" style="font-size:9.5px;color:${periodN?'#f59e0b':'#6b7280'};font-weight:600;white-space:nowrap">${periodN} selected</span>`:''}
+    <div class="upl-strip-status">
+      <span style="color:${statusColor}">${loaded?`✓ ${fname}`:'No file loaded'}</span>
     </div>
     <input type="file" id="dpFileInput" accept=".xlsx,.xls" style="display:none">
-  </div>`;
+  `);
 }
 
 function clearDeployment(){
@@ -2429,6 +2371,7 @@ function bDPLocRolePanel(sc, dep){
 }
 
 function bPersonnelTable(sc, dep){
+  const isGuest=!!(AUTH.currentUser&&AUTH.currentUser.isGuest);
   if(!dep) return `<div class="card" style="margin-top:14px;padding:28px;text-align:center;color:${sc.faint};font-size:12px">Upload EPCM Deployment file to view personnel mobilization status</div>`;
 
   // Cap display at Dec 2027
@@ -2574,7 +2517,7 @@ function bPersonnelTable(sc, dep){
       return `<tr style="background:${rowBg};height:32px">
         ${locCell}
         <td style="font-size:10px;color:${sc.muted};padding:4px 7px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${row.role}</td>
-        <td style="font-size:10px;color:${sc.text};font-weight:500;padding:4px 8px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${row.name||'—'}</td>
+        ${isGuest?'':` <td style="font-size:10px;color:${sc.text};font-weight:500;padding:4px 8px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${row.name||'—'}</td>`}
         <td style="font-size:9px;color:${sc.faint};text-align:center;padding:4px 4px;border:1px solid ${sc.border};${isSepRow?SEP:''}">${catRoman}</td>
         ${mCells}
       </tr>`;
@@ -2596,12 +2539,12 @@ function bPersonnelTable(sc, dep){
           <tr>
             <th style="min-width:20px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 6px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:center">LOC</th>
             <th style="min-width:130px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 10px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:left">ROLE</th>
-            <th style="min-width:160px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 10px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:left">NAME</th>
+            ${isGuest?'':` <th style="min-width:160px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 10px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:left">NAME</th>`}
             <th style="min-width:34px;background:${sc.card};color:${sc.muted};font-size:12px;font-weight:700;padding:7px 4px;border:1px solid ${sc.border};position:sticky;top:0;z-index:2;text-align:center">CAT</th>
             ${monthThs}
           </tr>
           <tr>
-            <td colspan="4" style="font-size:10px;font-weight:700;color:${sc.muted};padding:4px 8px;border:1px solid ${sc.border};white-space:nowrap;background:${sc.bg};position:sticky;top:40px;z-index:2">Total Man-Months</td>
+            <td colspan="${isGuest?3:4}" style="font-size:10px;font-weight:700;color:${sc.muted};padding:4px 8px;border:1px solid ${sc.border};white-space:nowrap;background:${sc.bg};position:sticky;top:40px;z-index:2">Total Man-Months</td>
             ${totalCells}
           </tr>
         </thead>
@@ -2887,26 +2830,209 @@ function exportHiringChart(){
   aoa.push(['Total',...months.map((_,i)=>recoveryData[i]!=null?recoveryData[i]:'')]);
 
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  // Bold the section header rows
-  [0, allRoles.length+2, 2*(allRoles.length+2)+1, 3*(allRoles.length+2)+2].forEach(r=>{
-    const cell=ws[XLSX.utils.encode_cell({r,c:0})];
-    if(cell) cell.s={font:{bold:true}};
-  });
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Hiring Status');
   XLSX.writeFile(wb,'Hiring_Status_Report.xlsx');
 }
 
 // ═══════════════════════════════════════════════════
+// KPI PAGE
+// ═══════════════════════════════════════════════════
+
+function getKPIMetrics(){
+  // ── Weld / NDT (from existing aggregators) ───────
+  const {weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal} = getNDTKPIs();
+
+  // ── NCR ──────────────────────────────────────────
+  const ncr = ST.data.ncr;
+  let ncrOpenRate=null, ncrOpenCount=0, ncrTotal=0;
+  let ncrRepeatRate=null, ncrRepeatCount=0;
+  if(ncr && ncr.length){
+    ncrTotal = ncr.length;
+    // Same closed/open convention as the NCR table: anything not CLOSED counts as open
+    ncrOpenCount = ncr.filter(r=>!(r.status||'').includes('CLOSED')).length;
+    ncrOpenRate = ncrTotal>0 ? ncrOpenCount/ncrTotal*100 : null;
+    // repeat: status contains REPEAT or description mentions it
+    ncrRepeatCount = ncr.filter(r=>(r.status||'').includes('REPEAT')||(r.desc||'').toUpperCase().includes('REPEAT')).length;
+    ncrRepeatRate = ncrTotal>0 ? ncrRepeatCount/ncrTotal*100 : null;
+  }
+
+  // ── Quality Observations from SOR ────────────────
+  const sor = ST.data.sor;
+  let sorPeriodCount=0, sorOpenCount=0, sorClosedCount=0;
+  if(sor && sor.length){
+    sorPeriodCount = sor.filter(r=>inPeriod(r.date)).length;
+    sorClosedCount = sor.filter(r=>(r.status||'').includes('CLOSED')).length;
+    sorOpenCount   = sor.length - sorClosedCount;
+  }
+
+  // ── Coating Rejection from daily sheets ──────────
+  let coatRate=null, coatRejected=0, coatTotal=0;
+  ['daily1','daily2','daily3'].forEach(k=>{
+    const rows=ST.data[k]; if(!rows) return;
+    const snap=getDailySnapshot(rows, ST.end);
+    if(snap){ coatTotal+=snap.coatTotal||0; coatRejected+=snap.coatRejected||0; }
+  });
+  if(coatTotal>0) coatRate = coatRejected/coatTotal*100;
+
+  // ── Deployment: Org Resources & Inspection ───────
+  let orgRate=null, orgActual=0, orgPlan=0;
+  let inspecRate=null, inspecActual=0, inspecPlan=0;
+  const dep=ST.data.deployment;
+  if(dep && dep.plan && dep.actual){
+    // Rows store monthly values in r.vals (array indexed by dep.months position).
+    // Headcount is concurrent — peak across the selected months, not a sum.
+    const selMonths = ST.dpMonths && ST.dpMonths.length ? ST.dpMonths : (dep.months.length?[dep.months[dep.months.length-1]]:[]);
+    const selIdxs = selMonths.map(m=>dep.months.indexOf(m)).filter(i=>i>=0);
+    const isInspec=r=>(r.cat||'').toUpperCase().includes('INSP')||(r.role||'').toUpperCase().includes('INSPECT');
+    const peak=r=>selIdxs.length?Math.max(0,...selIdxs.map(i=>+(r.vals[i]||0))):0;
+    dep.plan.forEach(r=>{ const v=peak(r); orgPlan+=v; if(isInspec(r)) inspecPlan+=v; });
+    dep.actual.forEach(r=>{ const v=peak(r); orgActual+=v; if(isInspec(r)) inspecActual+=v; });
+    orgRate    = orgPlan>0    ? orgActual/orgPlan*100       : null;
+    inspecRate = inspecPlan>0 ? inspecActual/inspecPlan*100 : null;
+  }
+
+  return {
+    weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal,
+    ncrOpenRate, ncrOpenCount, ncrTotal,
+    ncrRepeatRate, ncrRepeatCount,
+    sorPeriodCount, sorOpenCount, sorClosedCount,
+    coatRate, coatRejected, coatTotal,
+    orgRate, orgActual, orgPlan,
+    inspecRate, inspecActual, inspecPlan,
+  };
+}
+
+// Build a single KPI card (E+D style)
+function bKPICard({id, label, value, unit, target, targetDir, targetVal, sub, pill, spark, na}){
+  // targetDir: 'lt' (lower is better, target < X) | 'gt' (higher is better, target > X)
+  let status='na';
+  if(value!==null && !na){
+    if(targetDir==='lt') status = value<=targetVal ? 'good' : (value<=targetVal*1.5 ? 'warn' : 'bad');
+    if(targetDir==='gt') status = value>=targetVal ? 'good' : (value>=targetVal*0.9 ? 'warn' : 'bad');
+    if(targetDir==='trend') status = 'warn'; // no hard target
+  }
+  const pillLabels={good:'Pass',warn:'Monitor',bad:'Fail',na:'No Data'};
+  const pillTxt = pill || pillLabels[status];
+  const numTxt  = value!==null && !na ? (Number.isInteger(value)?value:value.toFixed(1)) : '—';
+
+  // Static sparkline heights — placeholder until historical series available
+  const bars = spark || [30,40,35,50,45,60];
+  const sparkHtml = bars.map((h,i)=>`<div class="kpi-ed-bar${i===bars.length-1?' hi':''}" style="height:${h}%"></div>`).join('');
+
+  return `<div class="kpi-ed ${status}">
+    <div class="kpi-ed-head">
+      <div class="kpi-ed-lbl">${label}</div>
+      <div class="kpi-ed-id">${id}</div>
+    </div>
+    <div class="kpi-ed-body">
+      <div><span class="kpi-ed-num">${numTxt}</span><span class="kpi-ed-unit">${unit}</span></div>
+      <div class="kpi-ed-row">
+        <span class="kpi-ed-pill">${pillTxt}</span>
+        <span class="kpi-ed-vs">${target}</span>
+      </div>
+    </div>
+    <div class="kpi-ed-foot">
+      <div class="kpi-ed-spark">${sparkHtml}</div>
+      <div class="kpi-ed-period">${sub}</div>
+    </div>
+  </div>`;
+}
+
+function renderKPI(){
+  const sc      = SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const m       = getKPIMetrics();
+  const dailyLive = !!(ST.data.daily1||ST.data.daily2||ST.data.daily3);
+  const ncrLive   = !!ST.data.ncr;
+  const sorLive   = !!ST.data.sor;
+  const depLive   = !!ST.data.deployment;
+
+  const KPI_PANELS = {
+    kpiWeld:      bKPICard({id:'KPI-11', label:'Weld Repair Rate',
+                    value:m.weldRepair, unit:'%', targetDir:'lt', targetVal:3,
+                    target:'Target &lt; 3%', sub:'Cumulative',
+                    spark:[30,45,38,55,50,m.weldRepair!==null?Math.min(100,m.weldRepair/5*100):40],
+                    na:!dailyLive}),
+
+    kpiNdtPipe:   bKPICard({id:'KPI-12', label:'NDT Backlog — Pipeline',
+                    value:m.ndtBacklog, unit:'joints', targetDir:'lt',
+                    targetVal:m.ndtBacklogGoal||99,
+                    target:'Target ≤ 2 days prod.', sub:'Current',
+                    spark:[80,70,65,60,50,m.ndtBacklog!==null?Math.min(100,(m.ndtBacklog/(m.ndtBacklogGoal||50))*60):40],
+                    na:!dailyLive}),
+
+    kpiFjc:       bKPICard({id:'KPI-FJC', label:'FJC Repair Rate',
+                    value:m.fjcRepair, unit:'%', targetDir:'lt', targetVal:1,
+                    target:'Target &lt; 1%', sub:'Cumulative',
+                    spark:[40,50,45,35,30,m.fjcRepair!==null?Math.min(100,m.fjcRepair*30):25],
+                    na:!dailyLive}),
+
+    kpiCoat:      bKPICard({id:'KPI-15', label:'Coating Rejection Rate',
+                    value:m.coatRate, unit:'%', targetDir:'lt', targetVal:1,
+                    target:'Target &lt; 1%',
+                    sub:m.coatTotal>0?`${m.coatRejected} rejected / ${m.coatTotal} total`:'Awaiting column mapping',
+                    na:m.coatTotal===0}),
+
+    kpiNcrOpen:   bKPICard({id:'KPI-08', label:'NCR Open Rate',
+                    value:m.ncrOpenRate, unit:'%', targetDir:'lt', targetVal:5,
+                    target:'Target &lt; 5%',
+                    sub:ncrLive?`${m.ncrOpenCount} open / ${m.ncrTotal} total`:'No data',
+                    spark:[30,40,50,45,55,m.ncrOpenRate!==null?Math.min(100,m.ncrOpenRate*10):40],
+                    na:!ncrLive}),
+
+    kpiNcrRepeat: bKPICard({id:'KPI-09', label:'Repeat NCR Rate',
+                    value:m.ncrRepeatRate, unit:'%', targetDir:'lt', targetVal:5,
+                    target:'Target &lt; 5%',
+                    sub:ncrLive?`${m.ncrRepeatCount} repeat / ${m.ncrTotal} total`:'No data',
+                    na:!ncrLive}),
+
+    kpiSorObs:    bKPICard({id:'KPI-10', label:'Quality Observations',
+                    value:m.sorPeriodCount, unit:'', targetDir:'trend', targetVal:null,
+                    target:'No hard target — trend only',
+                    sub:sorLive?`${m.sorOpenCount} open · ${m.sorClosedCount} closed · SOR`:'No data',
+                    pill:m.sorPeriodCount>0?'Active':'No Data',
+                    spark:[20,30,25,40,50,m.sorPeriodCount?Math.min(100,m.sorPeriodCount*7):30],
+                    na:!sorLive}),
+
+    kpiOrg:       bKPICard({id:'KPI-07', label:'Org. Resources',
+                    value:m.orgRate, unit:'%', targetDir:'gt', targetVal:90,
+                    target:'Target &gt; 90%',
+                    sub:depLive?`${m.orgActual} actual / ${m.orgPlan} planned`:'No data',
+                    spark:[70,75,80,85,88,m.orgRate!==null?Math.min(100,m.orgRate):80],
+                    na:!depLive}),
+
+    kpiInspec:    bKPICard({id:'KPI-26', label:'Inspection Resourcing',
+                    value:m.inspecRate, unit:'%', targetDir:'gt', targetVal:90,
+                    target:'Target &gt; 90%',
+                    sub:depLive?`${m.inspecActual} actual / ${m.inspecPlan} planned · inspectors`:'No data',
+                    spark:[75,78,80,82,84,m.inspecRate!==null?Math.min(100,m.inspecRate):80],
+                    na:!depLive}),
+  };
+
+  document.getElementById('app').innerHTML=`
+    ${bUploadBar()}
+    <div id="uplBarSpacer"></div>
+    <div id="kpiCanvas"></div>
+  `;
+
+  const sidenavExtraEl=document.getElementById('sidenavExtra');
+  if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
+  fillSidenavDrops();
+
+  renderCanvas(KPI_PANELS);
+  bindEvents();
+  if(EDIT_MODE) activateEditMode();
+}
+
+// ═══════════════════════════════════════════════════
 // CHART INIT
 // ═══════════════════════════════════════════════════
 function initCharts(rfiData, welderData, sorRecs, ncrRecs){
-  Chart.defaults.color='#7a809a';
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  Chart.defaults.color=sc.muted;
   Chart.defaults.font.family='system-ui,-apple-system,sans-serif';
 
   // RFI Donuts — Period (top) and Cumulative (bottom)
-  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
-  Chart.defaults.color=sc.muted;
   function makeDonut(canvasId, totals){
     const el=document.getElementById(canvasId);
     if(!el||!totals) return null;
@@ -2931,8 +3057,7 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
         options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
           plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.toFixed(2)}%`}}},
           scales:{x:{grid:{color:sc.chartGrid},ticks:{color:sc.muted,callback:v=>v+'%'},title:{display:true,text:'Repair Rate %',color:sc.muted}},
-            y:{grid:{display:false},ticks:{color:sc.text,font:{size:10}}}},
-          annotation:{annotations:{goal:{type:'line',xMin:3,xMax:3,borderColor:sc.bad,borderWidth:1,borderDash:[4,4]}}}}}); 
+            y:{grid:{display:false},ticks:{color:sc.text,font:{size:10}}}}}});
     }
   }
 
@@ -3035,23 +3160,23 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
 
 async function saveAllToDB(){
   const btn=document.getElementById('btnSave');
-  if(btn){btn.disabled=true;btn.textContent='⟳ Saving…';}
+  if(btn){ btn.disabled=true; btn.classList.add('saving'); } // pulsing glow while saving
   try{
     const keys=Object.keys(ST.data).filter(k=>ST.data[k]!==null);
-    if(!keys.length){alert('No data loaded to save.');if(btn){btn.disabled=false;btn.textContent='💾 Save';}return;}
+    if(!keys.length){alert('No data loaded to save.');if(btn){btn.disabled=false;btn.classList.remove('saving');}return;}
     await Promise.all(keys.map(k=>saveDataToDB(k,ST.data[k],ST.files[k]||k)));
     ST.unsaved.clear();
-    render();
+    render(); // re-render rebuilds the bar — saving class gone with it
   }catch(e){
     alert('Save failed: '+e.message);
-    if(btn){btn.disabled=false;btn.textContent='💾 Save';}
+    if(btn){ btn.disabled=false; btn.classList.remove('saving'); }
   }
 }
 
 async function clearAllFiles(){
   if(!confirm('Clear the entire dashboard? This will remove all uploaded data for all users.')) return;
   const btn=document.getElementById('btnClearFiles');
-  if(btn){btn.disabled=true;btn.textContent='⟳ Clearing…';}
+  if(btn) btn.disabled=true;
   try{
     const tables=['rfi_records','daily_sec1','daily_sec2','daily_sec3','welder_records','sor_records','ncr_records','deployment_data'];
     await Promise.all(tables.map(t=>sbDelete(t)));
@@ -3065,7 +3190,7 @@ async function clearAllFiles(){
     render();
   }catch(e){
     alert('Clear failed: '+e.message);
-    if(btn){btn.disabled=false;btn.textContent='🗑 Clear Dashboard';}
+    if(btn) btn.disabled=false;
   }
 }
 
@@ -3111,12 +3236,19 @@ function bindEvents(){
       const files=Array.from(e.target.files||[]);
       multiInput.value='';
       if(!files.length) return;
-      // Process all files in parallel
-      await Promise.all(files.map(f=>handleFile(null,f)));
+      // Sequential, NOT Promise.all: parallel parses chain through microtasks
+      // and the browser never paints — the page freezes for the whole batch.
+      uplDbg('bulk upload:',files.length,'file(s)');
+      const tBulk=performance.now();
+      for(const f of files){
+        await handleFile(null,f);
+        await uiYield(); // repaint between files so the UI stays alive
+      }
+      uplDbg('bulk done:',Math.round(performance.now()-tBulk)+'ms');
     };
   }
 
-  // ── Single-file input for individual slot re-upload ──
+  // ── Single-file upload for one dataset (status-dot click → uploadSlot) ──
   const singleInput=document.getElementById('fileSingle');
   if(singleInput){
     singleInput.onchange=async e=>{
@@ -3126,52 +3258,45 @@ function bindEvents(){
       if(file) await handleFile(key,file);
     };
   }
-
-  // ── Individual slot click → single re-upload with wrong-file detection ──
-  const keyToExpected={
-    rfi:'RFI Register (RFI_REG sheet)',
-    daily1:'Daily Section-1 (Daily_SEC1 sheet)',
-    daily2:'Daily Section-2 (Daily_SEC2 sheet)',
-    daily3:'Daily Section-3 (Daily_SEC3 sheet)',
-    welders:'Welders Performance (Weekly_WLDR_REP sheet)',
-    sor:'SOR Register (SOR sheet)',
-    ncr:'NCR Register (NCR sheet)',
-  };
-  SLOT_DEFS.forEach(s=>{
-    const slot=document.getElementById(`slot_${s.key}`);
-    if(slot){
-      slot.addEventListener('click',()=>{
-        const si=document.getElementById('fileSingle');
-        if(si){ si.dataset.key=s.key; si.click(); }
-      });
-      slot.addEventListener('dragover',e=>{e.preventDefault();slot.classList.add('drag');});
-      slot.addEventListener('dragleave',()=>slot.classList.remove('drag'));
-      slot.addEventListener('drop',e=>{
-        e.preventDefault();slot.classList.remove('drag');
-        const f=e.dataTransfer.files[0];
-        if(f) handleFile(s.key,f);
-      });
-    }
-  });
 }
 
 // ═══════════════════════════════════════════════════
 // FILE HANDLER
 // key = forced key (individual slot drop) OR null (auto-detect for bulk)
 // ═══════════════════════════════════════════════════
+// XLSX parsing is synchronous and blocks the main thread. Without an explicit
+// yield the browser never paints between render() and the parse — the page
+// looks frozen (no hover, no clicks, no spinner) for the whole upload.
+const UPL_DEBUG=true; // set false to silence upload timing logs
+const uplDbg=(...a)=>{ if(UPL_DEBUG) console.log('%c[UPLOAD]','color:#38bdf8;font-weight:700',...a); };
+function uiYield(){
+  // Let the browser paint before heavy sync work. rAF alone never fires in a
+  // hidden tab, so race it with a timeout to avoid stalling background uploads.
+  return new Promise(res=>{
+    let done=false; const fin=()=>{ if(!done){done=true;res();} };
+    requestAnimationFrame(()=>setTimeout(fin,0));
+    setTimeout(fin,80);
+  });
+}
+
 async function handleFile(forcedKey, file){
+  const t0=performance.now();
+  uplDbg('start:',file.name,Math.round(file.size/1024)+' KB','key='+(forcedKey||'auto'));
   // Pre-read workbook to detect key if not forced
   let key=forcedKey;
   let ab;
   try{ ab=await file.arrayBuffer(); }
   catch(e){ console.warn('Could not read file',file.name,e); return; }
+  uplDbg('arrayBuffer:',Math.round(performance.now()-t0)+'ms');
 
+  const tDet=performance.now();
   if(!key){
     const wb=XLSX.read(new Uint8Array(ab),{type:'array',bookSheets:true});
     key=detectKey(wb);
     if(!key){
       // Show unrecognised warning without disrupting other files
       ST.errors['?'+(file.name)]='Unrecognised: '+file.name;
+      uplDbg('UNRECOGNISED:',file.name);
       render(); return;
     }
   } else {
@@ -3190,16 +3315,20 @@ async function handleFile(forcedKey, file){
       if(msg) msg.innerHTML=`Please upload <span style="color:#3fb950;font-weight:600">"${expectedName}"</span><br>Instead, you tried to upload <span style="color:#f85149;font-weight:600">"${actualName}"</span>`;
       const modal=document.getElementById('wrongFileModal');
       if(modal) modal.style.display='flex';
+      uplDbg('WRONG FILE:',actualName,'→ expected',expectedName);
       render(); return;
     }
   }
+  uplDbg('detect/validate:',Math.round(performance.now()-tDet)+'ms','→ key='+key);
 
   ST.errors[key]='';
   ST.processing[key]=true;
   ST.files[key]=file.name;
   render();
+  await uiYield(); // paint the spinner/dots before the blocking parse below
 
   try{
+    const tParse=performance.now();
     let parsed;
     if(key==='rfi')      parsed=parseRFI(ab);
     else if(key==='daily1') parsed=parseDaily(ab);
@@ -3209,6 +3338,8 @@ async function handleFile(forcedKey, file){
     else if(key==='sor')        parsed=parseSOR(ab);
     else if(key==='ncr')        parsed=parseNCR(ab);
     else if(key==='deployment') parsed=parseDeployment(ab);
+    uplDbg('parse['+key+']:',Math.round(performance.now()-tParse)+'ms',
+      Array.isArray(parsed)?parsed.length+' rows':'');
 
     const isEmpty=!parsed||(key==='deployment'?!parsed.plan?.length:!parsed.length);
     if(isEmpty) throw new Error('No valid records found. Check file format.');
@@ -3216,11 +3347,14 @@ async function handleFile(forcedKey, file){
     ST.data[key]=parsed;
     ST.processing[key]=false;
     ST.unsaved.add(key); // mark only this key as unsaved
+    const tRender=performance.now();
     render();
+    uplDbg('done:',file.name,'render '+Math.round(performance.now()-tRender)+'ms','· total '+Math.round(performance.now()-t0)+'ms');
   }catch(e){
     ST.errors[key]=e.message;
     ST.data[key]=null;
     ST.processing[key]=false;
+    uplDbg('ERROR['+key+']:',e.message);
     render();
   }
 }
@@ -3246,7 +3380,7 @@ async function sbSelectAll(table, params=''){
   let all=[], offset=0;
   while(true){
     const url=`${SB_URL}/rest/v1/${table}?${params}${params?'&':''}offset=${offset}&limit=${PAGE}`;
-    const r=await fetchWithTimeout(url,{headers:{...SB_HDR,'Prefer':'count=exact'}});
+    const r=await fetchWithTimeout(url,{headers:SB_HDR});
     if(!r.ok) throw new Error(`DB read failed (${table}): ${r.status}`);
     const page=await r.json();
     if(!Array.isArray(page)||page.length===0) break;
@@ -3258,7 +3392,7 @@ async function sbSelectAll(table, params=''){
 }
 // Keep sbSelect for small tables (users, meta) where a single page is always enough
 async function sbSelect(table, params=''){
-  const r=await fetchWithTimeout(`${SB_URL}/rest/v1/${table}?${params}`,{headers:{...SB_HDR,'Prefer':'count=exact'}});
+  const r=await fetchWithTimeout(`${SB_URL}/rest/v1/${table}?${params}`,{headers:SB_HDR});
   if(!r.ok) throw new Error(`DB read failed (${table}): ${r.status}`);
   return r.json();
 }
@@ -3290,12 +3424,17 @@ async function sbUpsert(table, row){
 
 // ── Load all datasets from Supabase on page open ────
 async function loadAllFromDB(){
+  // Daily tables: prefer the coat_* columns; fall back to the legacy column set
+  // if the Supabase schema hasn't been migrated yet (coat values then default to 0).
+  const DAILY_COLS='date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance';
+  const loadDaily=t=>sbSelectAll(t,`select=${DAILY_COLS},coat_total,coat_rejected&order=date.asc`)
+    .catch(()=>sbSelectAll(t,`select=${DAILY_COLS}&order=date.asc`));
   try{
     const [rfi,s1,s2,s3,wld,sor,ncr,dep,meta]=await Promise.all([
       sbSelectAll('rfi_records','select=date,discipline,section,ic,status&order=date.asc'),
-      sbSelectAll('daily_sec1','select=date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance&order=date.asc'),
-      sbSelectAll('daily_sec2','select=date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance&order=date.asc'),
-      sbSelectAll('daily_sec3','select=date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance&order=date.asc'),
+      loadDaily('daily_sec1'),
+      loadDaily('daily_sec2'),
+      loadDaily('daily_sec3'),
       sbSelectAll('welder_records','select=welder_id,name,section,cum_aut,cum_rep,cum_pct,wk_aut,wk_rep,wk_pct,remarks'),
       sbSelectAll('sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc'),
       sbSelectAll('ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description&order=date.asc'),
@@ -3329,7 +3468,8 @@ async function loadAllFromDB(){
 function dbRowToDaily(r){
   return{date:r.date,welded:+r.welded||0,ndtRev:+r.ndt_rev||0,ndtAppr:+r.ndt_appr||0,
     ndtRescan:+r.ndt_rescan||0,ndtRepair:+r.ndt_repair||0,fjcReleased:+r.fjc_released||0,
-    fjcTotal:+r.fjc_total||0,fjcAccepted:+r.fjc_accepted||0,fjcRepair:+r.fjc_repair||0,fjcBalance:+r.fjc_balance||0};
+    fjcTotal:+r.fjc_total||0,fjcAccepted:+r.fjc_accepted||0,fjcRepair:+r.fjc_repair||0,fjcBalance:+r.fjc_balance||0,
+    coatTotal:+r.coat_total||0,coatRejected:+r.coat_rejected||0};
 }
 
 // ═══════════════════════════════════════════════════
@@ -3393,6 +3533,7 @@ async function loadAndShow(){
     }catch(e){}
   }
   applyScheme(CURRENT_SCHEME);
+  startIdleTimer(); // begin 20-min idle countdown
   document.getElementById('app').innerHTML=`<div style="padding:40px 20px;text-align:center;color:${SCHEMES[CURRENT_SCHEME].faint};font-size:13px">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="svg-spin" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="9" stroke="#1e2940" stroke-width="1.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/></svg>
     &nbsp; Loading dashboard data…</div>`;
@@ -3423,6 +3564,17 @@ function showLogin(){
     if(pp) pp.addEventListener('keydown',e=>{if(e.key==='Enter') attemptLogin();});
     if(pu) pu.focus();
   },50);
+}
+
+function toggleLoginPass(){
+  const inp = document.getElementById('loginPass');
+  const eye = document.getElementById('loginPassEye');
+  if(!inp) return;
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  if(eye) eye.innerHTML = show
+    ? '<path d="M3 3l18 18M10.5 10.7a3 3 0 0 0 3.8 3.8M6.5 6.7C4.3 8 2.9 9.9 2 12c2.5 5 5.5 7.5 10 7.5 1.8 0 3.5-.4 5-1.2M9.5 4.8C10.3 4.6 11.1 4.5 12 4.5c4.5 0 7.5 2.5 10 7.5-.6 1.1-1.2 2.1-2 3"/>'
+    : '<ellipse cx="12" cy="12" rx="4" ry="2.8"/><path d="M2 12c2.5-5 5.5-7.5 10-7.5s7.5 2.5 10 7.5c-2.5 5-5.5 7.5-10 7.5S4.5 17 2 12z"/>';
 }
 
 function continueAsGuest(){
@@ -3468,13 +3620,77 @@ async function attemptLogin(){
   }
 }
 
+// ── Idle Auto-Signout ────────────────────────────────
+const IDLE_TIMEOUT_MS  = 20 * 60 * 1000; // 20 minutes → show warning
+const IDLE_GRACE_MS    =  2 * 60 * 1000; // 2 minutes → then force logout
+let   _idleTimer       = null;
+let   _idleGraceTimer  = null;
+let   _idleCountdownIv = null;
+
+function _clearIdleTimers(){
+  clearTimeout(_idleTimer);
+  clearTimeout(_idleGraceTimer);
+  clearInterval(_idleCountdownIv);
+  _idleTimer=_idleGraceTimer=_idleCountdownIv=null;
+}
+
+function resetIdleTimer(){
+  if(!AUTH.currentUser) return; // not logged in — nothing to reset
+  _clearIdleTimers();
+  // close warning modal if user moved/clicked (they're back)
+  const m=document.getElementById('idleWarningModal');
+  if(m && m.classList.contains('open')) m.classList.remove('open');
+  _idleTimer=setTimeout(_showIdleWarning, IDLE_TIMEOUT_MS);
+}
+
+function startIdleTimer(){
+  ['mousemove','keydown','mousedown','touchstart','scroll','click'].forEach(ev=>
+    document.addEventListener(ev, resetIdleTimer, {passive:true})
+  );
+  resetIdleTimer();
+}
+
+function stopIdleTimer(){
+  ['mousemove','keydown','mousedown','touchstart','scroll','click'].forEach(ev=>
+    document.removeEventListener(ev, resetIdleTimer)
+  );
+  _clearIdleTimers();
+}
+
+function _showIdleWarning(){
+  const m=document.getElementById('idleWarningModal');
+  if(!m) return;
+  m.classList.add('open');
+  let secsLeft = IDLE_GRACE_MS / 1000;
+  const cd = document.getElementById('idleCountdown');
+  const _fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  if(cd) cd.textContent = _fmt(secsLeft);
+  _idleCountdownIv = setInterval(()=>{
+    secsLeft--;
+    if(cd) cd.textContent = _fmt(Math.max(0,secsLeft));
+    if(secsLeft <= 0){ clearInterval(_idleCountdownIv); logout(); }
+  }, 1000);
+  _idleGraceTimer = setTimeout(logout, IDLE_GRACE_MS);
+}
+
+function idleStaySignedIn(){
+  _clearIdleTimers();
+  const m=document.getElementById('idleWarningModal');
+  if(m) m.classList.remove('open');
+  resetIdleTimer(); // restart the 20-min clock
+}
+
 function logout(){
+  stopIdleTimer();
+  const m=document.getElementById('idleWarningModal');
+  if(m) m.classList.remove('open');
   toggleSidenav(false);
   clearSession(); AUTH.currentUser=null;
   Object.keys(ST.data).forEach(k=>ST.data[k]=null);
   Object.keys(ST.files).forEach(k=>ST.files[k]='');
   Object.keys(ST.errors).forEach(k=>ST.errors[k]='');
-  ST.start='2025-05-01'; ST.end='2026-03-27'; ST._dateSet=false;
+  const {start,end}=defaultWeekDates();
+  ST.start=start; ST.end=end; ST._dateSet=false;
   showLogin();
 }
 
@@ -3491,7 +3707,6 @@ function closeUserMgmt(){
   ['umgMsg','umgPwMsg'].forEach(id=>{const el=document.getElementById(id);if(el){el.className='umg-msg';el.textContent='';}});
 }
 let UMG_EDITING=null;
-let UMG_USERS_CACHE=[];
 function fmtLoginTime(iso){
   if(!iso) return 'Never';
   const d=new Date(iso);
@@ -3504,7 +3719,6 @@ async function renderUserList(){
   if(!list) return;
   list.innerHTML='<div style="color:#484f58;font-size:11px;padding:8px">Loading…</div>';
   const users=await sbSelect('dashboard_users','select=username,display_name,role,created_at&order=created_at.asc');
-  UMG_USERS_CACHE=users;
   // Last-sign-in is an optional column — fetched separately so a missing
   // `last_login` column never breaks the core user list.
   try{
@@ -3665,7 +3879,8 @@ async function saveDataToDB(key, parsed, fileName){
     rows=parsed.map(r=>({date:r.date,discipline:r.discipline,section:r.section,ic:r.ic,status:r.status}));
   } else if(key==='daily1'||key==='daily2'||key==='daily3'){
     rows=parsed.map(r=>({date:r.date,welded:r.welded,ndt_rev:r.ndtRev,ndt_appr:r.ndtAppr,ndt_rescan:r.ndtRescan,ndt_repair:r.ndtRepair,
-      fjc_released:r.fjcReleased,fjc_total:r.fjcTotal,fjc_accepted:r.fjcAccepted,fjc_repair:r.fjcRepair,fjc_balance:r.fjcBalance}));
+      fjc_released:r.fjcReleased,fjc_total:r.fjcTotal,fjc_accepted:r.fjcAccepted,fjc_repair:r.fjcRepair,fjc_balance:r.fjcBalance,
+      coat_total:r.coatTotal||0,coat_rejected:r.coatRejected||0}));
   } else if(key==='welders'){
     rows=parsed.map(r=>({welder_id:r.id,name:r.name,section:r.section,cum_aut:r.cumAut,cum_rep:r.cumRep,cum_pct:r.cumPct,
       wk_aut:r.wkAut,wk_rep:r.wkRep,wk_pct:r.wkPct,remarks:r.remarks||''}));
@@ -3765,21 +3980,9 @@ function applyScheme(key){
   if(!el){ el=document.createElement('style'); el.id=styleId; document.head.appendChild(el); }
   el.textContent = `
     body{background:${s.bg}!important;color:${s.text}!important}
-    .hdr{background:${s.hdr}!important;border-color:${s.border}!important}
     .hdr-title{color:${s.text}!important}
-    .hdr-sub,.hdr-uname{color:${s.muted}!important}
-    .hdr-btn{background:${s.card}!important;border-color:${s.border}!important;color:${s.text}!important}
-    .hdr-btn:hover{border-color:${s.accent}!important;color:${s.accent}!important}
-    .hdr-btn.mgmt{border-color:${s.accent}44!important;color:${s.accent}!important}
+    .hdr-sub{color:${s.muted}!important}
     .upl-bar{background:${s.hdr}!important;border-color:${s.border}!important}
-    .upl-card{background:${s.bg}!important;border-color:${s.border}!important}
-    .upl-card.ok::before{background:${s.good}!important}
-    .upl-card.unsaved::before{background:${s.accent}!important}
-    .upl-card.ok .upl-card-name{color:${s.good}!important}
-    .upl-card.unsaved .upl-card-name{color:${s.accent}!important}
-    .upl-card.ok .upl-card-rows{color:${s.good}!important}
-    .upl-card.unsaved .upl-card-rows{color:${s.accent}!important}
-    .upl-strip{background:${s.hdr}!important}
     .card{background:${s.card}!important;border-color:${s.border}!important}
     .slbl{color:${s.muted}!important}
     th.th{color:${s.muted}!important;border-color:${s.border}!important;background:${s.card}!important}
@@ -3803,7 +4006,6 @@ function applyScheme(key){
     .cs1{color:${s.cs1}!important}.cs2{color:${s.cs2}!important}.cs3{color:${s.cs3}!important}
     .kpi-inline{border-color:${s.border}!important}
     .d-inp{background:${s.card}!important;border-color:${s.border}!important;color:${s.text}!important}
-    .filter-tag{color:${s.accent}!important;border-color:${s.accent}44!important}
     #loginOverlay{background:${s.loginBg}!important}
     .login-illus-grad{background:linear-gradient(90deg,${s.loginBg} 24%,${s.loginBg}99 35%,${s.loginBg}44 46%,${s.loginBg}15 57%,${s.loginBg}00 68%)!important}
     .login-card{background:${s.card}!important;border-color:${s.border}!important}
@@ -3826,6 +4028,9 @@ function applyScheme(key){
 }
 // ═══════════════════════════════════════════════════
 async function switchScheme(key){
+  // Keep the theme submenu open: render() re-fills the dropdown (detaching the
+  // clicked button), so the outside-click handler can't tell the click was inside.
+  _keepDropOpen=true;
   applyScheme(key);
   render();
   // Save to Supabase in background
@@ -3836,11 +4041,17 @@ async function switchScheme(key){
       body:JSON.stringify({color_scheme:key})
     });
   }catch(e){}
-  // Close dropdown
-  const d=document.getElementById('schemeDropdown');
-  if(d) d.style.display='none';
 }
 
+// ── Sidebar pin: while a submenu is open the bar must stay expanded ──
+let _keepDropOpen=false;
+function syncSidenavPin(){
+  const ed=document.getElementById('exportDrop');
+  const sd=document.getElementById('schemeDropdown');
+  const open=(ed&&ed.style.display==='block')||(sd&&sd.style.display==='block');
+  const nav=document.getElementById('sidenav');
+  if(nav) nav.classList.toggle('drop-open',open);
+}
 function positionSidenavDrop(dropEl,wrapEl){
   const r=wrapEl.getBoundingClientRect();
   dropEl.style.left=r.right+'px';
@@ -3856,6 +4067,7 @@ function toggleSchemeDrop(){
   }
   const ed=document.getElementById('exportDrop');
   if(ed) ed.style.display='none';
+  syncSidenavPin();
 }
 function toggleExportDrop(){
   const d=document.getElementById('exportDrop');
@@ -3867,24 +4079,24 @@ function toggleExportDrop(){
   }
   const sd=document.getElementById('schemeDropdown');
   if(sd) sd.style.display='none';
+  syncSidenavPin();
 }
 document.addEventListener('click',e=>{
+  if(_keepDropOpen){ _keepDropOpen=false; syncSidenavPin(); return; }
   const ew=document.getElementById('exportDropWrap');
-  if(ew&&!ew.contains(e.target)){
-    const d=document.getElementById('exportDrop');
-    if(d) d.style.display='none';
-  }
+  const ed=document.getElementById('exportDrop');
+  if(ew&&ed&&!ew.contains(e.target)&&!ed.contains(e.target)) ed.style.display='none';
   const sw=document.getElementById('schemeDropWrap');
-  if(sw&&!sw.contains(e.target)){
-    const d=document.getElementById('schemeDropdown');
-    if(d) d.style.display='none';
-  }
+  const sd=document.getElementById('schemeDropdown');
+  if(sw&&sd&&!sw.contains(e.target)&&!sd.contains(e.target)) sd.style.display='none';
+  syncSidenavPin();
 });
 
 // ── Custom Export (choose data sets + date range) ───
 function openExportOptions(){
   const d=document.getElementById('exportDrop');
   if(d) d.style.display='none';
+  syncSidenavPin();
   const f=document.getElementById('expFrom'), t=document.getElementById('expTo');
   if(f&&!f.value) f.value=ST.start;
   if(t&&!t.value) t.value=ST.end;
@@ -3935,8 +4147,14 @@ function generateCustomExport(){
   // note → an info row placed above the table so the reader knows which
   // window of data they're looking at, without bloating the sheet name
   // (Excel sheet names are capped at 31 chars).
-  const mkSheet=(headers,rows,note)=>XLSX.utils.aoa_to_sheet(note?[[note],[],headers,...rows]:[headers,...rows]);
-  const sumK=(rows,keys)=>{ const t={}; keys.forEach(k=>t[k]=rows.reduce((a,r)=>a+(+r[k]||0),0)); return t; };
+  const mkSheet=(headers,rows,note)=>{
+    const aoa=note?[[note],[],headers,...rows]:[headers,...rows];
+    const ws=XLSX.utils.aoa_to_sheet(aoa);
+    const nc=headers.length;
+    if(note) ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:nc-1}}];
+    ws['!cols']=headers.map((_,ci)=>({wch:Math.min(Math.max(aoa.reduce((mx,row)=>{const v=row[ci];return Math.max(mx,v==null?0:String(v).length);},0)+2,8),60)}));
+    return ws;
+  };
   const periodNote=`Period: ${from} to ${to}`;
   const fullNote='Cumulative — full data history';
 
@@ -4032,6 +4250,7 @@ function generateCustomExport(){
 async function exportDashboardImage(){
   const d=document.getElementById('exportDrop');
   if(d) d.style.display='none';
+  syncSidenavPin();
 
   const target=document.getElementById('app');
   const btn=document.getElementById('btnExportImg');
@@ -4140,19 +4359,48 @@ const DEFAULT_DP_LAYOUT_BASE = [
 const DEFAULT_DP_LAYOUT = DEFAULT_DP_LAYOUT_BASE.map(p=>({...p}));
 let DP_CANVAS_LAYOUT = DEFAULT_DP_LAYOUT.map(p=>({...p}));
 
-// Which canvas is currently active ('dashCanvas' or 'dpCanvas')
+// ── KPI page canvas layout ──
+// 9 KPI cards in a 3×3 grid, each 24 cols wide × 14 rows tall, gap of 1 row
+const DEFAULT_KPI_LAYOUT_BASE = [
+  {id:'kpiWeld',      col:0,  row:0,  w:24, h:14},
+  {id:'kpiNdtPipe',   col:24, row:0,  w:24, h:14},
+  {id:'kpiFjc',       col:48, row:0,  w:24, h:14},
+  {id:'kpiCoat',      col:0,  row:15, w:24, h:14},
+  {id:'kpiNcrOpen',   col:24, row:15, w:24, h:14},
+  {id:'kpiNcrRepeat', col:48, row:15, w:24, h:14},
+  {id:'kpiSorObs',    col:0,  row:30, w:24, h:14},
+  {id:'kpiOrg',       col:24, row:30, w:24, h:14},
+  {id:'kpiInspec',    col:48, row:30, w:24, h:14},
+];
+const DEFAULT_KPI_LAYOUT = DEFAULT_KPI_LAYOUT_BASE.map(p=>({...p}));
+let KPI_CANVAS_LAYOUT = DEFAULT_KPI_LAYOUT.map(p=>({...p}));
+
+// Which canvas is currently active ('dashCanvas' | 'dpCanvas' | 'kpiCanvas')
 let ACTIVE_CANVAS_ID = 'dashCanvas';
-function getActiveLayout(){ return ACTIVE_CANVAS_ID==='dpCanvas'?DP_CANVAS_LAYOUT:CANVAS_LAYOUT; }
-function getActiveLayoutKey(){ return ACTIVE_CANVAS_ID==='dpCanvas'?DP_LAYOUT_KEY:LAYOUT_KEY; }
-function setActiveLayout(arr){ if(ACTIVE_CANVAS_ID==='dpCanvas') DP_CANVAS_LAYOUT=arr; else CANVAS_LAYOUT=arr; }
+function getActiveLayout(){
+  if(ACTIVE_CANVAS_ID==='dpCanvas')  return DP_CANVAS_LAYOUT;
+  if(ACTIVE_CANVAS_ID==='kpiCanvas') return KPI_CANVAS_LAYOUT;
+  return CANVAS_LAYOUT;
+}
+function getActiveLayoutKey(){
+  if(ACTIVE_CANVAS_ID==='dpCanvas')  return DP_LAYOUT_KEY;
+  if(ACTIVE_CANVAS_ID==='kpiCanvas') return KPI_LAYOUT_KEY;
+  return LAYOUT_KEY;
+}
+function setActiveLayout(arr){
+  if(ACTIVE_CANVAS_ID==='dpCanvas')       DP_CANVAS_LAYOUT=arr;
+  else if(ACTIVE_CANVAS_ID==='kpiCanvas') KPI_CANVAS_LAYOUT=arr;
+  else                                    CANVAS_LAYOUT=arr;
+}
 
 // Saved layout (persists in localStorage per session).
 // LAYOUT_KEY is versioned to GRID_SCALE — a layout saved at the old 12-col
 // resolution would render tiny/squished on the new 36-col grid, so bumping
 // the key when the grid resolution changes makes old saves simply not match
 // (falling back to DEFAULT_LAYOUT) instead of rendering incorrectly.
-const LAYOUT_KEY = `wep_canvas_layout_g${GRID_SCALE}_v2`;
+const LAYOUT_KEY    = `wep_canvas_layout_g${GRID_SCALE}_v2`;
 const DP_LAYOUT_KEY = `wep_dp_canvas_layout_g${GRID_SCALE}_v7`;
+const KPI_LAYOUT_KEY= `wep_kpi_canvas_layout_g${GRID_SCALE}_v1`;
 function saveLayout(){ try{ localStorage.setItem(getActiveLayoutKey(), JSON.stringify(getActiveLayout())); }catch(e){} }
 function loadLayout(){ try{ const s=localStorage.getItem(getActiveLayoutKey()); if(s) setActiveLayout(JSON.parse(s)); }catch(e){} }
 
@@ -4169,10 +4417,20 @@ const PANEL_NAMES={
   dpChart6m:'6-Month Chart',
   dpHiring:'Hiring Status',
   dpLocRole:'Location & Role',dpPersonnel:'Personnel Table',
+  kpiWeld:'Weld Repair Rate',kpiNdtPipe:'NDT Backlog — Pipeline',
+  kpiFjc:'FJC Repair Rate',kpiCoat:'Coating Rejection',
+  kpiNcrOpen:'NCR Open Rate',kpiNcrRepeat:'Repeat NCR Rate',
+  kpiSorObs:'Quality Observations',
+  kpiOrg:'Org. Resources',kpiInspec:'Inspection Resourcing',
 };
 const HIDDEN_KEY_DASH='wep_hidden_dash';
 const HIDDEN_KEY_DP='wep_hidden_dp';
-function getHiddenKey(){ return ACTIVE_CANVAS_ID==='dpCanvas'?HIDDEN_KEY_DP:HIDDEN_KEY_DASH; }
+const HIDDEN_KEY_KPI='wep_hidden_kpi';
+function getHiddenKey(){
+  if(ACTIVE_CANVAS_ID==='dpCanvas')  return HIDDEN_KEY_DP;
+  if(ACTIVE_CANVAS_ID==='kpiCanvas') return HIDDEN_KEY_KPI;
+  return HIDDEN_KEY_DASH;
+}
 function getHiddenPanels(){ try{return new Set(JSON.parse(localStorage.getItem(getHiddenKey())||'[]'));}catch{return new Set();} }
 function saveHiddenPanels(s){ localStorage.setItem(getHiddenKey(),JSON.stringify([...s])); }
 function hidePanel(id){
@@ -4293,9 +4551,7 @@ function renderCanvas(htmlMap){
 }
 
 // ── Edit mode ────────────────────────────────────────
-let _layoutDirty=false;
 function markLayoutDirty(){
-  _layoutDirty=true;
   const btn=document.getElementById('layoutSaveBtn');
   if(btn){
     btn.textContent='💾 Save Layout';
@@ -4304,7 +4560,6 @@ function markLayoutDirty(){
 }
 function doSaveLayout(){
   saveLayout();
-  _layoutDirty=false;
   const btn=document.getElementById('layoutSaveBtn');
   if(btn){
     btn.textContent='✓ Saved';
@@ -4317,10 +4572,10 @@ function toggleEditMode(){
   const btn=document.getElementById('btnEdit');
   const bar=document.getElementById('canvasModeBar');
   const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
-  if(btn){
-    btn.style.color=EDIT_MODE?sc.accent:'';
-    btn.style.background=EDIT_MODE?sc.accent+'18':'none';
-    btn.textContent=EDIT_MODE?'⊹ Editing…':'⊹ Edit Layout';
+  if(btn){ // icon button in the top-bar strip — restyle only, keep the SVG
+    btn.style.background=EDIT_MODE?'rgba(245,158,11,.18)':'rgba(255,255,255,.06)';
+    btn.style.color=EDIT_MODE?'#f59e0b':'#6b7280';
+    btn.title=EDIT_MODE?'Exit Edit Mode':'Edit Layout';
   }
   if(bar){
     bar.classList.toggle('on',EDIT_MODE);
@@ -4404,9 +4659,9 @@ function deactivateEditMode(){
 
 function resetLayout(){
   saveHiddenPanels(new Set());
-  setActiveLayout(ACTIVE_CANVAS_ID==='dpCanvas'
-    ? DEFAULT_DP_LAYOUT.map(p=>({...p}))
-    : DEFAULT_LAYOUT.map(p=>({...p})));
+  if(ACTIVE_CANVAS_ID==='dpCanvas')       setActiveLayout(DEFAULT_DP_LAYOUT.map(p=>({...p})));
+  else if(ACTIVE_CANVAS_ID==='kpiCanvas') setActiveLayout(DEFAULT_KPI_LAYOUT.map(p=>({...p})));
+  else                                    setActiveLayout(DEFAULT_LAYOUT.map(p=>({...p})));
   doSaveLayout();
   render();
 }
