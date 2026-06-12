@@ -648,11 +648,11 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
       <div class="umg-section">
         <div class="umg-slbl">Choose Data Sets</div>
         <div class="exp-grp">
-          <label class="exp-chk"><input type="checkbox" id="expRfiPeriod" checked> Period RFI Status</label>
+          <label class="exp-chk"><input type="checkbox" id="expRfiPeriod" checked> Reporting Duration RFI Status</label>
           <label class="exp-chk"><input type="checkbox" id="expRfiCumul" checked> Cumulative RFI Status</label>
-          <label class="exp-chk"><input type="checkbox" id="expNdtPeriod" checked> Period NDT (EPCM)</label>
+          <label class="exp-chk"><input type="checkbox" id="expNdtPeriod" checked> Reporting Duration NDT (EPCM)</label>
           <label class="exp-chk"><input type="checkbox" id="expNdtCumul" checked> Cumulative NDT (EPCM)</label>
-          <label class="exp-chk"><input type="checkbox" id="expFjcPeriod" checked> Period FJC Status</label>
+          <label class="exp-chk"><input type="checkbox" id="expFjcPeriod" checked> Reporting Duration FJC Status</label>
           <label class="exp-chk"><input type="checkbox" id="expFjcCumul" checked> Cumulative FJC Status</label>
           <label class="exp-chk"><input type="checkbox" id="expWelders" checked> Welders</label>
           <label class="exp-chk"><input type="checkbox" id="expSor" checked> Site Observations (SOR)</label>
@@ -759,6 +759,7 @@ const ST = {
   start: _defStart,
   end:   _defEnd,
   unsaved: new Set(), // keys with data in memory but not yet saved to Supabase
+  rfiSupersededCount: 0,
   data: {
     rfi:        null,
     daily1:     null,
@@ -813,15 +814,33 @@ function inPeriod(dateStr){
 // ═══════════════════════════════════════════════════
 const EXCL_STATUS = new Set(['SUPERSEDED','NOT IN USE']);
 
+// Clamp a worksheet's !ref to its real last data row (col A).
+// Excel inflates the used-range when stray keypresses land near the bottom of a sheet;
+// sheet_to_json then iterates millions of empty rows. Cells are sparse objects so
+// walking backward is instant.
+function clampSheetRef(ws){
+  if(!ws||!ws['!ref']) return;
+  const ref=XLSX.utils.decode_range(ws['!ref']);
+  if(ref.e.r<=50000) return;
+  for(let r=ref.e.r;r>=1;r--){
+    if(ws[XLSX.utils.encode_cell({r,c:0})]){ref.e.r=r;break;}
+  }
+  ws['!ref']=XLSX.utils.encode_range(ref);
+}
+
 function parseRFI(ab){
   const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
   const ws = wb.Sheets[wb.SheetNames.find(n=>n.toUpperCase().includes('RFI'))||wb.SheetNames[0]];
+  clampSheetRef(ws);
   const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
   const records=[];
+  let supersededCount=0;
   for(let i=1;i<raw.length;i++){
     const r=raw[i]; if(!r||!r[0]) continue;
     const status=(r[6]||'').toString().trim();
-    if(!status||EXCL_STATUS.has(status)) continue;
+    if(!status) continue;
+    if(status==='SUPERSEDED'){ supersededCount++; continue; }
+    if(EXCL_STATUS.has(status)) continue;
     const dateStr=xlDateToISO(r[5]);
     if(!dateStr) continue;
     let ic=(r[1]||'').toString().trim();
@@ -832,7 +851,7 @@ function parseRFI(ab){
     let section=(r[2]||'').toString().trim();
     records.push({date:dateStr,discipline,section,ic,status});
   }
-  return records;
+  return{records,supersededCount};
 }
 
 // Parse one of the 3 Daily Pipeline files
@@ -841,6 +860,7 @@ function parseRFI(ab){
 function parseDaily(ab){
   const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
   const ws = wb.Sheets[wb.SheetNames[0]];
+  clampSheetRef(ws);
   const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
   const rows=[];
   for(let i=3;i<raw.length;i++){   // skip 3 header rows (0,1,2)
@@ -902,6 +922,7 @@ function getDailyPeriod(rows, startDate, endDate){
 function parseWelders(ab){
   const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
   const ws = wb.Sheets[wb.SheetNames[0]];
+  clampSheetRef(ws);
   const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
   const welders=[];
   for(let i=3;i<raw.length;i++){
@@ -928,6 +949,7 @@ function parseWelders(ab){
 function parseSOR(ab){
   const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
   const ws = wb.Sheets[wb.SheetNames[0]];
+  clampSheetRef(ws);
   const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
   const records=[];
   for(let i=1;i<raw.length;i++){
@@ -950,6 +972,7 @@ function parseSOR(ab){
 function parseNCR(ab){
   const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
   const ws = wb.Sheets[wb.SheetNames[0]];
+  clampSheetRef(ws);
   const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
   const records=[];
   for(let i=1;i<raw.length;i++){
@@ -1116,7 +1139,7 @@ function getRFIData(){
   const periodRecs = ST.data.rfi.filter(r=>inPeriod(r.date));
   return{
     period:    aggRFI(periodRecs),
-    cumulative:aggRFI(ST.data.rfi),
+    cumulative:{...aggRFI(ST.data.rfi), supersededCount:ST.rfiSupersededCount||0},
     isDefault: false
   };
 }
@@ -1140,8 +1163,8 @@ function mkFJCRow(secLabel, rows, start, end, cumulative){
 // ═══════════════════════════════════════════════════
 // HTML BUILDERS
 // ═══════════════════════════════════════════════════
-function bRFITable(rows, totals, title, live){
-  if(!rows) return `<div class="card" style="display:flex;flex-direction:column;height:100%"><div class="slbl">${title}</div><div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#484f58">Upload RFI Register to populate</div></div>`;
+function bRFITable(rows, totals, title, live, supersededCount=null){
+  if(!rows) return `<div class="card" style="display:flex;flex-direction:column;height:100%"><div class="slbl" style="font-size:10px">${title}</div><div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#484f58">Upload RFI Register to populate</div></div>`;
   const trs=rows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
     <td class="td tl">${r.d}</td>
     <td class="td cb">${fn(r.acc)}</td><td class="td clb">${fn(r.accW)}</td>
@@ -1151,7 +1174,9 @@ function bRFITable(rows, totals, title, live){
   // Badges embedded at bottom
   const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
   const t=totals.total||1;
-  const p=v=>Math.round(v/t*100);
+  // When superseded count is provided (cumulative table), include it in the denominator
+  const denom=(t+(supersededCount!=null?supersededCount:0))||1;
+  const p=v=>Math.round(v/denom*100);
   const bd=[
     {l:'ACC',       v:totals.acc,  c:s.cb,   bg:s.cb+'18'},
     {l:'ACC W/COMM',v:totals.accW, c:s.clb,  bg:s.clb+'14'},
@@ -1163,8 +1188,11 @@ function bRFITable(rows, totals, title, live){
     <div class="bdg-pct" style="color:${b.c}">${p(b.v)}%</div>
     <div class="bdg-cnt">${fn(b.v)}</div>
   </div>`).join('');
+  const footnote=supersededCount!=null
+    ?`<div style="margin-top:8px;font-size:9.5px;color:${s.muted};letter-spacing:.03em">&#42; Count of Superseded RFIs: <span style="color:#e6edf3;font-weight:600">${fn(supersededCount)}</span>${supersededCount>0?' &mdash; percentages above are calculated over the grand total including superseded.':''}</div>`
+    :'';
   return`<div class="card" style="display:flex;flex-direction:column">
-    <div class="slbl">${title}</div>
+    <div class="slbl" style="font-size:10px">${title}</div>
     <div class="ox" style="flex:1"><table class="tbl"><thead><tr>
       <th class="th tl">Discipline</th><th class="th">ACC</th><th class="th">ACC W/C</th>
       <th class="th">CAN</th><th class="th">OPEN</th><th class="th">REJ</th><th class="th">Total</th>
@@ -1177,6 +1205,7 @@ function bRFITable(rows, totals, title, live){
     <div style="border-top:1px solid ${s.border};padding-top:10px;margin-top:10px">
       <div class="slbl" style="margin-bottom:6px">Status Breakdown</div>
       <div class="bdg-grid">${bdgHtml}</div>
+      ${footnote}
     </div>
   </div>`;
 }
@@ -1189,7 +1218,7 @@ function bRFIDonut(periodTotals, cumTotals, live){
   const sharedLegend=labels.map((l,i)=>`<span style="color:${donutColors[i]};white-space:nowrap">&#9632; ${l}</span>`).join('');
   return`<div class="card" style="display:flex;flex-direction:column;gap:4px;height:100%">
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid ${s.border};padding-bottom:6px;min-height:0">
-      <div class="slbl" style="text-align:center;width:100%;margin-bottom:4px">Period RFI</div>
+      <div class="slbl" style="text-align:center;width:100%;margin-bottom:4px;font-size:10px">Reporting Duration RFI</div>
       <div class="ch-wrap" style="height:210px;width:100%;display:flex;align-items:center;justify-content:center"><canvas id="donutPeriod"></canvas></div>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:4px;min-height:0">
@@ -1220,7 +1249,7 @@ function bNDTTable(secRows, title, live, kpis){
     const cols=kpisShown.length===1?'1fr':'repeat('+kpisShown.length+',1fr)';
     kpiHtml=`<div class="kpi-inline" style="grid-template-columns:${cols}">${kpisShown.map(k=>bKPIinline(k.label,k.value,k.goal,k.unit)).join('')}</div>`;
   }
-  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}</div>
+  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl" style="font-size:10px">${title}</div>
   <div class="ox"><table class="tbl"><thead><tr>
     <th class="th tl">Section</th><th class="th">Welded</th><th class="th">EPCM Rev</th>
     <th class="th">Accepted</th><th class="th">Repair</th>${hideBacklog?'':'<th class="th">Backlog</th>'}
@@ -1261,7 +1290,7 @@ function bFJCTable(secRows, title, live, kpis){
     const cols='repeat('+kpis.length+',1fr)';
     kpiHtml=`<div class="kpi-inline" style="grid-template-columns:${cols}">${kpis.map(k=>bKPIinline(k.label,k.value,k.goal,k.unit)).join('')}</div>`;
   }
-  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl">${title}</div>
+  return`<div class="card" style="display:flex;flex-direction:column"><div class="slbl" style="font-size:10px">${title}</div>
   <div class="ox"><table class="tbl"><thead><tr>
     <th class="th tl">Section</th><th class="th">Released</th><th class="th">Coated</th>
     <th class="th">Accepted</th><th class="th">Repair</th><th class="th">Balance</th>
@@ -1484,6 +1513,10 @@ function bUploadBar(){
 // Pages emit bTopBar(stripHtml) (directly or via bUploadBar/bDeployBar)
 // followed by a spacer div (#uplBarSpacer / #dpBarSpacer).
 // ═══════════════════════════════════════════════════
+// ENPPI logo embedded as data URI — the deployed site is a single HTML file,
+// so a relative image path would 404 there.
+const ENPPI_LOGO='data:image/png;base64,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';
+
 function bTopBar(stripHtml){
   const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
   const isAdmin=!isViewer; // superadmin + admin both get controls
@@ -1510,7 +1543,7 @@ function bTopBar(stripHtml){
     </div>
     <div class="upl-strip">${stripHtml}</div>
     <div class="tb-date">${dateSection}</div>
-    <img class="tb-logo" src="Enppi_Logo.png" alt="ENPPI">
+    <img class="tb-logo" src="${ENPPI_LOGO}" alt="ENPPI">
   </div>`;
 }
 
@@ -1834,12 +1867,12 @@ function render(){
 
   // Build all panel HTML strings
   const PANELS_HTML = {
-    rfiPeriod:   bRFITable(rfiData.period?.rows||null, rfiData.period?.totals||null, 'Period RFI Status', rfiLive),
+    rfiPeriod:   bRFITable(rfiData.period?.rows||null, rfiData.period?.totals||null, 'Reporting Duration RFI Status', rfiLive),
     rfiDonut:    bRFIDonut(rfiData.period?.totals||null, rfiData.cumulative?.totals||null, rfiLive),
-    rfiCumul:    bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive),
-    ndtPeriod:   bNDTTable(ndtPeriod, 'Period NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:pWeldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:pNdtBacklog,goal:pNdtBacklogGoal,unit:''}]),
+    rfiCumul:    bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive, rfiData.cumulative?.supersededCount||0),
+    ndtPeriod:   bNDTTable(ndtPeriod, 'Reporting Duration NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:pWeldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:pNdtBacklog,goal:pNdtBacklogGoal,unit:''}]),
     ndtCumul:    bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:weldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:ndtBacklog,goal:ndtBacklogGoal,unit:''}]),
-    fjcPeriod:   bFJCTable(fjcPeriod, 'Period FJC Status', dailyLive, [{label:'FJC Repair Rate',value:pFjcRepair,goal:1,unit:'%'}]),
+    fjcPeriod:   bFJCTable(fjcPeriod, 'Reporting Duration FJC Status', dailyLive, [{label:'FJC Repair Rate',value:pFjcRepair,goal:1,unit:'%'}]),
     fjcCumul:    bFJCTable(fjcCum, 'Cumulative FJC Status', dailyLive, [{label:'FJC Repair Rate',value:fjcRepair,goal:1,unit:'%'}]),
     welders:     bWelderChart(welderData),
     progress:    bProgress(dailyLive),
@@ -3330,7 +3363,7 @@ async function handleFile(forcedKey, file){
   try{
     const tParse=performance.now();
     let parsed;
-    if(key==='rfi')      parsed=parseRFI(ab);
+    if(key==='rfi')      { const r=parseRFI(ab); parsed=r.records; ST.rfiSupersededCount=r.supersededCount; localStorage.setItem('wep_rfi_superseded_count',r.supersededCount); }
     else if(key==='daily1') parsed=parseDaily(ab);
     else if(key==='daily2') parsed=parseDaily(ab);
     else if(key==='daily3') parsed=parseDaily(ab);
@@ -3444,6 +3477,7 @@ async function loadAllFromDB(){
 
     // Map DB column names back to the JS field names the parsers produce
     if(rfi.length)  ST.data.rfi    = rfi.map(r=>({date:r.date,discipline:r.discipline,section:r.section,ic:r.ic,status:r.status}));
+    ST.rfiSupersededCount = +(localStorage.getItem('wep_rfi_superseded_count')||0);
     if(s1.length)   ST.data.daily1 = s1.map(dbRowToDaily);
     if(s2.length)   ST.data.daily2 = s2.map(dbRowToDaily);
     if(s3.length)   ST.data.daily3 = s3.map(dbRowToDaily);
@@ -4406,9 +4440,9 @@ function loadLayout(){ try{ const s=localStorage.getItem(getActiveLayoutKey()); 
 
 // ── Panel visibility (hide/show in edit mode) ─────────
 const PANEL_NAMES={
-  rfiPeriod:'Period RFI',rfiDonut:'RFI Donut',rfiCumul:'Cumulative RFI',
-  ndtPeriod:'Period NDT',ndtCumul:'Cumulative NDT',
-  fjcPeriod:'Period FJC',fjcCumul:'Cumulative FJC',
+  rfiPeriod:'Reporting Duration RFI',rfiDonut:'RFI Donut',rfiCumul:'Cumulative RFI',
+  ndtPeriod:'Reporting Duration NDT',ndtCumul:'Cumulative NDT',
+  fjcPeriod:'Reporting Duration FJC',fjcCumul:'Cumulative FJC',
   welders:'Welder Activity',progress:'Progress',
   ncrTable:'NCR Table',ncrBar:'NCR Bar',
   sorTable:'SOR Table',sorScatter:'SOR Scatter',
