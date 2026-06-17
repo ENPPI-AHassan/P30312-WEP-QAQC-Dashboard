@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>P30312 — Weekly QA/QC Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- xlsx-js-style: free drop-in fork of SheetJS 0.18.5 that adds cell styling
+     (borders/fills/fonts/number formats). Exposes the same XLSX global, so all
+     existing import/export code keeps working unchanged. -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -174,20 +178,20 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .kpi-ed{background:#090912;border:1px solid #161929;border-radius:12px;overflow:hidden;transition:transform .15s,box-shadow .2s,border-color .2s}
 .kpi-ed:hover{transform:translateY(-2px)}
 .kpi-ed.good{--kc:#00ff9d}.kpi-ed.warn{--kc:#fbbf24}.kpi-ed.bad{--kc:#f43f5e}.kpi-ed.na{--kc:#3b4260}
-.kpi-ed:hover{border-color:color-mix(in srgb,var(--kc,#2d3348) 28%,transparent);box-shadow:0 10px 28px rgba(0,0,0,.5),0 0 20px color-mix(in srgb,var(--kc,#000) 8%,transparent)}
+.kpi-ed:hover{border-color:rgba(255,255,255,.12);box-shadow:0 10px 28px rgba(0,0,0,.5),0 0 20px rgba(0,0,0,.08)}
 .kpi-ed-head{padding:10px 13px 8px;border-bottom:1px solid rgba(255,255,255,.035);display:flex;justify-content:space-between;align-items:flex-start}
 .kpi-ed-lbl{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#4a5068;line-height:1.3}
 .kpi-ed-id{font-size:8.5px;color:#2d3348;font-weight:600;letter-spacing:.06em;font-family:'Courier New',monospace;flex-shrink:0;margin-left:4px}
 .kpi-ed-body{padding:10px 13px 8px}
-.kpi-ed-num{font-size:34px;font-weight:900;letter-spacing:-.03em;line-height:1;color:var(--kc,#4a5068);text-shadow:0 0 12px color-mix(in srgb,var(--kc,#000) 30%,transparent),0 0 28px color-mix(in srgb,var(--kc,#000) 12%,transparent)}
+.kpi-ed-num{font-size:34px;font-weight:900;letter-spacing:-.03em;line-height:1;color:var(--kc,#4a5068);text-shadow:0 0 12px rgba(0,0,0,.3),0 0 28px rgba(0,0,0,.12)}
 .kpi-ed-unit{font-size:12px;color:#4a5068;font-weight:500;margin-left:3px}
 .kpi-ed-row{display:flex;align-items:center;gap:7px;margin-top:6px}
-.kpi-ed-pill{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--kc,#2d3348) 13%,transparent);color:var(--kc,#4a5068);border:1px solid color-mix(in srgb,var(--kc,#2d3348) 22%,transparent);white-space:nowrap}
+.kpi-ed-pill{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.06);color:var(--kc,#4a5068);border:1px solid rgba(255,255,255,.1);white-space:nowrap}
 .kpi-ed-vs{font-size:9.5px;color:#3b4260;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi-ed-foot{background:rgba(0,0,0,.22);padding:7px 13px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.025)}
 .kpi-ed-spark{display:flex;align-items:flex-end;gap:3px;height:20px}
 .kpi-ed-bar{width:5px;border-radius:2px 2px 0 0;background:rgba(255,255,255,.06)}
-.kpi-ed-bar.hi{background:var(--kc,#2d3348);box-shadow:0 0 5px color-mix(in srgb,var(--kc,#000) 45%,transparent)}
+.kpi-ed-bar.hi{background:var(--kc,#2d3348);box-shadow:0 0 5px rgba(0,0,0,.45)}
 .kpi-ed-period{font-size:9px;color:#3b4260;letter-spacing:.04em}
 /* spinning SVG arc */
 .svg-spin{animation:spin .9s linear infinite;transform-origin:center;display:block}
@@ -666,6 +670,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
           <div><div class="umg-slbl" style="margin-bottom:5px">To</div><input class="umg-inp" id="expTo" type="date"></div>
         </div>
         <div class="exp-note">Applies to <b>Period</b> data sets only — each will only include records within this range. <b>Cumulative</b> data sets always export the full available history regardless of this range.</div>
+        <div id="expGuestNote" style="display:none;margin-top:8px;font-size:11px;color:#f59e0b;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:5px;padding:6px 10px">🔒 Date range is locked for guest access.</div>
       </div>
       <button class="umg-add-btn" onclick="generateCustomExport()">📊 Generate Excel</button>
       <div class="umg-msg" id="expMsg"></div>
@@ -914,8 +919,8 @@ function getDailyPeriod(rows, startDate, endDate){
     fjcReleased:last.fjcReleased - prev.fjcReleased,
     fjcTotal:   last.fjcTotal - prev.fjcTotal,
     fjcAccepted:last.fjcAccepted - prev.fjcAccepted,
-    fjcRepair:  last.fjcRepair - prev.fjcRepair,
-    fjcBalance: last.fjcBalance - prev.fjcBalance,
+    fjcRepair:  last.fjcRepair,
+    fjcBalance: last.fjcBalance,
   };
 }
 
@@ -4134,6 +4139,12 @@ function openExportOptions(){
   const f=document.getElementById('expFrom'), t=document.getElementById('expTo');
   if(f&&!f.value) f.value=ST.start;
   if(t&&!t.value) t.value=ST.end;
+  // Guests cannot change the date range — lock the inputs
+  const isGuest=!!(AUTH.currentUser&&AUTH.currentUser.isGuest);
+  if(f) f.disabled=isGuest;
+  if(t) t.disabled=isGuest;
+  const note=document.getElementById('expGuestNote');
+  if(note) note.style.display=isGuest?'block':'none';
   document.getElementById('exportOptionsModal').classList.add('open');
 }
 function closeExportOptions(){
@@ -4178,106 +4189,170 @@ function generateCustomExport(){
   if(!Object.values(sel).some(Boolean)){ showMsg('Select at least one data set to export.',false); return; }
 
   const wb=XLSX.utils.book_new();
-  // note → an info row placed above the table so the reader knows which
-  // window of data they're looking at, without bloating the sheet name
-  // (Excel sheet names are capped at 31 chars).
-  const mkSheet=(headers,rows,note)=>{
-    const aoa=note?[[note],[],headers,...rows]:[headers,...rows];
-    const ws=XLSX.utils.aoa_to_sheet(aoa);
-    const nc=headers.length;
-    if(note) ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:nc-1}}];
-    ws['!cols']=headers.map((_,ci)=>({wch:Math.min(Math.max(aoa.reduce((mx,row)=>{const v=row[ci];return Math.max(mx,v==null?0:String(v).length);},0)+2,8),60)}));
-    return ws;
+  const ws={};
+
+  // ── styling primitives (xlsx-js-style) ────────────────────────────────
+  // Border color: 6-char RGB (no alpha prefix) as required by xlsx-js-style.
+  // Four independent side objects — sharing one object across top/bottom/left/right
+  // causes xlsx-js-style to mangle the border XML during XF deduplication.
+  const mkBorder=()=>({
+    top:   {style:'thin',color:{rgb:'000000'}},
+    bottom:{style:'thin',color:{rgb:'000000'}},
+    left:  {style:'thin',color:{rgb:'000000'}},
+    right: {style:'thin',color:{rgb:'000000'}},
+  });
+  // Style templates (border injected fresh per cell via mkBorder()).
+  const S_TITLE=()=>({font:{bold:true,sz:11},alignment:{horizontal:'center',vertical:'center'},border:mkBorder()});
+  const S_HEAD =()=>({font:{bold:true,sz:10},alignment:{horizontal:'center'},border:mkBorder()});
+  const S_LBL  =()=>({border:mkBorder()});
+  const S_NUM  =()=>({border:mkBorder(),alignment:{horizontal:'right'}});
+  const S_TLBL =()=>({font:{bold:true},border:mkBorder()});
+  const S_TNUM =()=>({font:{bold:true},border:mkBorder(),alignment:{horizontal:'right'}});
+
+  let MAXR=0,MAXC=0,placed=false;
+  const merges=[];
+  const put=(r,c,v,styleFn,fmt)=>{
+    const addr=XLSX.utils.encode_cell({r,c});
+    const num=(typeof v==='number'&&isFinite(v));
+    const cell={t:num?'n':'s',v:(v==null?'':v)};
+    // Fresh style object per cell — no shared references, no XF bleed.
+    const s=styleFn();
+    if(num&&fmt) s.numFmt=fmt;
+    cell.s=s;
+    ws[addr]=cell;
+    if(r>MAXR)MAXR=r; if(c>MAXC)MAXC=c;
   };
-  const periodNote=`Period: ${from} to ${to}`;
-  const fullNote='Cumulative — full data history';
+  // place a titled, bordered panel: title bar → header row → data rows
+  const panel=(r0,c0,title,headers,rows,o)=>{
+    o=o||{}; placed=true;
+    const span=headers.length;
+    put(r0,c0,title,S_TITLE);
+    for(let cc=1;cc<span;cc++) put(r0,c0+cc,'',S_TITLE); // border across merged title
+    merges.push({s:{r:r0,c:c0},e:{r:r0,c:c0+span-1}});
+    headers.forEach((h,j)=>put(r0+1,c0+j,h,S_HEAD));
+    rows.forEach((row,i)=>{
+      const isTot=o.totalRows&&o.totalRows.includes(i);
+      row.forEach((val,j)=>{
+        const pct=o.pctCols&&o.pctCols.includes(j);
+        const style=(j===0)?(isTot?S_TLBL:S_LBL):(isTot?S_TNUM:S_NUM);
+        put(r0+2+i,c0+j,val,style,pct?'0.00%':undefined);
+      });
+    });
+  };
+  const tlast=rows=>[rows.length-1];
 
   const origStart=ST.start, origEnd=ST.end;
   try{
-    // ── PERIOD sheets — limited to the chosen export range ──
-    if(sel.rfiPeriod && ST.data.rfi){
-      const agg=aggRFI(ST.data.rfi.filter(r=>r.date>=from&&r.date<=to));
-      const rows=agg.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
-      rows.push(['TOTAL',agg.totals.acc,agg.totals.accW,agg.totals.can,agg.totals.open,agg.totals.rej,agg.totals.total]);
-      XLSX.utils.book_append_sheet(wb,mkSheet(['Discipline','ACC','ACC W/COMM','CAN','OPEN','REJ','Total'],rows,periodNote),'RFI Period');
-    }
-    if(sel.ndtPeriod||sel.fjcPeriod){
-      ST.start=from; ST.end=to;
-      if(sel.ndtPeriod){
-        const rows=getNDTRows(false);
-        if(rows){
-          const t=sumK(rows,['welded','rev','appr','repair','bl']);
-          const out=rows.map(r=>[r.s,r.welded,r.rev,r.appr,r.repair,r.bl]);
-          out.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);
-          XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Welded','EPCM Rev','EPCM Appr','Repair','Backlog'],out,periodNote),'NDT Period');
-        }
-      }
-      if(sel.fjcPeriod){
-        const rows=getFJCRows(false);
-        if(rows){
-          const t=sumK(rows,['released','total','accepted','repair','balance']);
-          const out=rows.map(r=>[r.s,r.released,r.total,r.accepted,r.repair,r.balance]);
-          out.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);
-          XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Released','Coated','Accepted','Repair','Balance'],out,periodNote),'FJC Period');
-        }
-      }
-      ST.start=origStart; ST.end=origEnd;
+    // ── RFI (band 1): period | KPIs | cumulative ──
+    let rfiP=null,rfiC=null,kpi=null;
+    if(ST.data.rfi){
+      const aP=aggRFI(ST.data.rfi.filter(r=>r.date>=from&&r.date<=to));
+      rfiP=aP.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
+      rfiP.push(['TOTAL',aP.totals.acc,aP.totals.accW,aP.totals.can,aP.totals.open,aP.totals.rej,aP.totals.total]);
+      const aC=aggRFI(ST.data.rfi);
+      rfiC=aC.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
+      rfiC.push(['TOTAL',aC.totals.acc,aC.totals.accW,aC.totals.can,aC.totals.open,aC.totals.rej,aC.totals.total]);
+      const T=aC.totals, tot=T.total||1;
+      kpi=[['ACC %',T.acc/tot],['ACC W/C %',T.accW/tot],['REJ %',T.rej/tot],
+           ['CAN %',T.can/tot],['OPEN %',T.open/tot],['REJ KPI',(T.rej/tot<0.05?'< 5% ✓':'≥ 5% ✗')]];
     }
 
-    // ── CUMULATIVE sheets — always the full data history ──
-    if(sel.rfiCumul && ST.data.rfi){
-      const agg=aggRFI(ST.data.rfi); // RFI cumulative already aggregates all records, unbounded
-      const rows=agg.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
-      rows.push(['TOTAL',agg.totals.acc,agg.totals.accW,agg.totals.can,agg.totals.open,agg.totals.rej,agg.totals.total]);
-      XLSX.utils.book_append_sheet(wb,mkSheet(['Discipline','ACC','ACC W/COMM','CAN','OPEN','REJ','Total'],rows,fullNote),'RFI Cumulative');
-    }
-    if(sel.ndtCumul||sel.fjcCumul){
-      // getNDTRows/getFJCRows(true) snapshot "as of ST.end" — point it at the
-      // latest date in the data so cumulative reflects the full history,
-      // independent of whatever range was chosen for the export.
-      ST.start=null; ST.end=maxDateAcross(ST.data.daily1,ST.data.daily2,ST.data.daily3)||origEnd;
-      if(sel.ndtCumul){
-        const rows=getNDTRows(true);
-        if(rows){
-          const t=sumK(rows,['welded','rev','appr','repair','bl']);
-          const out=rows.map(r=>[r.s,r.welded,r.rev,r.appr,r.repair,r.bl]);
-          out.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);
-          XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Welded','EPCM Rev','EPCM Appr','Repair','Backlog'],out,fullNote),'NDT Cumulative');
-        }
-      }
-      if(sel.fjcCumul){
-        const rows=getFJCRows(true);
-        if(rows){
-          const t=sumK(rows,['released','total','accepted','repair','balance']);
-          const out=rows.map(r=>[r.s,r.released,r.total,r.accepted,r.repair,r.balance]);
-          out.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);
-          XLSX.utils.book_append_sheet(wb,mkSheet(['Section','Released','Coated','Accepted','Repair','Balance'],out,fullNote),'FJC Cumulative');
-        }
-      }
-      ST.start=origStart; ST.end=origEnd;
+    // ── NDT + FJC: period (chosen range) and cumulative (full history) ──
+    let ndtP=null,fjcP=null,ndtC=null,fjcC=null,ndtCr=[],fjcCr=[];
+    ST.start=from; ST.end=to;
+    let r=getNDTRows(false);
+    if(r){const t=sumK(r,['welded','rev','appr','repair','bl']);ndtP=r.map(x=>[x.s,x.welded,x.rev,x.appr,x.repair,x.bl]);ndtP.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);}
+    r=getFJCRows(false);
+    if(r){const t=sumK(r,['released','total','accepted','repair','balance']);fjcP=r.map(x=>[x.s,x.released,x.total,x.accepted,x.repair,x.balance]);fjcP.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);}
+    ST.start=null; ST.end=maxDateAcross(ST.data.daily1,ST.data.daily2,ST.data.daily3)||origEnd;
+    r=getNDTRows(true);
+    if(r){ndtCr=r;const t=sumK(r,['welded','rev','appr','repair','bl']);ndtC=r.map(x=>[x.s,x.welded,x.rev,x.appr,x.repair,x.bl]);ndtC.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);}
+    r=getFJCRows(true);
+    if(r){fjcCr=r;const t=sumK(r,['released','total','accepted','repair','balance']);fjcC=r.map(x=>[x.s,x.released,x.total,x.accepted,x.repair,x.balance]);fjcC.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);}
+    ST.start=origStart; ST.end=origEnd;
+
+    // ── Pipeline welding progress (band 4 left), real data only ──
+    // No per-section target exists in the data, so the 4th column shows FJC
+    // Accepted; % complete is welded against the 42,000-joint project scope
+    // (same denominator the on-screen progress bar uses).
+    let prog=null;
+    if(ndtCr.length){
+      const TOTAL_JOINTS=42000;
+      prog=ndtCr.map(x=>{const f=fjcCr.find(y=>y.s===x.s);return [x.s,x.welded,f?f.accepted:0,x.welded/TOTAL_JOINTS];});
+      const wTot=ndtCr.reduce((a,x)=>a+x.welded,0), fTot=fjcCr.reduce((a,x)=>a+x.accepted,0);
+      prog.push(['OVERALL',wTot,fTot,wTot/TOTAL_JOINTS]);
     }
 
-    // ── Standalone data sets (no period/cumulative split) ──
-    if(sel.welders && ST.data.welders?.length){
-      const rows=ST.data.welders.map(w=>[w.id,w.name,w.section,w.cumAut,w.cumRep,+w.cumPct.toFixed(2),w.wkAut,w.wkRep,+w.wkPct.toFixed(2),w.remarks]);
-      XLSX.utils.book_append_sheet(wb,mkSheet(['ID','Name','Section','Cum AUT','Cum Rep','Cum Rep%','Wk AUT','Wk Rep','Wk Rep%','Remarks'],rows),'Welders');
+    // ── Welders > 3% repair (band 4 right) ──
+    let wel=null;
+    if(ST.data.welders&&ST.data.welders.length){
+      const over=ST.data.welders.filter(w=>w.cumPct>3&&w.cumAut>0).sort((a,b)=>b.cumPct-a.cumPct);
+      if(over.length){
+        wel=over.slice(0,3).map(w=>[w.name,w.id,w.section,w.cumPct/100]);
+        const cnt={};over.forEach(w=>{cnt[w.section]=(cnt[w.section]||0)+1;});
+        const summary=Object.entries(cnt).map(([s,n])=>`${s}:${n}`).join('  ')||'—';
+        wel.push(['Welders >3%',summary,'TOT',String(over.length)]);
+      }
     }
-    if(sel.sor && ST.data.sor?.length){
-      const rows=ST.data.sor.filter(r=>r.date>=from&&r.date<=to).map(r=>[r.sorNo,r.short,r.date,r.ic,r.status,r.km,r.desc]);
-      XLSX.utils.book_append_sheet(wb,mkSheet(['SOR No','Short Name','Date','IC','Status','KM','Description'],rows,periodNote),'SOR');
+
+    // ── NCR / SOR by-status (band 5), filtered to the chosen range ──
+    const statusRows=(recs,keyFn)=>{
+      const m={};
+      recs.filter(r=>r.date>=from&&r.date<=to).forEach(r=>{
+        const k=keyFn(r); if(!m[k])m[k]={k,open:0,closed:0,total:0};
+        if(String(r.status).includes('CLOSED'))m[k].closed++; else m[k].open++; m[k].total++;
+      });
+      const rows=Object.values(m).sort((a,b)=>b.total-a.total).map(x=>[x.k,x.open,x.closed,x.total]);
+      const t=rows.reduce((a,x)=>[null,a[1]+x[1],a[2]+x[2],a[3]+x[3]],[null,0,0,0]);
+      rows.push(['TOTAL',t[1],t[2],t[3]]);
+      return rows;
+    };
+    const ncrS=(ST.data.ncr&&ST.data.ncr.length)?statusRows(ST.data.ncr,r=>r.againstName):null;
+    const sorS=(ST.data.sor&&ST.data.sor.length)?statusRows(ST.data.sor,r=>r.ic):null;
+
+    // ── place panels on the fixed grid (checkboxes toggle each panel) ──
+    const RFI_H=['DISCIPLINE','ACC','ACC W/COMM','CAN','OPEN','REJ','TOTAL'];
+    const NDT_H=['SECTION','WELDED','EPCM REV','EPCM APPR','REPAIR','BACKLOG'];
+    const FJC_H=['SECTION','RELEASED','COATED','ACCEPTED','REPAIR','BALANCE'];
+    const ST_H =['IC','OPEN','CLOSED','TOTAL'];
+
+    // ── header: project title + reporting duration spanning all 16 columns ──
+    const isoToDMY=d=>{if(!d||d==='—')return d||'—';const[y,m,dy]=d.split('-');return`${dy}/${m}/${y}`;};
+    const hdr1='WEST TO EAST PIPELINE "WEP" PROJECT  ·  P30312  ·  CONSTRUCTION QA/QC DASHBOARD';
+    const hdr2=`REPORTING PERIOD: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`;
+    const S_HDR1=()=>({font:{bold:true,sz:13},alignment:{horizontal:'center',vertical:'center'},border:mkBorder()});
+    const S_HDR2=()=>({font:{bold:true,sz:11},alignment:{horizontal:'center',vertical:'center'},border:mkBorder()});
+    put(0,0,hdr1,S_HDR1); for(let c=1;c<16;c++) put(0,c,'',S_HDR1);
+    put(1,0,hdr2,S_HDR2); for(let c=1;c<16;c++) put(1,c,'',S_HDR2);
+    merges.push({s:{r:0,c:0},e:{r:0,c:15}},{s:{r:1,c:0},e:{r:1,c:15}});
+
+    // panels shifted down 3 rows (2 header rows + 1 blank gap)
+    if(sel.rfiPeriod&&rfiP) panel(3,0,'RFI — REPORTING PERIOD',RFI_H,rfiP,{totalRows:tlast(rfiP)});
+    if(sel.rfiCumul&&rfiC){
+      panel(3,9,'RFI — CUMULATIVE',RFI_H,rfiC,{totalRows:tlast(rfiC)});
+      if(kpi) panel(3,7,'RFI KPIs',['METRIC','VALUE'],kpi,{pctCols:[1]});
     }
-    if(sel.ncr && ST.data.ncr?.length){
-      const rows=ST.data.ncr.filter(r=>r.date>=from&&r.date<=to).map(r=>[r.ncrNo,r.date,r.raisedBy,r.againstName,r.status,r.targetClose,r.actualClose,r.desc]);
-      XLSX.utils.book_append_sheet(wb,mkSheet(['NCR No','Date','Raised By','Against','Status','Target Close','Actual Close','Description'],rows,periodNote),'NCR');
-    }
+    if(sel.ndtPeriod&&ndtP) panel(19,0,'WELDING / NDT — REPORTING PERIOD',NDT_H,ndtP,{totalRows:tlast(ndtP)});
+    if(sel.ndtCumul&&ndtC) panel(19,9,'WELDING / NDT — CUMULATIVE',NDT_H,ndtC,{totalRows:tlast(ndtC)});
+    if(sel.fjcPeriod&&fjcP) panel(27,0,'FJC — REPORTING PERIOD',FJC_H,fjcP,{totalRows:tlast(fjcP)});
+    if(sel.fjcCumul&&fjcC) panel(27,9,'FJC — CUMULATIVE',FJC_H,fjcC,{totalRows:tlast(fjcC)});
+    if(prog) panel(35,0,'PIPELINE WELDING PROGRESS',['SECTION','WELDED','FJC ACC','% COMPLETE'],prog,{totalRows:tlast(prog),pctCols:[3]});
+    if(sel.welders&&wel) panel(35,9,'WELDERS — HIGHEST REPAIR RATE',['NAME','W.ID','SEC','REP %'],wel,{pctCols:[3]});
+    if(sel.ncr&&ncrS) panel(43,0,'NCR — BY STATUS',ST_H,ncrS,{totalRows:tlast(ncrS)});
+    if(sel.sor&&sorS) panel(43,9,'SOR — BY STATUS',ST_H,sorS,{totalRows:tlast(sorS)});
   }catch(e){
     ST.start=origStart; ST.end=origEnd;
     showMsg('Export failed: '+e.message,false);
     return;
   }
+  ST.start=origStart; ST.end=origEnd;
 
-  if(wb.SheetNames.length===0){ showMsg('No data available for the selected data sets / range.',false); return; }
-  XLSX.writeFile(wb,`P30312_CustomExport_${from}_to_${to}.xlsx`);
+  if(!placed){ showMsg('No data available for the selected data sets / range.',false); return; }
+  ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(MAXR,46),c:Math.max(MAXC,15)}});
+  ws['!merges']=merges;
+  ws['!cols']=[14.3,10,12,11,9,9,9,12,9,14.3,9,18,10,12,11,9].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws,'Dashboard');
+  XLSX.writeFile(wb,`P30312_Dashboard_${from}_to_${to}.xlsx`);
   showMsg('Export generated — check your downloads folder.',true);
 }
 
@@ -4286,43 +4361,105 @@ async function exportDashboardImage(){
   if(d) d.style.display='none';
   syncSidenavPin();
 
-  const target=document.getElementById('app');
   const btn=document.getElementById('btnExportImg');
-  if(!target||typeof html2canvas!=='function'){
+  if(typeof html2canvas!=='function'){
     alert('Image export library failed to load — check your internet connection and try again.');
     return;
   }
 
-  const origLabel=btn?btn.innerHTML:null;
-  if(btn){ btn.innerHTML='⏳ Rendering high-res image…'; btn.style.pointerEvents='none'; }
+  // ── determine pages by role ──────────────────────────────────────────────
+  const u=AUTH.currentUser||{};
+  const isAdmin=(u.role==='superadmin'||u.role==='admin');
+  const isGuest=!!u.isGuest;
+  const ALL_PAGES=[
+    {view:'dashboard',  label:'Main Dashboard'},
+    {view:'deployment', label:'Manpower Deployment'},
+    {view:'kpi',        label:'Quality KPIs'},
+  ];
+  const pages=isAdmin?ALL_PAGES:isGuest?ALL_PAGES.slice(0,1):ALL_PAGES.slice(0,2);
 
+  const origView=APP_VIEW;
+  const origLabel=btn?btn.innerHTML:null;
+
+  // ── full-screen overlay: hides page transitions from the user ────────────
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
+  const ovMsg=document.createElement('div');
+  ovMsg.style.cssText='color:#e6edf3;font-size:15px;font-weight:600;font-family:system-ui,sans-serif';
+  const ovSub=document.createElement('div');
+  ovSub.style.cssText='color:#8b949e;font-size:12px;font-family:system-ui,sans-serif';
+  overlay.append(ovMsg,ovSub);
+  document.body.appendChild(overlay);
+
+  const setMsg=(m,s='')=>{ ovMsg.textContent=m; ovSub.textContent=s; };
+
+  // Disable Chart.js animations so charts paint on the first frame.
+  let chartAnimOrig=null;
+  if(typeof Chart!=='undefined'&&Chart.defaults){
+    chartAnimOrig=Chart.defaults.animation;
+    Chart.defaults.animation=false;
+  }
+
+  const date=new Date().toISOString().slice(0,10);
   try{
-    const bg=getComputedStyle(document.body).backgroundColor;
-    const canvas=await html2canvas(target,{
-      scale:Math.max(3, window.devicePixelRatio*2),
-      useCORS:true,
-      backgroundColor:bg,
-      windowWidth:target.scrollWidth,
-      windowHeight:target.scrollHeight,
-      scrollX:0,
-      scrollY:0
-    });
-    await new Promise(resolve=>{
-      canvas.toBlob(blob=>{
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a');
-        a.href=url;
-        a.download=`QAQC_Dashboard_${new Date().toISOString().slice(0,10)}.png`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        resolve();
-      },'image/png',1.0);
-    });
+    const bg=getComputedStyle(document.body).backgroundColor||'#0d1117';
+
+    const capturePage=async(view,label,idx)=>{
+      setMsg(`Rendering — ${label}`,`Page ${idx+1} of ${pages.length}`);
+      switchView(view);
+      await new Promise(r=>setTimeout(r,400)); // let charts finish first draw
+      const target=document.getElementById('app');
+      // Use the document scroll width so absolutely-positioned panels that
+      // extend beyond #app's own box are not clipped on the right.
+      const w=Math.max(target.scrollWidth, document.documentElement.scrollWidth, document.body.scrollWidth);
+      const h=target.scrollHeight;
+      return html2canvas(target,{
+        scale:Math.max(3,window.devicePixelRatio*2),
+        useCORS:true,
+        backgroundColor:bg,
+        width:w, height:h,
+        windowWidth:w, windowHeight:h,
+        scrollX:0, scrollY:0,
+      });
+    };
+
+    const skipped=[];
+    const zip=new JSZip();
+    for(let i=0;i<pages.length;i++){
+      const p=pages[i];
+      let canvas;
+      try{ canvas=await capturePage(p.view,p.label,i); }
+      catch(e){ skipped.push(p.label); console.warn(`Export skipped "${p.label}":`,e); continue; }
+
+      // keep PNG in memory as a blob, add to zip
+      const blob=await new Promise(r=>canvas.toBlob(r,'image/png',1.0));
+      const fname=`${i+1}_${p.label.replace(/\s+/g,'-')}.png`;
+      zip.file(fname,blob);
+    }
+
+    switchView(origView);
+    if(skipped.length) console.warn('Export: skipped pages:',skipped.join(', '));
+
+    if(!zip.files||!Object.keys(zip.files).length){
+      alert('Image export failed — no pages could be rendered.\nSkipped: '+skipped.join(', '));
+      return;
+    }
+
+    setMsg('Building ZIP…','Almost done');
+    const zipBlob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+    const url=URL.createObjectURL(zipBlob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`QAQC_Dashboard_${date}.zip`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
   }catch(e){
+    switchView(origView);
     alert('Failed to export dashboard image: '+e.message);
   }finally{
+    if(chartAnimOrig!==null&&typeof Chart!=='undefined'&&Chart.defaults)
+      Chart.defaults.animation=chartAnimOrig;
+    overlay.remove();
     if(btn){ btn.innerHTML=origLabel; btn.style.pointerEvents=''; }
   }
 }
