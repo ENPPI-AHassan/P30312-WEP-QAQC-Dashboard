@@ -46,6 +46,7 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .sidenav.open .sidenav-userinfo{transition-delay:.18s}
 /* Sign-out: always visible, icon-only when collapsed (label fades via .snav-lbl) */
 .sidenav:not(.open) .sidenav-signout .snav-lbl{opacity:0;max-width:0;overflow:hidden}
+.sidenav:hover .sidenav-signout .snav-lbl,.sidenav.drop-open .sidenav-signout .snav-lbl{opacity:1;max-width:200px;transition-delay:.12s}
 /* Collapsed tooltips */
 .sidenav:not(.open) .sidenav-link[data-tip],
 .sidenav:not(.open) .sidenav-signout[data-tip]{position:relative}
@@ -68,7 +69,7 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 /* Same fixed-geometry rule as .sidenav-link: 11px margin + 1px border + 10px pad
    centres the 15px icon in the 58px rail; identical in every state. */
 .sidenav-signout{margin:6px 11px 16px;padding:11px 10px;border-radius:8px;background:#252a3a;border:1px solid #2d3348;
-  color:#f85149;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:flex-start;
+  color:#f85149;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;
   gap:8px;white-space:nowrap;transition:box-shadow .25s,border-color .25s,background .2s}
 .sidenav-signout:hover{border-color:rgba(244,63,94,.45);background:rgba(244,63,94,.08);box-shadow:0 0 12px 2px rgba(244,63,94,.55)}
 .sidenav-backdrop{display:none;position:fixed;inset:0;left:58px;background:rgba(0,0,0,.4);z-index:1050}
@@ -230,6 +231,23 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 #userMgmtModal.open{display:flex}
 #idleWarningModal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;display:none;align-items:center;justify-content:center}
 #idleWarningModal.open{display:flex}
+#changePwModal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9500;display:none;align-items:center;justify-content:center}
+#changePwModal.open{display:flex}
+.cpw-card{background:#161c2c;border:1px solid #2d3a58;border-radius:14px;width:420px;max-width:94vw;box-shadow:0 28px 90px rgba(0,0,0,.75)}
+.cpw-hdr{padding:18px 22px 14px;border-bottom:1px solid #2d3348;display:flex;align-items:center;justify-content:space-between}
+.cpw-body{padding:20px 22px 24px}
+.cpw-who{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid #2d3348}
+.cpw-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+.cpw-pw-wrap{position:relative}
+.cpw-pw-wrap .umg-inp{padding-right:38px;width:100%;box-sizing:border-box}
+.cpw-eye{position:absolute;right:0;top:0;bottom:0;width:38px;background:none;border:none;cursor:pointer;color:#4a5068;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.cpw-eye:hover{color:#7a809a}
+.umg-blocked-row{border-color:rgba(244,63,94,.35)!important;background:rgba(244,63,94,.06)!important}
+.umg-blocked-badge{font-size:9px;font-weight:700;letter-spacing:.05em;background:rgba(244,63,94,.15);color:#f43f5e;border:1px solid rgba(244,63,94,.3);border-radius:4px;padding:2px 6px;flex:none}
+.umg-unblock-btn{background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);border-radius:5px;color:#14b8a6;font-size:11px;font-weight:600;padding:4px 10px;cursor:pointer;transition:background .15s;flex:none}
+.umg-unblock-btn:hover{background:rgba(20,184,166,.22)}
+.snav-notif-badge{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#f43f5e;box-shadow:0 0 6px #f43f5e99;pointer-events:none}
+.snav-users-wrap{position:relative;display:flex}
 .idle-card{background:#161c2c;border:1px solid #2d3a58;border-radius:14px;padding:36px 40px;max-width:420px;width:90%;box-shadow:0 28px 90px rgba(0,0,0,.75);text-align:center}
 .idle-icon{font-size:36px;margin-bottom:14px}
 .idle-title{font-size:16px;font-weight:700;color:#e6edf3;margin-bottom:8px}
@@ -281,7 +299,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
   .upl-bar{position:relative!important;left:0!important;box-shadow:none!important}
   .upl-strip{display:none!important}
   #uplBarSpacer,#dpBarSpacer{display:none!important}
-  #loginOverlay,#userMgmtModal,#wrongFileModal,#idleWarningModal{display:none!important}
+  #loginOverlay,#userMgmtModal,#wrongFileModal,#idleWarningModal,#changePwModal{display:none!important}
   body{min-width:unset!important}
   .row{break-inside:avoid}
   .card,.kpi-card{break-inside:avoid}
@@ -627,6 +645,57 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
   </div>
 </div>
 
+<!-- CHANGE PASSWORD MODAL -->
+<div id="changePwModal">
+  <div class="cpw-card">
+    <div class="cpw-hdr">
+      <div><div class="umg-title">Change Password</div><div class="umg-sub">Update your login password</div></div>
+      <button class="btn-x" onclick="closeChangePw()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke="#f43f5e" stroke-width="1.3" opacity=".3"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#f43f5e" stroke-width="1.7"/></svg></button>
+    </div>
+    <div class="cpw-body">
+      <div class="cpw-who">
+        <div class="cpw-avatar" id="cpwAvatar"></div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#e6edf3" id="cpwDisplayName"></div>
+          <div style="font-size:11px;color:#7a809a" id="cpwUsername"></div>
+        </div>
+        <span class="role-badge" id="cpwRoleBadge" style="margin-left:auto"></span>
+      </div>
+      <div class="umg-form-grid" style="grid-template-columns:1fr;gap:14px">
+        <div>
+          <div class="umg-slbl" style="margin-bottom:5px">Current Password</div>
+          <div class="cpw-pw-wrap">
+            <input class="umg-inp" id="cpwCurrent" type="password" placeholder="Enter current password">
+            <button class="cpw-eye" type="button" onclick="toggleCpwEye('cpwCurrent','cpwEye0')">
+              <svg id="cpwEye0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="12" rx="4" ry="2.8"/><path d="M2 12c2.5-5 5.5-7.5 10-7.5s7.5 2.5 10 7.5c-2.5 5-5.5 7.5-10 7.5S4.5 17 2 12z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="umg-slbl" style="margin-bottom:5px">New Password</div>
+          <div class="cpw-pw-wrap">
+            <input class="umg-inp" id="cpwNew" type="password" placeholder="Min 8 characters">
+            <button class="cpw-eye" type="button" onclick="toggleCpwEye('cpwNew','cpwEye1')">
+              <svg id="cpwEye1" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="12" rx="4" ry="2.8"/><path d="M2 12c2.5-5 5.5-7.5 10-7.5s7.5 2.5 10 7.5c-2.5 5-5.5 7.5-10 7.5S4.5 17 2 12z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="umg-slbl" style="margin-bottom:5px">Confirm New Password</div>
+          <div class="cpw-pw-wrap">
+            <input class="umg-inp" id="cpwConfirm" type="password" placeholder="Repeat new password">
+            <button class="cpw-eye" type="button" onclick="toggleCpwEye('cpwConfirm','cpwEye2')">
+              <svg id="cpwEye2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="12" rx="4" ry="2.8"/><path d="M2 12c2.5-5 5.5-7.5 10-7.5s7.5 2.5 10 7.5c-2.5 5-5.5 7.5-10 7.5S4.5 17 2 12z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <button class="umg-add-btn" style="margin-top:18px" onclick="submitChangePw()">Update Password</button>
+      <div class="umg-msg" id="cpwMsg"></div>
+    </div>
+  </div>
+</div>
+
 <!-- IDLE WARNING MODAL -->
 <div id="idleWarningModal">
   <div class="idle-card">
@@ -765,6 +834,7 @@ const ST = {
   end:   _defEnd,
   unsaved: new Set(), // keys with data in memory but not yet saved to Supabase
   rfiSupersededCount: 0,
+  blockedCount: 0,
   data: {
     rfi:        null,
     daily1:     null,
@@ -885,9 +955,6 @@ function parseDaily(ab){
       fjcAccepted:n(r[24]),
       fjcRepair:  n(r[25]),
       fjcBalance: n(r[26]),
-      // TODO: confirm column indices for coating data in the daily sheet
-      coatTotal:    n(r[27]),
-      coatRejected: n(r[28]),
     });
   }
   return rows;
@@ -919,8 +986,8 @@ function getDailyPeriod(rows, startDate, endDate){
     fjcReleased:last.fjcReleased - prev.fjcReleased,
     fjcTotal:   last.fjcTotal - prev.fjcTotal,
     fjcAccepted:last.fjcAccepted - prev.fjcAccepted,
-    fjcRepair:  last.fjcRepair,
-    fjcBalance: last.fjcBalance,
+    fjcRepair:  Math.max(0, last.fjcRepair - prev.fjcRepair),
+    fjcBalance: Math.max(0, last.fjcBalance - prev.fjcBalance),
   };
 }
 
@@ -1182,17 +1249,17 @@ function bRFITable(rows, totals, title, live, supersededCount=null){
   // When superseded count is provided (cumulative table), include it in the denominator
   const denom=(t+(supersededCount!=null?supersededCount:0))||1;
   const p=v=>Math.round(v/denom*100);
-  const bd=[
-    {l:'ACC',       v:totals.acc,  c:s.cb,   bg:s.cb+'18'},
-    {l:'ACC W/COMM',v:totals.accW, c:s.clb,  bg:s.clb+'14'},
-    {l:'CAN',       v:totals.can,  c:s.muted, bg:s.muted+'14'},
-    {l:'REJ',       v:totals.rej,  c:s.bad,   bg:s.bad+'18'},
-  ];
-  const bdgHtml=bd.map(b=>`<div class="bdg" style="background:${b.bg};border-left-color:${b.c}">
-    <div class="bdg-lbl" style="color:${b.c}">${b.l}</div>
-    <div class="bdg-pct" style="color:${b.c}">${p(b.v)}%</div>
-    <div class="bdg-cnt">${fn(b.v)}</div>
-  </div>`).join('');
+  const mkBdg=(l,v,c,bg,extra='')=>`<div class="bdg" style="background:${bg};border-left-color:${c};${extra}">
+    <div class="bdg-lbl" style="color:${c}">${l}</div>
+    <div class="bdg-pct" style="color:${c}">${p(v)}%</div>
+    <div class="bdg-cnt">${fn(v)}</div>
+  </div>`;
+  const bdgHtml=
+    mkBdg('OPEN',      totals.open, s.ca,    s.ca+'18')+
+    mkBdg('ACC W/COMM',totals.accW, s.clb,   s.clb+'14')+
+    mkBdg('ACC',       totals.acc,  s.cb,    s.cb+'18','grid-row:span 2')+
+    mkBdg('CAN',       totals.can,  s.muted, s.muted+'14')+
+    mkBdg('REJ',       totals.rej,  s.bad,   s.bad+'18');
   const footnote=supersededCount!=null
     ?`<div style="margin-top:8px;font-size:9.5px;color:${s.muted};letter-spacing:.03em">&#42; Count of Superseded RFIs: <span style="color:#e6edf3;font-weight:600">${fn(supersededCount)}</span>${supersededCount>0?' &mdash; percentages above are calculated over the grand total including superseded.':''}</div>`
     :'';
@@ -1209,7 +1276,7 @@ function bRFITable(rows, totals, title, live, supersededCount=null){
     </tr></tfoot></table></div>
     <div style="border-top:1px solid ${s.border};padding-top:10px;margin-top:10px">
       <div class="slbl" style="margin-bottom:6px">Status Breakdown</div>
-      <div class="bdg-grid">${bdgHtml}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 0.65fr;grid-template-rows:auto auto;gap:6px">${bdgHtml}</div>
       ${footnote}
     </div>
   </div>`;
@@ -1685,14 +1752,17 @@ function bSidenavExtra(){
       </button>
     </div>
 
-    ${isSA?`<button class="sidenav-link snav-users" data-tip="User Management" style="width:100%;background:none;border:none;cursor:pointer" onclick="openUserMgmt()">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
-        <path d="M12 3L4 6.5v5c0 4.5 3.4 8.7 8 9.5 4.6-.8 8-5 8-9.5v-5L12 3z" stroke="#60a5fa" stroke-width="1.4" stroke-linejoin="round"/>
-        <circle cx="12" cy="10" r="2.2" stroke="#60a5fa" stroke-width="1.2"/>
-        <path d="M7.5 17c.5-2.5 2.5-4 4.5-4s4 1.5 4.5 4" stroke="#60a5fa" stroke-width="1.2" stroke-linecap="round"/>
-      </svg>
-      <span class="snav-lbl">User Management</span>
-    </button>`:''}
+    ${(isSA||u.role==='admin')?`<div class="snav-users-wrap">
+      <button class="sidenav-link snav-users" data-tip="User Management" style="width:100%;background:none;border:none;cursor:pointer" onclick="openUserMgmt()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
+          <path d="M12 3L4 6.5v5c0 4.5 3.4 8.7 8 9.5 4.6-.8 8-5 8-9.5v-5L12 3z" stroke="#60a5fa" stroke-width="1.4" stroke-linejoin="round"/>
+          <circle cx="12" cy="10" r="2.2" stroke="#60a5fa" stroke-width="1.2"/>
+          <path d="M7.5 17c.5-2.5 2.5-4 4.5-4s4 1.5 4.5 4" stroke="#60a5fa" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="snav-lbl">User Management</span>
+      </button>
+      ${(ST.blockedCount>0)?`<span class="snav-notif-badge" title="${ST.blockedCount} blocked account${ST.blockedCount>1?'s':''}"></span>`:''}
+    </div>`:''}
 
     <div class="sidenav-divider"></div>
 
@@ -1701,6 +1771,14 @@ function bSidenavExtra(){
       <div class="sidenav-uirow"><span class="sidenav-uilbl">Access Type</span><span class="role-badge ${roleCls}">${roleLabel}</span></div>
       ${(!isGuest&&u.lastLogin)?`<div class="sidenav-uirow"><span class="sidenav-uilbl">Last Sign-in</span><span class="sidenav-uival" style="font-size:10px">${fmtLoginTime(u.lastLogin)}</span></div>`:''}
     </div>
+    ${!isGuest?`<button class="sidenav-link" data-tip="Change Password" style="width:100%;background:none;border:none;cursor:pointer;margin-top:4px" onclick="openChangePw()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none" stroke="#7a809a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        <circle cx="12" cy="16" r="1.3" fill="#7a809a"/>
+      </svg>
+      <span class="snav-lbl" style="color:#7a809a">Change Password</span>
+    </button>`:''}
+
     <button class="sidenav-signout" data-tip="Sign Out" onclick="logout()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f85149" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -2904,12 +2982,12 @@ function getKPIMetrics(){
     sorOpenCount   = sor.length - sorClosedCount;
   }
 
-  // ── Coating Rejection from daily sheets ──────────
+  // ── Coating Rejection — derived from FJC columns (coated=fjcTotal, repair=fjcRepair)
   let coatRate=null, coatRejected=0, coatTotal=0;
   ['daily1','daily2','daily3'].forEach(k=>{
     const rows=ST.data[k]; if(!rows) return;
     const snap=getDailySnapshot(rows, ST.end);
-    if(snap){ coatTotal+=snap.coatTotal||0; coatRejected+=snap.coatRejected||0; }
+    if(snap){ coatTotal+=snap.fjcTotal||0; coatRejected+=snap.fjcRepair||0; }
   });
   if(coatTotal>0) coatRate = coatRejected/coatTotal*100;
 
@@ -3507,8 +3585,7 @@ async function loadAllFromDB(){
 function dbRowToDaily(r){
   return{date:r.date,welded:+r.welded||0,ndtRev:+r.ndt_rev||0,ndtAppr:+r.ndt_appr||0,
     ndtRescan:+r.ndt_rescan||0,ndtRepair:+r.ndt_repair||0,fjcReleased:+r.fjc_released||0,
-    fjcTotal:+r.fjc_total||0,fjcAccepted:+r.fjc_accepted||0,fjcRepair:+r.fjc_repair||0,fjcBalance:+r.fjc_balance||0,
-    coatTotal:+r.coat_total||0,coatRejected:+r.coat_rejected||0};
+    fjcTotal:+r.fjc_total||0,fjcAccepted:+r.fjc_accepted||0,fjcRepair:+r.fjc_repair||0,fjcBalance:+r.fjc_balance||0};
 }
 
 // ═══════════════════════════════════════════════════
@@ -3572,6 +3649,13 @@ async function loadAndShow(){
     }catch(e){}
   }
   applyScheme(CURRENT_SCHEME);
+  // Fetch blocked user count for admin/superadmin so the sidebar badge is ready
+  if(AUTH.currentUser && (AUTH.currentUser.role==='superadmin'||AUTH.currentUser.role==='admin') && !AUTH.currentUser.isGuest){
+    try{
+      const blocked=await sbSelect('dashboard_users','select=username&is_blocked=eq.true');
+      ST.blockedCount=blocked.length;
+    }catch(e){ ST.blockedCount=0; }
+  }
   startIdleTimer(); // begin 20-min idle countdown
   document.getElementById('app').innerHTML=`<div style="padding:40px 20px;text-align:center;color:${SCHEMES[CURRENT_SCHEME].faint};font-size:13px">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="svg-spin" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="9" stroke="#1e2940" stroke-width="1.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/></svg>
@@ -3623,23 +3707,92 @@ function continueAsGuest(){
   loadAndShow();
 }
 
+let _lockoutIv=null;
+function _clearLockoutCountdown(){ clearInterval(_lockoutIv); _lockoutIv=null; }
+
+function _startLockoutCountdown(until){
+  const btn=document.getElementById('loginBtn');
+  const errEl=document.getElementById('loginErr');
+  _clearLockoutCountdown();
+  const tick=()=>{
+    const secsLeft=Math.max(0,Math.ceil((new Date(until)-Date.now())/1000));
+    const m=Math.floor(secsLeft/60), s=String(secsLeft%60).padStart(2,'0');
+    errEl.textContent=`Too many failed attempts. Try again in ${m}:${s}.`;
+    errEl.classList.add('show');
+    if(btn){ btn.disabled=true; btn.textContent='Sign In'; }
+    if(secsLeft<=0){ _clearLockoutCountdown(); if(btn) btn.disabled=false; }
+  };
+  tick();
+  _lockoutIv=setInterval(tick,1000);
+}
+
 async function attemptLogin(){
   const uInput=(document.getElementById('loginUser').value||'').trim().toLowerCase();
   const pInput=(document.getElementById('loginPass').value||'');
   const btn=document.getElementById('loginBtn');
   const errEl=document.getElementById('loginErr');
   if(!uInput||!pInput){errEl.textContent='Please enter username and password.';errEl.classList.add('show');return;}
-  btn.disabled=true;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="svg-spin" style="display:inline-block;vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="9" stroke="#1e2940" stroke-width="1.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/></svg> Signing in…';errEl.classList.remove('show');
+  btn.disabled=true;
+  btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="svg-spin" style="display:inline-block;vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="9" stroke="#1e2940" stroke-width="1.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/></svg> Signing in…';
+  errEl.classList.remove('show');
   try{
-    const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uInput)}&select=username,display_name,role,pw_hash`);
-    if(!rows.length){ throw new Error('Invalid username or password.'); }
+    const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uInput)}&select=username,display_name,role,pw_hash,login_attempts,locked_until,is_blocked`);
+    if(!rows.length){ btn.disabled=false; btn.textContent='Sign In'; errEl.textContent='Invalid username or password.'; errEl.classList.add('show'); return; }
     const user=rows[0];
-    const hash=await hashPw(pInput);
-    if(hash!==user.pw_hash){ throw new Error('Invalid username or password.'); }
 
-    // Last-sign-in tracking lives in an optional `last_login timestamptz` column
-    // on dashboard_users. Queried/patched separately (and silently ignored on
-    // failure) so a missing column never breaks the core login flow.
+    // Blocked permanently
+    if(user.is_blocked){
+      btn.disabled=false; btn.textContent='Sign In';
+      errEl.textContent='This account has been blocked. Please contact the administrator.';
+      errEl.classList.add('show'); return;
+    }
+
+    // Temporary lockout — show countdown
+    if(user.locked_until && new Date(user.locked_until)>new Date()){
+      btn.disabled=false; btn.textContent='Sign In';
+      _startLockoutCountdown(user.locked_until); return;
+    }
+
+    const hash=await hashPw(pInput);
+    if(hash!==user.pw_hash){
+      // Wrong password — increment attempts
+      const attempts=(user.login_attempts||0)+1;
+      const patch={login_attempts:attempts};
+      if(attempts===3){
+        // 3rd wrong → 5-minute lockout
+        patch.locked_until=new Date(Date.now()+5*60*1000).toISOString();
+        fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
+          method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
+        }).catch(()=>{});
+        btn.disabled=false; btn.textContent='Sign In';
+        _startLockoutCountdown(patch.locked_until); return;
+      } else if(attempts>=4){
+        // 4th wrong after lockout passed → block permanently
+        patch.is_blocked=true;
+        fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
+          method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
+        }).catch(()=>{});
+        btn.disabled=false; btn.textContent='Sign In';
+        errEl.textContent='Your account has been blocked after too many failed attempts. Please contact the administrator.';
+        errEl.classList.add('show'); return;
+      } else {
+        fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
+          method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
+        }).catch(()=>{});
+        btn.disabled=false; btn.textContent='Sign In';
+        errEl.textContent=`Invalid username or password. ${3-attempts} attempt${3-attempts!==1?'s':''} remaining before lockout.`;
+        errEl.classList.add('show'); return;
+      }
+    }
+
+    // ── Correct password ──
+    _clearLockoutCountdown();
+    // Reset attempt counters
+    fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},
+      body:JSON.stringify({login_attempts:0,locked_until:null,last_login:new Date().toISOString()})
+    }).catch(()=>{});
+
     let prevLogin=null;
     try{
       const llRows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uInput)}&select=last_login`);
@@ -3648,10 +3801,6 @@ async function attemptLogin(){
 
     const session={username:uInput,displayName:user.display_name||uInput,role:uInput===SUPER_ADMIN?'superadmin':user.role,lastLogin:prevLogin};
     setSession(session); AUTH.currentUser=session;
-    // Stamp this sign-in time (fire-and-forget)
-    fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
-      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify({last_login:new Date().toISOString()})
-    }).catch(()=>{});
     await loadAndShow();
   }catch(e){
     btn.disabled=false; btn.textContent='Sign In';
@@ -3735,7 +3884,7 @@ function logout(){
 
 // ── User Management ─────────────────────────────────
 function openUserMgmt(){
-  if(!AUTH.currentUser||AUTH.currentUser.username!==SUPER_ADMIN){alert('Only the Super Admin can manage users.');return;}
+  if(!AUTH.currentUser||(!['superadmin','admin'].includes(AUTH.currentUser.role))){alert('Access denied.');return;}
   renderUserList();
   document.getElementById('userMgmtModal').classList.add('open');
 }
@@ -3757,7 +3906,7 @@ async function renderUserList(){
   const list=document.getElementById('umgUserList');
   if(!list) return;
   list.innerHTML='<div style="color:#484f58;font-size:11px;padding:8px">Loading…</div>';
-  const users=await sbSelect('dashboard_users','select=username,display_name,role,created_at&order=created_at.asc');
+  const users=await sbSelect('dashboard_users','select=username,display_name,role,created_at,is_blocked&order=created_at.asc');
   // Last-sign-in is an optional column — fetched separately so a missing
   // `last_login` column never breaks the core user list.
   try{
@@ -3771,6 +3920,7 @@ async function renderUserList(){
     const initials=(u.display_name||u.username).substring(0,2).toUpperCase();
     const isMe=u.username===AUTH.currentUser.username;
     const isSA=u.username===SUPER_ADMIN;
+    const isBlocked=!!u.is_blocked;
     const editing=UMG_EDITING===u.username;
     const editForm=editing?`<div class="umg-edit-form">
       <div class="umg-form-grid">
@@ -3788,15 +3938,16 @@ async function renderUserList(){
       </div>
       <div class="umg-msg" id="umgEditMsg_${u.username}"></div>
     </div>`:'';
-    return`<div class="umg-user-row" style="${editing?'flex-direction:column;align-items:stretch':''}">
+    return`<div class="umg-user-row ${isBlocked?'umg-blocked-row':''}" style="${editing?'flex-direction:column;align-items:stretch':''}">
       <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;${editing?'margin-bottom:10px':''}">
         <div class="umg-avatar" style="background:${rc.bg};color:${rc.txt}">${initials}</div>
         <div style="flex:1;min-width:0">
-          <div class="umg-uname">${u.username}${isMe?' <span style="color:#8b949e;font-size:9px">(you)</span>':''}</div>
+          <div class="umg-uname">${u.username}${isMe?' <span style="color:#8b949e;font-size:9px">(you)</span>':''}${isBlocked?' <span class="umg-blocked-badge">BLOCKED</span>':''}</div>
           <div class="umg-disp">${u.display_name||''} ${u.created_at?'· joined '+u.created_at.slice(0,10):''} · last sign-in: ${fmtLoginTime(u.last_login)}</div>
         </div>
         <span class="role-badge ${rc.cls}">${rc.lbl}</span>
         <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+          ${isBlocked?`<button class="umg-unblock-btn" onclick="unblockUser('${u.username}')">Unblock</button>`:''}
           <button class="umg-edit" title="${editing?'Close edit form':'Edit user'}" style="${editing?'background:rgba(245,158,11,.18)':''}" onclick="${editing?'cancelEditUser()':`toggleEditUser('${u.username}')`}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 4.5l4 4L8 20H4v-4L15.5 4.5z"/><line x1="12" y1="8" x2="16" y2="12" opacity=".5"/></svg></button>
           ${(!isSA&&!isMe)?`<button class="umg-del" title="Remove user" onclick="deleteUser('${u.username}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke="#f43f5e" stroke-width="1.3" opacity=".3"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#f43f5e" stroke-width="1.6"/></svg></button>`:''}
         </div>
@@ -3864,6 +4015,89 @@ async function deleteUser(uname){
     renderUserList();
   }catch(e){alert('Delete failed: '+e.message);}
 }
+// ── Change Password Modal (all non-guest roles) ──────
+function openChangePw(){
+  const u=AUTH.currentUser;
+  if(!u||u.isGuest) return;
+  const roleColors={superadmin:{bg:'#1a0f3a',txt:'#a371f7',cls:'role-superadmin',lbl:'Super Admin'},admin:{bg:'#0d1f4f',txt:'#388bfd',cls:'role-admin',lbl:'Admin'},viewer:{bg:'#1a1a1a',txt:'#8b949e',cls:'role-viewer',lbl:'Viewer'}};
+  const rc=roleColors[u.role]||roleColors.viewer;
+  const initials=(u.displayName||u.username).substring(0,2).toUpperCase();
+  const av=document.getElementById('cpwAvatar');
+  const dn=document.getElementById('cpwDisplayName');
+  const un=document.getElementById('cpwUsername');
+  const rb=document.getElementById('cpwRoleBadge');
+  if(av){av.textContent=initials;av.style.background=rc.bg;av.style.color=rc.txt;}
+  if(dn) dn.textContent=u.displayName||u.username;
+  if(un) un.textContent='@'+u.username;
+  if(rb){rb.textContent=rc.lbl;rb.className='role-badge '+rc.cls;}
+  ['cpwCurrent','cpwNew','cpwConfirm'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['cpwEye0','cpwEye1','cpwEye2'].forEach(id=>{
+    const inp=document.getElementById({cpwEye0:'cpwCurrent',cpwEye1:'cpwNew',cpwEye2:'cpwConfirm'}[id]);
+    if(inp) inp.type='password';
+  });
+  const msg=document.getElementById('cpwMsg');
+  if(msg){msg.textContent='';msg.className='umg-msg';}
+  document.getElementById('changePwModal').classList.add('open');
+}
+function closeChangePw(){
+  document.getElementById('changePwModal').classList.remove('open');
+}
+function toggleCpwEye(inputId, eyeId){
+  const inp=document.getElementById(inputId);
+  const eye=document.getElementById(eyeId);
+  if(!inp) return;
+  const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  // Swap eye icon: open eye when showing, closed when hidden
+  if(eye) eye.innerHTML=show
+    ?`<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>`
+    :`<ellipse cx="12" cy="12" rx="4" ry="2.8"/><path d="M2 12c2.5-5 5.5-7.5 10-7.5s7.5 2.5 10 7.5c-2.5 5-5.5 7.5-10 7.5S4.5 17 2 12z"/>`;
+}
+async function submitChangePw(){
+  const cur=(document.getElementById('cpwCurrent').value||'');
+  const np=(document.getElementById('cpwNew').value||'');
+  const cp=(document.getElementById('cpwConfirm').value||'');
+  const msg=document.getElementById('cpwMsg');
+  const showMsg=(txt,ok)=>{msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');};
+  if(!cur) return showMsg('Please enter your current password.',false);
+  if(np.length<8) return showMsg('New password must be at least 8 characters.',false);
+  if(np!==cp) return showMsg('New passwords do not match.',false);
+  try{
+    const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(AUTH.currentUser.username)}&select=pw_hash`);
+    if(!rows.length) throw new Error('User not found.');
+    const curHash=await hashPw(cur);
+    if(curHash!==rows[0].pw_hash) return showMsg('Current password is incorrect.',false);
+    const newHash=await hashPw(np);
+    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(AUTH.currentUser.username)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify({pw_hash:newHash})
+    });
+    if(!r.ok) throw new Error('Update failed.');
+    showMsg('Password updated successfully.',true);
+    setTimeout(closeChangePw,1500);
+  }catch(e){ showMsg(e.message||'Error updating password.',false); }
+}
+document.getElementById('changePwModal').addEventListener('click',function(e){if(e.target===this)closeChangePw();});
+
+// ── Unblock user (admin/superadmin) ─────────────────
+async function unblockUser(uname){
+  if(!confirm(`Unblock user "${uname}" and reset their login attempts?`)) return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uname)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},
+      body:JSON.stringify({is_blocked:false,login_attempts:0,locked_until:null})
+    });
+    if(!r.ok) throw new Error('Unblock failed.');
+    // Refresh blocked count and sidebar badge
+    try{
+      const blocked=await sbSelect('dashboard_users','select=username&is_blocked=eq.true');
+      ST.blockedCount=blocked.length;
+    }catch(e){ ST.blockedCount=0; }
+    const sidenavExtraEl=document.getElementById('sidenavExtra');
+    if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
+    renderUserList();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
 async function changeMyPassword(){
   const np=(document.getElementById('umgNewPw').value||'');
   const cp=(document.getElementById('umgConfPw').value||'');
