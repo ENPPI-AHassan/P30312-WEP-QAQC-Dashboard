@@ -855,6 +855,10 @@ const ST = {
 
 const CHARTS = {};
 const fn = v => (v == null || v === '') ? '—' : Number(v).toLocaleString();
+// HTML-escape any value sourced from an uploaded file or the DB before it goes
+// into innerHTML / a template literal. Prevents stored XSS from a booby-trapped
+// workbook (discipline names, IC, NCR "against", roles, person names, filenames…).
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sumK = (rows,keys)=>{ const t={}; keys.forEach(k=>t[k]=rows.reduce((a,r)=>a+(+r[k]||0),0)); return t; };
 
 // ═══════════════════════════════════════════════════
@@ -1238,7 +1242,7 @@ function mkFJCRow(secLabel, rows, start, end, cumulative){
 function bRFITable(rows, totals, title, live, supersededCount=null){
   if(!rows) return `<div class="card" style="display:flex;flex-direction:column;height:100%"><div class="slbl" style="font-size:10px">${title}</div><div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#484f58">Upload RFI Register to populate</div></div>`;
   const trs=rows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
-    <td class="td tl">${r.d}</td>
+    <td class="td tl">${esc(r.d)}</td>
     <td class="td cb">${fn(r.acc)}</td><td class="td clb">${fn(r.accW)}</td>
     <td class="td cm">${fn(r.can)}</td><td class="td ca">${fn(r.open)}</td>
     <td class="td cr">${fn(r.rej)}</td><td class="td">${fn(r.total)}</td>
@@ -1427,7 +1431,7 @@ function bSORTable(sorRecs, live){
     rows=[]; totals={closed:0,open:0,total:0};
   }
   const trs=rows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
-    <td class="td tl">${r.ic}</td>
+    <td class="td tl">${esc(r.ic)}</td>
     <td class="td cg">${fn(r.closed)}</td><td class="td ca">${fn(r.open)}</td><td class="td">${fn(r.total)}</td>
   </tr>`).join('');
   return`<div class="card" style="min-width:220px"><div class="slbl">Site Observations</div>
@@ -1469,7 +1473,7 @@ function bNCRTable(ncrRecs, live){
     rows=[]; totals={closed:0,open:0,total:0};
   }
   const trs=rows.map((r,i)=>`<tr class="${i%2?'tr-alt':''}">
-    <td class="td tl">${r.against}</td>
+    <td class="td tl">${esc(r.against)}</td>
     <td class="td cg">${fn(r.closed)}</td><td class="td ca">${fn(r.open)}</td><td class="td">${fn(r.total)}</td>
   </tr>`).join('');
   return`<div class="card" style="min-width:220px"><div class="slbl">NCR Status</div>
@@ -1553,7 +1557,7 @@ function bUploadBar(){
     const unsaved=loaded&&ST.unsaved.has(s.key);
     const fname=ST.files[s.key]?ST.files[s.key].split('/').pop().split('\\').pop():'';
     const tip=`${s.label} — ${loaded?(fname||'loaded')+(unsaved?' · UNSAVED':'')+' · click to replace':'not loaded · click to upload'}`;
-    return`<span class="upl-dot ${unsaved?'unsaved':loaded?'ok':''}" data-tip="${tip}" onclick="uploadSlot('${s.key}')"></span>`;
+    return`<span class="upl-dot ${unsaved?'unsaved':loaded?'ok':''}" data-tip="${esc(tip)}" onclick="uploadSlot('${s.key}')"></span>`;
   }).join('');
 
   return bTopBar(`
@@ -1575,7 +1579,7 @@ function bUploadBar(){
       ${UPL_ICONS.layout}
     </button>`:''}
     ${errList.length?`<div class="upl-strip-sep"></div>
-    <span class="upl-strip-btn" style="background:rgba(244,63,94,.12);color:#f43f5e;cursor:help" title="${errList.join('&#10;')}">${UPL_ICONS.err}</span>`:''}
+    <span class="upl-strip-btn" style="background:rgba(244,63,94,.12);color:#f43f5e;cursor:help" title="${errList.map(esc).join('&#10;')}">${UPL_ICONS.err}</span>`:''}
   `);
 }
 
@@ -2226,7 +2230,7 @@ function bDeployBar(sc, dep){
     </button>
     <span id="dpMonthCount" style="font-size:9.5px;color:${periodN?'#f59e0b':'#6b7280'};font-weight:600;white-space:nowrap">${periodN} selected</span>`:''}
     <div class="upl-strip-status">
-      <span style="color:${statusColor}">${loaded?`✓ ${fname}`:'No file loaded'}</span>
+      <span style="color:${statusColor}">${loaded?`✓ ${esc(fname)}`:'No file loaded'}</span>
     </div>
     <input type="file" id="dpFileInput" accept=".xlsx,.xls" style="display:none">
   `);
@@ -2241,13 +2245,13 @@ function clearDeployment(){
 function bDPUploadPanel(sc, dep, isViewer){
   if(isViewer) return `<div class="card" style="display:flex;align-items:center;padding:14px 18px">
     <span style="font-size:11px;color:${sc.faint}">
-      ${dep?`✅ ${ST.files.deployment||'Loaded'} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows`:'No deployment file loaded'}
+      ${dep?`✅ ${esc(ST.files.deployment||'Loaded')} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows`:'No deployment file loaded'}
     </span></div>`;
   // File input + upload button now live in bDeployBar; this panel just shows status
   return `<div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px">
     <span style="font-size:12px;color:${sc.muted};font-weight:600">EPCM Deployment File</span>
     ${dep
-      ?`<span style="font-size:11px;color:${sc.good}">✅ ${ST.files.deployment||'Loaded'} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows</span>`
+      ?`<span style="font-size:11px;color:${sc.good}">✅ ${esc(ST.files.deployment||'Loaded')} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows</span>`
       :`<span style="font-size:11px;color:${sc.faint}">No file loaded — use the bar above to upload EPCM_Deployment.xlsx</span>`}
   </div>`;
 }
@@ -2313,7 +2317,7 @@ function bDPRolesPanel(sc, dep){
     const av=peakVals(dep.actual,r=>r.role===role);
     const st=dpStatusMulti(pv,av,selMs);
     return`<tr class="${i%2?'tr-alt':''}">
-      <td class="td tl">${role}</td>
+      <td class="td tl">${esc(role)}</td>
       <td class="td">${pv||'—'}</td><td class="td">${av||'—'}</td>
       <td class="td" style="color:${av-pv<0?sc.bad:av-pv>0?sc.good:sc.muted}">${pv>0||av>0?(av-pv>0?'+':'')+(av-pv):'—'}</td>
       <td class="td">${dpStatusBadge(st,sc)}</td></tr>`;
@@ -2361,7 +2365,7 @@ function bDPLocRolePanel(sc, dep){
   const selMs=ST.dpMonths||[];
   const selIdxs=selMs.map(m=>dep.months.indexOf(m)).filter(i=>i>=0);
 
-  const LOC_ORDER=['GENERAL','CENTRAL','SECTION 1','SECTION 2','SECTION 3','TUNNEL','JD'];
+  const LOC_ORDER=['GENERAL','JD','MPS','IPS','MOT/TNL','PPL SEC01','PPL SEC02','PPL SEC03','ADCOP','MOL'];
 
   // Collect all locs in sheet order (plan first, then actual supplements),
   // then re-sort: known LOC_ORDER entries by index, unknowns keep their sheet order.
@@ -2417,7 +2421,7 @@ function bDPLocRolePanel(sc, dep){
         background:${sc.card};color:${sc.text};
         font-size:11px;font-weight:700;letter-spacing:.04em;
         padding:4px 8px;border:1px solid ${sc.border};
-        white-space:nowrap;min-width:60px;max-width:80px;word-break:break-word">${loc}</td>
+        white-space:nowrap;min-width:60px;max-width:80px;word-break:break-word">${esc(loc)}</td>
       <td style="font-size:12px;font-weight:700;color:${sc.text};padding:6px 12px;
         border:1px solid ${sc.border};white-space:nowrap;letter-spacing:.03em">Subtotal</td>
       <td style="text-align:center;font-size:12px;font-weight:700;color:${sc.text};padding:6px 10px;border:1px solid ${sc.border}">${subPv||'—'}</td>
@@ -2435,7 +2439,7 @@ function bDPLocRolePanel(sc, dep){
       const st=dpStatusMulti(pv,av,selMs);
       const rowBg=ri%2===0?ROW_EVEN:ROW_ODD;
       return `<tr style="background:${rowBg}">
-        <td style="font-size:11px;color:${sc.text};padding:4px 12px 4px 22px;border:1px solid ${sc.border};white-space:nowrap">${role}</td>
+        <td style="font-size:11px;color:${sc.text};padding:4px 12px 4px 22px;border:1px solid ${sc.border};white-space:nowrap">${esc(role)}</td>
         <td style="text-align:center;font-size:11px;color:${sc.muted};padding:4px 10px;border:1px solid ${sc.border}">${pv||'—'}</td>
         <td style="text-align:center;font-size:11px;color:${sc.muted};padding:4px 10px;border:1px solid ${sc.border}">${av||'—'}</td>
         <td style="text-align:center;font-size:11px;padding:4px 10px;border:1px solid ${sc.border};
@@ -2496,15 +2500,6 @@ function bPersonnelTable(sc, dep){
   const now = new Date();
   const curM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-  // Location accent colours (match Excel banding)
-  const LOC_COLORS = {
-    'CENTRAL':    '#6B4FA0',
-    'SECTION 1':  '#2E7D45',
-    'SECTION 2':  '#B22222',
-    'SECTION 3':  '#C07000',
-    'TUNNEL':     '#456080',
-    'JD':         '#7D6608'
-  };
   const LOC_ORDER = ['GENERAL','JD','MPS','IPS','MOT/TNL','PPL SEC01','PPL SEC02','PPL SEC03','ADCOP','MOL'];
 
   // Plan lookup keyed by "loc|role" (lowercased) — plan has no person names,
@@ -2608,13 +2603,12 @@ function bPersonnelTable(sc, dep){
   // Body rows
   const bodyRows=groups.map((grp,gi)=>{
     const lc=grp.loc;
-    const lColor=LOC_COLORS[lc]||sc.accent;
     return grp.rows.map((row,ri)=>{
       // Prominent separator line between location groups (skip very first group)
       const isSepRow = ri===0 && gi>0;
       const SEP = 'border-top:2px solid rgba(255,255,255,0.13)';
       const locCell=ri===0
-        ?`<td rowspan="${grp.rows.length}" style="text-align:center;vertical-align:middle;background:${sc.card};color:${sc.text};font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 8px;border:1px solid ${sc.border};${isSepRow?SEP:''};white-space:nowrap;min-width:60px;max-width:80px;word-break:break-word">${lc}</td>`
+        ?`<td rowspan="${grp.rows.length}" style="text-align:center;vertical-align:middle;background:${sc.card};color:${sc.text};font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 8px;border:1px solid ${sc.border};${isSepRow?SEP:''};white-space:nowrap;min-width:60px;max-width:80px;word-break:break-word">${esc(lc)}</td>`
         :'';
       const catRoman=(row.cat||'').replace('Category ','');
       const mCells=months.map((_,mi)=>{
@@ -2632,9 +2626,9 @@ function bPersonnelTable(sc, dep){
       const rowBg=ri%2?'rgba(255,255,255,0.04)':'rgba(255,255,255,0.000)';
       return `<tr style="background:${rowBg};height:32px">
         ${locCell}
-        <td style="font-size:10px;color:${sc.muted};padding:4px 7px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${row.role}</td>
-        ${isGuest?'':` <td style="font-size:10px;color:${sc.text};font-weight:500;padding:4px 8px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${row.name||'—'}</td>`}
-        <td style="font-size:9px;color:${sc.faint};text-align:center;padding:4px 4px;border:1px solid ${sc.border};${isSepRow?SEP:''}">${catRoman}</td>
+        <td style="font-size:10px;color:${sc.muted};padding:4px 7px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${esc(row.role)}</td>
+        ${isGuest?'':` <td style="font-size:10px;color:${sc.text};font-weight:500;padding:4px 8px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${esc(row.name||'—')}</td>`}
+        <td style="font-size:9px;color:${sc.faint};text-align:center;padding:4px 4px;border:1px solid ${sc.border};${isSepRow?SEP:''}">${esc(catRoman)}</td>
         ${mCells}
       </tr>`;
     }).join('');
@@ -3086,7 +3080,7 @@ function renderKPI(){
     kpiCoat:      bKPICard({id:'KPI-15', label:'Coating Rejection Rate',
                     value:m.coatRate, unit:'%', targetDir:'lt', targetVal:1,
                     target:'Target &lt; 1%',
-                    sub:m.coatTotal>0?`${m.coatRejected} rejected / ${m.coatTotal} total`:'Awaiting column mapping',
+                    sub:m.coatTotal>0?`${m.coatRejected} rejected / ${m.coatTotal} total`:'No data',
                     na:m.coatTotal===0}),
 
     kpiNcrOpen:   bKPICard({id:'KPI-08', label:'NCR Open Rate',
@@ -3171,7 +3165,15 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
       CHARTS.welder=new Chart(welderEl,{type:'bar',
         data:{labels,datasets:[{label:'Cumul. Repair %',data:vals,backgroundColor:colors,borderRadius:3}]},
         options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-          plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.toFixed(2)}%`}}},
+          plugins:{legend:{display:false},tooltip:{callbacks:{
+            title:ctx=>{const w=wList[ctx[0].dataIndex];const sn=(w.section||'').replace(/\D/g,'');return`${w.name} (Sec${sn})`;},
+            label:ctx=>{
+              const w=wList[ctx.dataIndex];
+              const lines=[`Repair rate: ${ctx.raw.toFixed(2)}%`];
+              if(w.remarks) lines.push(`Remarks: ${w.remarks}`);
+              return lines;
+            }
+          },backgroundColor:sc.card,borderColor:sc.border,borderWidth:1,titleColor:sc.text,bodyColor:sc.muted,padding:10,displayColors:false}},
           scales:{x:{grid:{color:sc.chartGrid},ticks:{color:sc.muted,callback:v=>v+'%'},title:{display:true,text:'Repair Rate %',color:sc.muted}},
             y:{grid:{display:false},ticks:{color:sc.text,font:{size:10}}}}}});
     }
@@ -3212,7 +3214,7 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
               title:()=>'',
               label:ctx=>{
                 const pt=ctx.raw;
-                return[`${pt.sorNo}`,`KM: ${pt.x}`,`Status: ${pt.status||ctx.dataset.label}`];
+                return[`${pt.sorNo}`,`Status: ${pt.status||ctx.dataset.label}`];
               }
             },
             backgroundColor:sc.card,borderColor:sc.border,borderWidth:1,
@@ -3302,6 +3304,8 @@ async function clearAllFiles(){
     Object.keys(ST.errors).forEach(k=>ST.errors[k]='');
     Object.keys(ST.processing).forEach(k=>ST.processing[k]=false);
     ST.unsaved.clear();
+    ST.rfiSupersededCount=0;
+    localStorage.removeItem('wep_rfi_superseded_count');
     ST._dateSet=false;
     render();
   }catch(e){
@@ -3428,7 +3432,7 @@ async function handleFile(forcedKey, file){
       ST.errors[forcedKey]=`WRONG_FILE|${expectedName}|${actualName}`;
       // Show modal
       const msg=document.getElementById('wrongFileMsg');
-      if(msg) msg.innerHTML=`Please upload <span style="color:#3fb950;font-weight:600">"${expectedName}"</span><br>Instead, you tried to upload <span style="color:#f85149;font-weight:600">"${actualName}"</span>`;
+      if(msg) msg.innerHTML=`Please upload <span style="color:#3fb950;font-weight:600">"${esc(expectedName)}"</span><br>Instead, you tried to upload <span style="color:#f85149;font-weight:600">"${esc(actualName)}"</span>`;
       const modal=document.getElementById('wrongFileModal');
       if(modal) modal.style.display='flex';
       uplDbg('WRONG FILE:',actualName,'→ expected',expectedName);
@@ -3537,14 +3541,20 @@ async function sbUpsert(table, row){
   });
   if(!r.ok) throw new Error(`DB upsert failed (${table}): ${r.status}`);
 }
+// Call a Postgres function (RPC). Used for login/password so the pw_hash check
+// runs inside the DB and the hash never reaches the client (see supabase_security.sql).
+async function sbRpc(fn, body){
+  const r=await fetchWithTimeout(`${SB_URL}/rest/v1/rpc/${fn}`,{
+    method:'POST', headers:SB_HDR, body:JSON.stringify(body||{})
+  });
+  if(!r.ok) throw new Error(`RPC ${fn} failed: ${r.status}`);
+  return r.json();
+}
 
 // ── Load all datasets from Supabase on page open ────
 async function loadAllFromDB(){
-  // Daily tables: prefer the coat_* columns; fall back to the legacy column set
-  // if the Supabase schema hasn't been migrated yet (coat values then default to 0).
   const DAILY_COLS='date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance';
-  const loadDaily=t=>sbSelectAll(t,`select=${DAILY_COLS},coat_total,coat_rejected&order=date.asc`)
-    .catch(()=>sbSelectAll(t,`select=${DAILY_COLS}&order=date.asc`));
+  const loadDaily=t=>sbSelectAll(t,`select=${DAILY_COLS}&order=date.asc`);
   try{
     const [rfi,s1,s2,s3,wld,sor,ncr,dep,meta]=await Promise.all([
       sbSelectAll('rfi_records','select=date,discipline,section,ic,status&order=date.asc'),
@@ -3736,70 +3746,34 @@ async function attemptLogin(){
   btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="svg-spin" style="display:inline-block;vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="9" stroke="#1e2940" stroke-width="1.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/></svg> Signing in…';
   errEl.classList.remove('show');
   try{
-    const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uInput)}&select=username,display_name,role,pw_hash,login_attempts,locked_until,is_blocked`);
-    if(!rows.length){ btn.disabled=false; btn.textContent='Sign In'; errEl.textContent='Invalid username or password.'; errEl.classList.add('show'); return; }
-    const user=rows[0];
+    // Password check + attempt/lockout/block bookkeeping all happen inside the DB
+    // (verify_login). The stored hash never leaves Postgres. The client only sends
+    // its SHA-256(password+salt) and receives a status + identity back.
+    const hash=await hashPw(pInput);
+    const res=(await sbRpc('verify_login',{p_username:uInput,p_hash:hash}))[0]||{status:'nouser'};
 
-    // Blocked permanently
-    if(user.is_blocked){
+    if(res.status==='blocked'){
       btn.disabled=false; btn.textContent='Sign In';
       errEl.textContent='This account has been blocked. Please contact the administrator.';
       errEl.classList.add('show'); return;
     }
-
-    // Temporary lockout — show countdown
-    if(user.locked_until && new Date(user.locked_until)>new Date()){
+    if(res.status==='locked'){
       btn.disabled=false; btn.textContent='Sign In';
-      _startLockoutCountdown(user.locked_until); return;
+      _startLockoutCountdown(res.locked_until); return;
     }
-
-    const hash=await hashPw(pInput);
-    if(hash!==user.pw_hash){
-      // Wrong password — increment attempts
-      const attempts=(user.login_attempts||0)+1;
-      const patch={login_attempts:attempts};
-      if(attempts===3){
-        // 3rd wrong → 5-minute lockout
-        patch.locked_until=new Date(Date.now()+5*60*1000).toISOString();
-        fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
-          method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
-        }).catch(()=>{});
-        btn.disabled=false; btn.textContent='Sign In';
-        _startLockoutCountdown(patch.locked_until); return;
-      } else if(attempts>=4){
-        // 4th wrong after lockout passed → block permanently
-        patch.is_blocked=true;
-        fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
-          method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
-        }).catch(()=>{});
-        btn.disabled=false; btn.textContent='Sign In';
-        errEl.textContent='Your account has been blocked after too many failed attempts. Please contact the administrator.';
-        errEl.classList.add('show'); return;
-      } else {
-        fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
-          method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
-        }).catch(()=>{});
-        btn.disabled=false; btn.textContent='Sign In';
-        errEl.textContent=`Invalid username or password. ${3-attempts} attempt${3-attempts!==1?'s':''} remaining before lockout.`;
-        errEl.classList.add('show'); return;
-      }
+    if(res.status!=='ok'){
+      btn.disabled=false; btn.textContent='Sign In';
+      const left=res.attempts_left;
+      errEl.textContent=(left!=null&&left>=0)
+        ? `Invalid username or password. ${left} attempt${left!==1?'s':''} remaining before lockout.`
+        : 'Invalid username or password.';
+      errEl.classList.add('show'); return;
     }
 
     // ── Correct password ──
     _clearLockoutCountdown();
-    // Reset attempt counters
-    fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uInput)}`,{
-      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},
-      body:JSON.stringify({login_attempts:0,locked_until:null,last_login:new Date().toISOString()})
-    }).catch(()=>{});
-
-    let prevLogin=null;
-    try{
-      const llRows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uInput)}&select=last_login`);
-      if(llRows.length) prevLogin=llRows[0].last_login||null;
-    }catch(e){}
-
-    const session={username:uInput,displayName:user.display_name||uInput,role:uInput===SUPER_ADMIN?'superadmin':user.role,lastLogin:prevLogin};
+    const session={username:res.username,displayName:res.display_name||res.username,
+      role:res.username===SUPER_ADMIN?'superadmin':res.role,lastLogin:res.prev_login||null};
     setSession(session); AUTH.currentUser=session;
     await loadAndShow();
   }catch(e){
@@ -3942,8 +3916,8 @@ async function renderUserList(){
       <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;${editing?'margin-bottom:10px':''}">
         <div class="umg-avatar" style="background:${rc.bg};color:${rc.txt}">${initials}</div>
         <div style="flex:1;min-width:0">
-          <div class="umg-uname">${u.username}${isMe?' <span style="color:#8b949e;font-size:9px">(you)</span>':''}${isBlocked?' <span class="umg-blocked-badge">BLOCKED</span>':''}</div>
-          <div class="umg-disp">${u.display_name||''} ${u.created_at?'· joined '+u.created_at.slice(0,10):''} · last sign-in: ${fmtLoginTime(u.last_login)}</div>
+          <div class="umg-uname">${esc(u.username)}${isMe?' <span style="color:#8b949e;font-size:9px">(you)</span>':''}${isBlocked?' <span class="umg-blocked-badge">BLOCKED</span>':''}</div>
+          <div class="umg-disp">${esc(u.display_name||'')} ${u.created_at?'· joined '+u.created_at.slice(0,10):''} · last sign-in: ${fmtLoginTime(u.last_login)}</div>
         </div>
         <span class="role-badge ${rc.cls}">${rc.lbl}</span>
         <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
@@ -4063,15 +4037,12 @@ async function submitChangePw(){
   if(np.length<8) return showMsg('New password must be at least 8 characters.',false);
   if(np!==cp) return showMsg('New passwords do not match.',false);
   try{
-    const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(AUTH.currentUser.username)}&select=pw_hash`);
-    if(!rows.length) throw new Error('User not found.');
+    // Current-password check happens inside the DB (change_password): it only
+    // updates when the supplied old hash matches, so no hash is read client-side.
     const curHash=await hashPw(cur);
-    if(curHash!==rows[0].pw_hash) return showMsg('Current password is incorrect.',false);
     const newHash=await hashPw(np);
-    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(AUTH.currentUser.username)}`,{
-      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify({pw_hash:newHash})
-    });
-    if(!r.ok) throw new Error('Update failed.');
+    const ok=await sbRpc('change_password',{p_username:AUTH.currentUser.username,p_old_hash:curHash,p_new_hash:newHash});
+    if(ok!==true) return showMsg('Current password is incorrect.',false);
     showMsg('Password updated successfully.',true);
     setTimeout(closeChangePw,1500);
   }catch(e){ showMsg(e.message||'Error updating password.',false); }
@@ -4152,8 +4123,7 @@ async function saveDataToDB(key, parsed, fileName){
     rows=parsed.map(r=>({date:r.date,discipline:r.discipline,section:r.section,ic:r.ic,status:r.status}));
   } else if(key==='daily1'||key==='daily2'||key==='daily3'){
     rows=parsed.map(r=>({date:r.date,welded:r.welded,ndt_rev:r.ndtRev,ndt_appr:r.ndtAppr,ndt_rescan:r.ndtRescan,ndt_repair:r.ndtRepair,
-      fjc_released:r.fjcReleased,fjc_total:r.fjcTotal,fjc_accepted:r.fjcAccepted,fjc_repair:r.fjcRepair,fjc_balance:r.fjcBalance,
-      coat_total:r.coatTotal||0,coat_rejected:r.coatRejected||0}));
+      fjc_released:r.fjcReleased,fjc_total:r.fjcTotal,fjc_accepted:r.fjcAccepted,fjc_repair:r.fjcRepair,fjc_balance:r.fjcBalance}));
   } else if(key==='welders'){
     rows=parsed.map(r=>({welder_id:r.id,name:r.name,section:r.section,cum_aut:r.cumAut,cum_rep:r.cumRep,cum_pct:r.cumPct,
       wk_aut:r.wkAut,wk_rep:r.wkRep,wk_pct:r.wkPct,remarks:r.remarks||''}));
