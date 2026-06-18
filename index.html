@@ -3547,7 +3547,11 @@ async function sbRpc(fn, body){
   const r=await fetchWithTimeout(`${SB_URL}/rest/v1/rpc/${fn}`,{
     method:'POST', headers:SB_HDR, body:JSON.stringify(body||{})
   });
-  if(!r.ok) throw new Error(`RPC ${fn} failed: ${r.status}`);
+  if(!r.ok){
+    let detail=''; try{ detail=await r.text(); }catch(e){}
+    console.error(`[RPC ${fn}] HTTP ${r.status}`, detail);
+    throw new Error(`RPC ${fn} failed: ${r.status}${detail?' — '+detail:''}`);
+  }
   return r.json();
 }
 
