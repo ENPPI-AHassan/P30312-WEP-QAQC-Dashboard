@@ -88,6 +88,20 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .tb-date{flex-shrink:0;margin-right:80px}
 .tb-logo{height:34px;width:auto;flex-shrink:0;display:block}
 #uplBarSpacer,#dpBarSpacer{height:60px}
+/* ── Dash Tabs (in top bar strip) ──────────────────────────── */
+.dtb-tabs{display:flex;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:3px;gap:2px;flex-shrink:0}
+.dtb-tab{padding:5px 16px;border:none;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:background .15s,color .15s;background:transparent;color:#7a809a;white-space:nowrap}
+.dtb-tab.active{background:#1e2235;color:#e2e8f4;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+/* ── KPI Strip (canvas panel) ───────────────────────────────── */
+#kpiStrip{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px;height:100%}
+.ks-card{background:var(--card,#0e1520);border:1px solid var(--border,#2d3348);border-radius:10px;padding:10px 12px;transition:border-color .2s,box-shadow .2s;display:flex;flex-direction:column}
+.ks-card:hover{border-color:var(--ks-c,#7a809a);box-shadow:0 0 18px color-mix(in srgb,var(--ks-c,#7a809a) 15%,transparent)}
+.ks-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#7a809a;margin-bottom:4px}
+.ks-val{font-size:22px;font-weight:800;font-family:monospace;line-height:1;margin-bottom:2px}
+.ks-sub{font-size:9px;color:#7a809a;margin-bottom:5px}
+.ks-pill{display:inline-block;font-size:9px;font-weight:700;padding:2px 9px;border-radius:12px;border:1px solid;margin-bottom:4px}
+.ks-bar{height:3px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:auto;overflow:hidden;flex-shrink:0}
+.ks-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
 /* Action strip (page-specific buttons) */
 .upl-strip{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
 .upl-strip-btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;border:none;cursor:pointer;transition:background .15s,opacity .15s;flex-shrink:0}
@@ -169,6 +183,8 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .snav-manpower:hover svg,.snav-manpower.snav-active svg{filter:drop-shadow(0 0 5px #00ff9d) drop-shadow(0 0 11px #00ff9d66)}
 .snav-export:hover{background:linear-gradient(90deg,#fbbf240d,transparent)!important;border-left-color:#fbbf24!important;color:#e2e8f0!important}
 .snav-export:hover svg{filter:drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 11px #fbbf2466)}
+.snav-wrench:hover,.snav-wrench.snav-active{background:linear-gradient(90deg,#38bdf80d,transparent)!important;border-left-color:#38bdf8!important;color:#e2e8f0!important}
+.snav-wrench:hover svg,.snav-wrench.snav-active svg{filter:drop-shadow(0 0 5px #38bdf8) drop-shadow(0 0 11px #38bdf866)}
 .snav-theme:hover{background:linear-gradient(90deg,#e879f90d,transparent)!important;border-left-color:#e879f9!important;color:#e2e8f0!important}
 .snav-theme:hover svg{filter:drop-shadow(0 0 5px #e879f9) drop-shadow(0 0 11px #e879f966)}
 .snav-users:hover{background:linear-gradient(90deg,#60a5fa0d,transparent)!important;border-left-color:#60a5fa!important;color:#e2e8f0!important}
@@ -447,6 +463,52 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
   /* Show mobile tab bar */
   #mobTabBar{display:flex}
 }
+
+/* ── Onboarding Tour ─────────────────────────────────────────── */
+#tourDim{position:fixed;inset:0;z-index:9900;background:rgba(0,0,0,.9);pointer-events:all}
+#tourSpotlight{position:fixed;z-index:9901;pointer-events:none;border-radius:10px;background:transparent;
+  box-shadow:0 0 0 3px rgba(99,179,237,.65),0 0 22px 6px rgba(99,179,237,.5),0 0 0 9999px rgba(0,0,0,.9);
+  transition:left .52s cubic-bezier(.4,0,.2,1),top .52s cubic-bezier(.4,0,.2,1),
+             width .52s cubic-bezier(.4,0,.2,1),height .52s cubic-bezier(.4,0,.2,1),
+             border-radius .52s ease,transform .24s ease-in-out;
+  animation:tourGlow 1.7s ease-in-out infinite .52s}
+@keyframes tourGlow{
+  0%,100%{box-shadow:0 0 0 3px rgba(99,179,237,.55),0 0 16px 4px rgba(99,179,237,.4),0 0 0 9999px rgba(0,0,0,.9)}
+  50%{box-shadow:0 0 0 5px rgba(99,179,237,.9),0 0 36px 10px rgba(99,179,237,.7),0 0 0 9999px rgba(0,0,0,.9)}}
+/* Tour card */
+#tourCard{position:fixed;z-index:9902;background:#0d1117;border:1px solid rgba(99,179,237,.3);border-radius:14px;
+  padding:18px 22px;max-width:360px;min-width:260px;
+  box-shadow:0 8px 40px rgba(0,0,0,.7);pointer-events:all}
+#tourCard .tc-step{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#60a5fa;margin-bottom:8px}
+#tourCard .tc-title{font-size:15px;font-weight:700;color:#e2e8f4;margin-bottom:6px}
+#tourCard .tc-text{font-size:12px;color:#8b949e;line-height:1.6;margin-bottom:14px}
+#tourCard .tc-row1{display:flex;gap:0;align-items:center;margin-bottom:6px}
+.tc-progress{display:flex;gap:4px;align-items:center;margin-right:auto}
+.tc-dot{width:6px;height:6px;border-radius:50%;background:rgba(99,179,237,.18);transition:background .3s}
+.tc-dot.active{background:#60a5fa}
+.tc-right-btns{display:flex;flex-direction:column;gap:5px;align-items:stretch}
+.tc-top-btns{display:flex;gap:8px}
+.tc-btn-next{padding:7px 20px;border:1px solid rgba(99,179,237,.45);border-radius:7px;background:rgba(29,78,216,.28);color:#93c5fd;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em;backdrop-filter:blur(6px);transition:background .15s,border-color .15s}
+.tc-btn-next:hover{background:rgba(29,78,216,.45);border-color:rgba(99,179,237,.7)}
+.tc-btn-skip{padding:7px 16px;border:1px solid rgba(251,146,60,.45);border-radius:7px;background:rgba(194,65,12,.28);color:#fdba74;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em;backdrop-filter:blur(6px);transition:background .15s,border-color .15s}
+.tc-btn-skip:hover{background:rgba(194,65,12,.45);border-color:rgba(251,146,60,.7)}
+.tc-btn-dna{padding:5px 16px;border:1px solid rgba(252,165,165,.3);border-radius:7px;background:rgba(153,27,27,.28);color:#fca5a5;font-size:10px;font-weight:600;cursor:pointer;letter-spacing:.03em;backdrop-filter:blur(6px);transition:background .15s;width:100%}
+.tc-btn-dna:hover{background:rgba(153,27,27,.45);border-color:rgba(252,165,165,.5)}
+/* Welcome — floating text, no card */
+#tourWelcome{position:fixed;inset:0;z-index:9902;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:all;text-align:center;padding:0 48px}
+.tw-pre{font-size:22px;font-weight:300;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8;margin-bottom:16px;
+  animation:tourSlide .7s cubic-bezier(.22,1,.36,1) both}
+.tw-main{font-size:clamp(36px,5vw,72px);font-weight:900;color:#e2e8f4;line-height:1.08;letter-spacing:-.01em;margin-bottom:20px;
+  animation:tourSlide .7s .12s cubic-bezier(.22,1,.36,1) both}
+.tw-by{font-size:13px;color:#60a5fa;letter-spacing:.06em;margin-bottom:48px;
+  animation:tourSlide .7s .24s cubic-bezier(.22,1,.36,1) both}
+.tw-actions{display:flex;flex-direction:column;align-items:center;gap:14px;
+  animation:tourSlide .7s .36s cubic-bezier(.22,1,.36,1) both}
+.tw-start{padding:12px 48px;background:#1d4ed8;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.06em;transition:background .15s,transform .1s}
+.tw-start:hover{background:#2563eb;transform:translateY(-2px)}
+.tw-skip-link{font-size:11px;color:#4a5568;cursor:pointer;background:none;border:none;letter-spacing:.04em}
+.tw-skip-link:hover{color:#718096}
+@keyframes tourSlide{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
 </style>
 </head>
 <body>
@@ -997,7 +1059,8 @@ function getDailyPeriod(rows, startDate, endDate){
 
 function parseWelders(ab){
   const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
-  const ws = wb.Sheets[wb.SheetNames[0]];
+  const wsName=wb.SheetNames.find(n=>/WLDR|WELDER|PERFORMANCE/i.test(n))||wb.SheetNames[0];
+  const ws = wb.Sheets[wsName];
   clampSheetRef(ws);
   const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
   const welders=[];
@@ -1015,7 +1078,7 @@ function parseWelders(ab){
     const wkAut  = +r[4]||0;
     const wkRep  = +r[5]||0;
     const wkPct  = wkAut>0 ? wkRep/wkAut*100 : 0;
-    const remarks=(r[18]||'').toString().trim();
+    const remarks=(r[19]||'').toString().trim();
     if(cumAut===0 && wkAut===0) continue;
     welders.push({name,id,section,cumAut,cumRep,cumPct,wkAut,wkRep,wkPct,remarks});
   }
@@ -1265,7 +1328,7 @@ function bRFITable(rows, totals, title, live, supersededCount=null){
     mkBdg('CAN',       totals.can,  s.muted, s.muted+'14')+
     mkBdg('REJ',       totals.rej,  s.bad,   s.bad+'18');
   const footnote=supersededCount!=null
-    ?`<div style="margin-top:8px;font-size:9.5px;color:${s.muted};letter-spacing:.03em">&#42; Count of Superseded RFIs: <span style="color:#e6edf3;font-weight:600">${fn(supersededCount)}</span>${supersededCount>0?' &mdash; percentages above are calculated over the grand total including superseded.':''}</div>`
+    ?`<div style="margin-top:8px;font-size:9.5px;color:${s.muted};letter-spacing:.03em">&#42; Count of Superseded RFIs: <span style="color:#e6edf3;font-weight:600">${fn(supersededCount)}</span>${supersededCount>0?' &mdash; percentages below are calculated over the grand total including superseded.':''}</div>`
     :'';
   return`<div class="card" style="display:flex;flex-direction:column">
     <div class="slbl" style="font-size:10px">${title}</div>
@@ -1278,31 +1341,31 @@ function bRFITable(rows, totals, title, live, supersededCount=null){
       <td class="tf cm">${fn(totals.can)}</td><td class="tf ca">${fn(totals.open)}</td>
       <td class="tf cr">${fn(totals.rej)}</td><td class="tf">${fn(totals.total)}</td>
     </tr></tfoot></table></div>
+    ${footnote}
     <div style="border-top:1px solid ${s.border};padding-top:10px;margin-top:10px">
       <div class="slbl" style="margin-bottom:6px">Status Breakdown</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 0.65fr;grid-template-rows:auto auto;gap:6px">${bdgHtml}</div>
-      ${footnote}
     </div>
   </div>`;
 }
 
 function bRFIDonut(periodTotals, cumTotals, live){
-  if(!periodTotals&&!cumTotals) return`<div class="card" style="display:flex;align-items:center;justify-content:center"><span class="cm" style="font-size:11px">Upload RFI Register</span></div>`;
+  const isPeriod=DASH_TAB==='period';
+  const totals=isPeriod?periodTotals:cumTotals;
+  const title=isPeriod?'Reporting Duration RFI':'Cumulative RFI';
+  const canvasId=isPeriod?'donutPeriod':'donutCumul';
+  if(!totals) return`<div class="card" style="display:flex;align-items:center;justify-content:center"><span class="cm" style="font-size:11px">Upload RFI Register</span></div>`;
   const s=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
   const donutColors=[s.cb, s.clb, s.muted, s.ca, s.bad];
   const labels=['ACC','ACC W/COMM','CAN','OPEN','REJ'];
-  const sharedLegend=labels.map((l,i)=>`<span style="color:${donutColors[i]};white-space:nowrap">&#9632; ${l}</span>`).join('');
-  return`<div class="card" style="display:flex;flex-direction:column;gap:4px;height:100%">
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:1px solid ${s.border};padding-bottom:6px;min-height:0">
-      <div class="slbl" style="text-align:center;width:100%;margin-bottom:4px;font-size:10px">Reporting Duration RFI</div>
-      <div class="ch-wrap" style="height:210px;width:100%;display:flex;align-items:center;justify-content:center"><canvas id="donutPeriod"></canvas></div>
-    </div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:4px;min-height:0">
-      <div class="slbl" style="text-align:center;width:100%;margin-bottom:4px">Cumulative RFI</div>
-      <div class="ch-wrap" style="height:210px;width:100%;display:flex;align-items:center;justify-content:center"><canvas id="donutCumul"></canvas></div>
+  const legend=labels.map((l,i)=>`<span style="color:${donutColors[i]};white-space:nowrap">&#9632; ${l}</span>`).join('');
+  return`<div class="card" style="display:flex;flex-direction:column;height:100%">
+    <div class="slbl" style="text-align:center;font-size:10px;flex-shrink:0">${title}</div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+      <div class="ch-wrap" style="max-height:240px;width:100%;display:flex;align-items:center;justify-content:center"><canvas id="${canvasId}"></canvas></div>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:5px 10px;font-size:9px;justify-content:center;padding-top:6px;border-top:1px solid ${s.border};flex-shrink:0">
-      ${sharedLegend}
+      ${legend}
     </div>
   </div>`;
 }
@@ -1408,17 +1471,16 @@ function bProgress(live){
 function bWelderChart(wData){
   const welders = wData || [];
   const over = welders.filter(w=>w.cumPct>3&&w.cumAut>0).sort((a,b)=>b.cumPct-a.cumPct);
-  if(!over.length) return`<div class="card" style="min-height:180px;display:flex;align-items:center;justify-content:center"><span class="cm" style="font-size:11px">No welders &gt; 3% repair rate</span></div>`;
-  const h=Math.max(180,over.length*26+80);
-  return`<div class="card"><div class="slbl">Welders &gt; 3% Repair Rate</div>
-    <div class="ch-wrap" style="height:${h}px"><canvas id="welderChart"></canvas></div>
+  if(!over.length) return`<div class="card" style="height:100%;display:flex;align-items:center;justify-content:center"><span class="cm" style="font-size:11px">No welders &gt; 3% repair rate</span></div>`;
+  return`<div class="card" style="display:flex;flex-direction:column;height:100%"><div class="slbl">Welders &gt; 3% Repair Rate</div>
+    <div class="ch-wrap" style="flex:1;min-height:0"><canvas id="welderChart"></canvas></div>
   </div>`;
 }
 
-function bSORTable(sorRecs, live){
+function bSORTable(sorRecs, live, title='Site Observations'){
   let rows, totals;
   if(sorRecs){
-    const filtered=sorRecs.filter(r=>inPeriod(r.date));
+    const filtered=sorRecs;
     const m={};
     filtered.forEach(r=>{
       if(!m[r.ic]) m[r.ic]={ic:r.ic,closed:0,open:0,total:0};
@@ -1434,7 +1496,7 @@ function bSORTable(sorRecs, live){
     <td class="td tl">${esc(r.ic)}</td>
     <td class="td cg">${fn(r.closed)}</td><td class="td ca">${fn(r.open)}</td><td class="td">${fn(r.total)}</td>
   </tr>`).join('');
-  return`<div class="card" style="min-width:220px"><div class="slbl">Site Observations</div>
+  return`<div class="card" style="min-width:220px"><div class="slbl">${title}</div>
   <table class="tbl"><thead><tr>
     <th class="th tl">IC</th><th class="th">Closed</th><th class="th">Open</th><th class="th">Total</th>
   </tr></thead><tbody>${trs}</tbody>
@@ -1457,10 +1519,10 @@ function bSORScatter(){
   </div>`;
 }
 
-function bNCRTable(ncrRecs, live){
+function bNCRTable(ncrRecs, live, title='NCR Status'){
   let rows, totals;
   if(ncrRecs){
-    const filtered=ncrRecs.filter(r=>inPeriod(r.date));
+    const filtered=ncrRecs;
     const m={};
     filtered.forEach(r=>{
       if(!m[r.againstName]) m[r.againstName]={against:r.againstName,closed:0,open:0,total:0};
@@ -1476,7 +1538,7 @@ function bNCRTable(ncrRecs, live){
     <td class="td tl">${esc(r.against)}</td>
     <td class="td cg">${fn(r.closed)}</td><td class="td ca">${fn(r.open)}</td><td class="td">${fn(r.total)}</td>
   </tr>`).join('');
-  return`<div class="card" style="min-width:220px"><div class="slbl">NCR Status</div>
+  return`<div class="card" style="min-width:220px"><div class="slbl">${title}</div>
   <table class="tbl"><thead><tr>
     <th class="th tl">Against</th><th class="th">Closed</th><th class="th">Open</th><th class="th">Total</th>
   </tr></thead><tbody>${trs}</tbody>
@@ -1535,7 +1597,14 @@ function uploadSlot(key){
 
 function bUploadBar(){
   const isViewer=AUTH.currentUser&&AUTH.currentUser.role==='viewer';
-  if(isViewer) return bTopBar('');
+  const isDash=APP_VIEW==='dashboard';
+  const tabsHtml=isDash?`
+    <div class="upl-strip-sep"></div>
+    <div class="dtb-tabs">
+      <button class="dtb-tab${DASH_TAB==='period'?' active':''}" onclick="switchDashTab('period')">Reporting Duration</button>
+      <button class="dtb-tab${DASH_TAB!=='period'?' active':''}" onclick="switchDashTab('cumul')">Cumulative</button>
+    </div>`:'';
+  if(isViewer) return bTopBar(tabsHtml);
 
   const loadedCount=Object.values(ST.data).filter(v=>v!==null).length;
   const anyProcessing=Object.values(ST.processing).some(v=>v);
@@ -1561,7 +1630,7 @@ function bUploadBar(){
   }).join('');
 
   return bTopBar(`
-    <button class="upl-strip-btn" onclick="document.getElementById('fileMulti').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="Upload All Files" ${anyProcessing?'disabled':''}>
+    <button id="btnUploadAll" class="upl-strip-btn" onclick="document.getElementById('fileMulti').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="Upload All Files" ${anyProcessing?'disabled':''}>
       ${anyProcessing?UPL_ICONS.spin:UPL_ICONS.upload}
     </button>
     <div class="upl-dots">${dots}</div>
@@ -1571,13 +1640,14 @@ function bUploadBar(){
     <button id="btnClearFiles" class="upl-strip-btn" onclick="clearAllFiles()" style="background:rgba(244,63,94,.1);color:#f87171" title="Clear Dashboard" ${!loadedCount?'disabled':''}>
       ${UPL_ICONS.trash}
     </button>
-    <button class="upl-strip-btn" onclick="clearPeriod()" style="background:rgba(255,255,255,.06);color:#6b7280" title="Clear Period" ${!hasRFI?'disabled':''}>
+    <button id="btnClearPeriod" class="upl-strip-btn" onclick="clearPeriod()" style="background:rgba(255,255,255,.06);color:#6b7280" title="Clear Period" ${!hasRFI?'disabled':''}>
       ${UPL_ICONS.calX}
     </button>
     ${isSA?`<div class="upl-strip-sep"></div>
     <button id="btnEdit" class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
       ${UPL_ICONS.layout}
     </button>`:''}
+    ${tabsHtml}
     ${errList.length?`<div class="upl-strip-sep"></div>
     <span class="upl-strip-btn" style="background:rgba(244,63,94,.12);color:#f43f5e;cursor:help" title="${errList.map(esc).join('&#10;')}">${UPL_ICONS.err}</span>`:''}
   `);
@@ -1717,6 +1787,14 @@ function bSidenavExtra(){
       <span class="snav-lbl">Quality KPIs <span style="font-size:9px;font-weight:600;letter-spacing:.04em;opacity:.7">· SA only</span></span>
     </button>
     `:''}
+
+    <button class="sidenav-link snav-wrench${APP_VIEW==='wrench'?' snav-active':''}" data-tip="Wrench Documents" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('wrench')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
+        <circle cx="12" cy="12" r="9" stroke="#38bdf8" stroke-width="1.3" opacity=".3"/>
+        <path d="M9 7h6M9 12h6M9 17h4" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="snav-lbl">Wrench Documents</span>
+    </button>
 
     <button class="sidenav-link snav-manpower${isDep?' snav-active':''}" data-tip="Manpower Deployment" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('deployment')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
@@ -1910,6 +1988,188 @@ function getPeriodKPIs(){
 // VIEW ROUTING
 // ═══════════════════════════════════════════════════
 let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment'
+let DASH_TAB = 'period'; // 'period' | 'cumul'
+
+function switchDashTab(t){ DASH_TAB=t; render(); }
+
+
+function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, dailyLive, sorRecs, wTotal, fjcAccTotal, ncrRecs }){
+  const totalJoints=42000;
+  const wPct=wTotal?Math.min(100,wTotal/totalJoints*100):null;
+  const sorClosedCount=sorRecs?sorRecs.filter(r=>(r.status||'').includes('CLOSED')).length:null;
+  const sorOpenCount=sorRecs?sorRecs.length-sorClosedCount:null;
+  const today=new Date().toISOString().slice(0,10);
+  const ncrTotal=ncrRecs?ncrRecs.length:null;
+  const ncrOverdueCount=ncrRecs?ncrRecs.filter(r=>!(r.status||'').includes('CLOSED')&&r.targetClose&&r.targetClose<today).length:null;
+  const ncrOverduePct=ncrOverdueCount!=null&&ncrTotal?ncrOverdueCount/ncrTotal*100:null;
+  const na='—';
+  // bar: fillPct 0-100, color string
+  const mkBar=(fillPct,color)=>fillPct!=null
+    ?`<div class="ks-bar"><div class="ks-bar-fill" style="width:${Math.min(100,Math.max(0,fillPct)).toFixed(1)}%;background:${color}"></div></div>`
+    :'';
+  const mkCard=(label,val,sub,pill,color,bar='')=>{
+    const v=val!=null?val:na;
+    return`<div class="ks-card" style="--ks-c:${color}">
+      <div class="ks-lbl">${label}</div>
+      <div class="ks-val" style="color:${val!=null?color:'#4a5068'}">${v}</div>
+      <div class="ks-sub">${sub}</div>
+      ${pill?`<span class="ks-pill" style="background:${pill.bg};border-color:${pill.bc};color:${pill.c}">${pill.txt}</span>`:''}
+      ${bar}
+    </div>`;
+  };
+  const pct=v=>v!=null?v.toFixed(1)+'%':null;
+  const weldColor=weldRepair!=null&&weldRepair>3?sc.bad:sc.good;
+  const fjcColor=fjcRepair!=null&&fjcRepair>1?sc.bad:sc.good;
+  const blColor=ndtBacklog!=null&&ndtBacklogGoal!=null&&ndtBacklog>ndtBacklogGoal?sc.ca:sc.good;
+  const ncrColor=ncrOverduePct!=null&&ncrOverduePct>5?sc.bad:sc.good;
+  const weldPill=weldRepair!=null
+    ?(weldRepair<=3?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 3% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
+    :null;
+  const fjcPill=fjcRepair!=null
+    ?(fjcRepair<=1?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 1% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
+    :null;
+  const blPill=ndtBacklog!=null&&ndtBacklogGoal!=null
+    ?(ndtBacklog<=ndtBacklogGoal?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:`GOAL ≤ ${fn(ndtBacklogGoal)} ✓`}:{bg:'rgba(249,115,22,.1)',bc:'rgba(249,115,22,.28)',c:'#f97316',txt:`GOAL ≤ ${fn(ndtBacklogGoal)}`})
+    :null;
+  const sorPill=sorOpenCount!=null
+    ?{bg:'rgba(20,184,166,.08)',bc:'rgba(20,184,166,.22)',c:'#14b8a6',txt:`${sorClosedCount} CLOSED`}
+    :null;
+  const ncrPill=ncrOverduePct!=null
+    ?(ncrOverduePct<=5?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 5% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
+    :null;
+  // Trend bars — progress towards goal (clamped 0-100)
+  const wPctColor=wPct!=null&&wPct>=80?sc.good:sc.cb;
+  const repairBar=(rate,target,color)=>rate!=null?mkBar(Math.min(100,rate/target*100),color):''; // fill = how much of target used
+  const sorBarFill=sorRecs&&sorRecs.length?sorOpenCount/sorRecs.length*100:null;
+  return`<div id="kpiStrip">
+    ${mkCard('Welding Progress', wPct!=null?wPct.toFixed(1)+'%':null, wTotal!=null?`${fn(wTotal)} / ${fn(totalJoints)} joints`:'No daily data', wPct!=null?{bg:'rgba(245,158,11,.1)',bc:'rgba(245,158,11,.28)',c:'#f59e0b',txt:`FJC ${fjcAccTotal!=null?(fjcAccTotal/totalJoints*100).toFixed(1)+'%':'—'}`}:null, wPctColor, mkBar(wPct,wPctColor))}
+    ${mkCard('Weld Repair Rate', pct(weldRepair), 'cumulative NDT', weldPill, weldColor, repairBar(weldRepair,3,weldColor))}
+    ${mkCard('NDT Backlog', ndtBacklog!=null?fn(ndtBacklog):null, 'joints awaiting review', blPill, blColor, ndtBacklog!=null&&ndtBacklogGoal?mkBar(ndtBacklog/ndtBacklogGoal*100,blColor):'')}
+    ${mkCard('FJC Repair Rate', pct(fjcRepair), 'cumulative FJC', fjcPill, fjcColor, repairBar(fjcRepair,1,fjcColor))}
+    ${mkCard('Observations Open', sorOpenCount!=null?String(sorOpenCount):null, sorRecs?`of ${fn(sorRecs.length)} total SOR`:'No SOR data', sorPill, sc.ca, mkBar(sorBarFill,sc.ca))}
+    ${mkCard('NCR Overdue', ncrOverduePct!=null?ncrOverduePct.toFixed(1)+'%':null, ncrTotal!=null?`${ncrOverdueCount} of ${fn(ncrTotal)} NCRs`:'No NCR data', ncrPill, ncrColor, ncrOverduePct!=null?mkBar(ncrOverduePct/5*100,ncrColor):'')}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// WRENCH DOCUMENT SEARCH
+// ═══════════════════════════════════════════════════
+const WR = { username:'', password:'', results:null, total:0, loading:false, error:'' };
+
+function renderWrench(){
+  const sc = SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const loggedIn = !!(WR.username && WR.password);
+
+  const loginForm = `
+    <div class="card" style="padding:28px 32px;max-width:420px;margin:0 auto">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${sc.muted};margin-bottom:18px">Wrench Login</div>
+      <input id="wrU" type="text" placeholder="Wrench username" value="${esc(WR.username)}"
+        style="width:100%;box-sizing:border-box;background:${sc.bg};border:1px solid ${sc.border};border-radius:6px;padding:9px 13px;font-size:13px;color:${sc.text};outline:none;margin-bottom:10px"/>
+      <input id="wrP" type="password" placeholder="Wrench password"
+        style="width:100%;box-sizing:border-box;background:${sc.bg};border:1px solid ${sc.border};border-radius:6px;padding:9px 13px;font-size:13px;color:${sc.text};outline:none;margin-bottom:16px"/>
+      <button onclick="wrenchLogin()"
+        style="width:100%;background:#38bdf8;color:#000;border:none;border-radius:6px;padding:10px;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer">
+        CONNECT TO WRENCH
+      </button>
+      ${WR.error?`<div style="margin-top:12px;font-size:12px;color:#f43f5e">${esc(WR.error)}</div>`:''}
+    </div>`;
+
+  const searchPanel = `
+    <div class="card" style="padding:24px 28px">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <input id="wrQ" type="text" placeholder="Document number or keyword…"
+          style="flex:1;background:${sc.bg};border:1px solid ${sc.border};border-radius:6px;padding:9px 13px;font-size:13px;color:${sc.text};outline:none"
+          onkeydown="if(event.key==='Enter')wrenchSearch()"/>
+        <button onclick="wrenchSearch()"
+          style="background:#38bdf8;color:#000;border:none;border-radius:6px;padding:9px 22px;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer;white-space:nowrap">
+          ${WR.loading?'SEARCHING…':'SEARCH'}
+        </button>
+        <button onclick="wrenchLogout()" title="Disconnect"
+          style="background:none;border:1px solid ${sc.border};border-radius:6px;padding:9px 14px;font-size:11px;color:${sc.muted};cursor:pointer">
+          ✕ Logout
+        </button>
+      </div>
+      ${WR.error?`<div style="font-size:12px;color:#f43f5e;margin-bottom:8px">${esc(WR.error)}</div>`:''}
+      ${WR.results!==null ? wrenchResultsHtml(sc) : ''}
+    </div>`;
+
+  document.getElementById('app').innerHTML=`
+    ${bTopBar('Wrench Document Search')}
+    <div id="uplBarSpacer"></div>
+    <div style="padding:32px 40px;max-width:900px;margin:0 auto">
+      ${loggedIn ? searchPanel : loginForm}
+    </div>`;
+
+  if(!loggedIn){
+    document.getElementById('wrU')?.focus();
+  } else {
+    const q=document.getElementById('wrQ');
+    if(q) setTimeout(()=>q.focus(),50);
+  }
+}
+
+function wrenchResultsHtml(sc){
+  if(WR.loading) return `<div style="text-align:center;padding:24px;color:${sc.muted};font-size:13px">Searching Wrench…</div>`;
+  if(!WR.results||!WR.results.length) return `<div style="text-align:center;padding:24px;color:${sc.muted};font-size:13px">No documents found.</div>`;
+  const rows = WR.results.map(r=>`
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border}">${esc(r.docNo)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border}">${esc(r.description)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border};text-align:center">${esc(r.rev)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border}">${esc(r.transmittal)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border};text-align:center">${esc(r.date)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border};text-align:center">
+        <a href="https://enppi.wrenchsp.com/ENPPI_LIVE/WrenchWeb/Document/DocumentDetails?itemId=${r.itemId}" target="_blank" rel="noopener"
+          style="color:#38bdf8;font-size:11px;font-weight:600;text-decoration:none">OPEN ↗</a>
+      </td>
+    </tr>`).join('');
+  return `
+    <div style="font-size:11px;color:${sc.muted};margin-bottom:8px">${WR.total} result${WR.total!==1?'s':''} found</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.04)">
+            <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">DOC NO</th>
+            <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">DESCRIPTION</th>
+            <th style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">REV</th>
+            <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">TRANSMITTAL</th>
+            <th style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">DATE</th>
+            <th style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}"></th>
+          </tr>
+        </thead>
+        <tbody style="color:${sc.text}">${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function wrenchLogin(){
+  WR.username=(document.getElementById('wrU')?.value||'').trim();
+  WR.password=(document.getElementById('wrP')?.value||'').trim();
+  WR.error='';
+  if(!WR.username||!WR.password){WR.error='Enter both username and password.';renderWrench();return;}
+  renderWrench();
+}
+
+function wrenchLogout(){
+  WR.username=''; WR.password=''; WR.results=null; WR.error=''; WR.loading=false;
+  renderWrench();
+}
+
+async function wrenchSearch(){
+  const q=(document.getElementById('wrQ')?.value||'').trim();
+  if(!q){return;}
+  WR.loading=true; WR.error=''; WR.results=null;
+  renderWrench();
+  try{
+    const res=await sbEdgeFn('wrench-search',{query:q,username:WR.username,password:WR.password});
+    if(res.error){WR.error=res.error;WR.results=[];}
+    else{WR.results=res.results||[];WR.total=res.total||WR.results.length;}
+  }catch(e){
+    WR.error=e.message||'Search failed';WR.results=[];
+  }
+  WR.loading=false;
+  renderWrench();
+}
 
 function switchView(v){
   // SA-only pages: block non-SA users even if called directly
@@ -1937,6 +2197,7 @@ function render(){
   Object.keys(CHARTS).forEach(k=>delete CHARTS[k]);
   if(APP_VIEW==='deployment'){ ACTIVE_CANVAS_ID='dpCanvas'; renderDeployment(); return; }
   if(APP_VIEW==='kpi'){ ACTIVE_CANVAS_ID='kpiCanvas'; renderKPI(); return; }
+  if(APP_VIEW==='wrench'){ renderWrench(); return; }
   ACTIVE_CANVAS_ID='dashCanvas';
 
   const rfiData=getRFIData();
@@ -1952,20 +2213,41 @@ function render(){
   const sorRecs=ST.data.sor;
   const ncrRecs=ST.data.ncr;
 
-  // Build all panel HTML strings
+  // Welding progress totals for KPI strip
+  const d1r=ST.data.daily1, d2r=ST.data.daily2, d3r=ST.data.daily3;
+  let wTotal=null, fjcAccTotal=null;
+  if(d1r||d2r||d3r){
+    const s1=d1r?getDailySnapshot(d1r,ST.end):null;
+    const s2=d2r?getDailySnapshot(d2r,ST.end):null;
+    const s3=d3r?getDailySnapshot(d3r,ST.end):null;
+    wTotal=(s1?s1.welded:0)+(s2?s2.welded:0)+(s3?s3.welded:0);
+    fjcAccTotal=(s1?s1.fjcAccepted:0)+(s2?s2.fjcAccepted:0)+(s3?s3.fjcAccepted:0);
+  }
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+
+  // Build all panel HTML strings — period/cumul panels swap content based on DASH_TAB
+  const isPeriodTab = DASH_TAB === 'period';
   const PANELS_HTML = {
-    rfiPeriod:   bRFITable(rfiData.period?.rows||null, rfiData.period?.totals||null, 'Reporting Duration RFI Status', rfiLive),
+    kpiStrip:    bKPIStrip({sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, dailyLive, sorRecs, wTotal, fjcAccTotal, ncrRecs}),
+    rfiPeriod:   isPeriodTab
+      ? bRFITable(rfiData.period?.rows||null, rfiData.period?.totals||null, 'Reporting Duration RFI Status', rfiLive)
+      : bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive, rfiData.cumulative?.supersededCount||0),
     rfiDonut:    bRFIDonut(rfiData.period?.totals||null, rfiData.cumulative?.totals||null, rfiLive),
-    rfiCumul:    bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive, rfiData.cumulative?.supersededCount||0),
-    ndtPeriod:   bNDTTable(ndtPeriod, 'Reporting Duration NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:pWeldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:pNdtBacklog,goal:pNdtBacklogGoal,unit:''}]),
-    ndtCumul:    bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:weldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:ndtBacklog,goal:ndtBacklogGoal,unit:''}]),
-    fjcPeriod:   bFJCTable(fjcPeriod, 'Reporting Duration FJC Status', dailyLive, [{label:'FJC Repair Rate',value:pFjcRepair,goal:1,unit:'%'}]),
-    fjcCumul:    bFJCTable(fjcCum, 'Cumulative FJC Status', dailyLive, [{label:'FJC Repair Rate',value:fjcRepair,goal:1,unit:'%'}]),
+    ndtPeriod:   isPeriodTab
+      ? bNDTTable(ndtPeriod, 'Reporting Duration NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:pWeldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:pNdtBacklog,goal:pNdtBacklogGoal,unit:''}])
+      : bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive, [{label:'Welding Repair Rate',value:weldRepair,goal:3,unit:'%'},{label:'NDT Backlog',value:ndtBacklog,goal:ndtBacklogGoal,unit:''}]),
+    fjcPeriod:   isPeriodTab
+      ? bFJCTable(fjcPeriod, 'Reporting Duration FJC Status', dailyLive, [{label:'FJC Repair Rate',value:pFjcRepair,goal:1,unit:'%'}])
+      : bFJCTable(fjcCum, 'Cumulative FJC Status', dailyLive, [{label:'FJC Repair Rate',value:fjcRepair,goal:1,unit:'%'}]),
     welders:     bWelderChart(welderData),
     progress:    bProgress(dailyLive),
-    ncrTable:    bNCRTable(ncrRecs, !!ncrRecs),
+    ncrTable:    isPeriodTab
+      ? bNCRTable(ncrRecs?ncrRecs.filter(r=>inPeriod(r.date)):null, !!ncrRecs, 'Reporting Duration NCR Status')
+      : bNCRTable(ncrRecs, !!ncrRecs, 'Cumulative NCR Status'),
     ncrBar:      bNCRBar(ncrRecs, !!ncrRecs),
-    sorTable:    bSORTable(sorRecs, !!sorRecs),
+    sorTable:    isPeriodTab
+      ? bSORTable(sorRecs?sorRecs.filter(r=>inPeriod(r.date)):null, !!sorRecs, 'Reporting Duration Site Observations')
+      : bSORTable(sorRecs, !!sorRecs, 'Cumulative Site Observations'),
     sorScatter:  bSORScatter(),
   };
 
@@ -1986,7 +2268,9 @@ function render(){
 
   // Render canvas panels
   renderCanvas(PANELS_HTML);
-  initCharts(rfiData, welderData, sorRecs, ncrRecs);
+  const sorFiltered=isPeriodTab?sorRecs?.filter(r=>inPeriod(r.date))??null:sorRecs;
+  const ncrFiltered=isPeriodTab?ncrRecs?.filter(r=>inPeriod(r.date))??null:ncrRecs;
+  initCharts(rfiData, welderData, sorFiltered, ncrFiltered);
   bindEvents();
   // Re-apply edit mode if active
   if(EDIT_MODE) activateEditMode();
@@ -3151,8 +3435,9 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
     return new Chart(el,{type:'doughnut',data:{labels:['ACC','ACC W/COMM','CAN','OPEN','REJ'],datasets:[{data,backgroundColor:colors,borderColor:sc.card,borderWidth:2}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fn(ctx.raw)}`}}},cutout:'65%'}});
   }
-  CHARTS.donutPeriod = makeDonut('donutPeriod', rfiData.period?.totals||null);
-  CHARTS.donutCumul  = makeDonut('donutCumul',  rfiData.cumulative?.totals||null);
+  const isPeriodTab=DASH_TAB==='period';
+  if(isPeriodTab) CHARTS.donutPeriod = makeDonut('donutPeriod', rfiData.period?.totals||null);
+  else            CHARTS.donutCumul  = makeDonut('donutCumul',  rfiData.cumulative?.totals||null);
 
   // Welder bar chart
   const welderEl=document.getElementById('welderChart');
@@ -3164,25 +3449,25 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
       const colors=vals.map(v=>v>10?sc.bad:v>5?sc.warn:sc.accent);
       CHARTS.welder=new Chart(welderEl,{type:'bar',
         data:{labels,datasets:[{label:'Cumul. Repair %',data:vals,backgroundColor:colors,borderRadius:3}]},
-        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        options:{responsive:true,maintainAspectRatio:false,
           plugins:{legend:{display:false},tooltip:{callbacks:{
             title:ctx=>{const w=wList[ctx[0].dataIndex];const sn=(w.section||'').replace(/\D/g,'');return`${w.name} (Sec${sn})`;},
             label:ctx=>{
               const w=wList[ctx.dataIndex];
-              const lines=[`Repair rate: ${ctx.raw.toFixed(2)}%`];
+              const lines=[`Repair rate: ${ctx.raw.toFixed(2)}% (${w.cumRep}/${w.cumAut})`];
               if(w.remarks) lines.push(`Remarks: ${w.remarks}`);
               return lines;
             }
           },backgroundColor:sc.card,borderColor:sc.border,borderWidth:1,titleColor:sc.text,bodyColor:sc.muted,padding:10,displayColors:false}},
-          scales:{x:{grid:{color:sc.chartGrid},ticks:{color:sc.muted,callback:v=>v+'%'},title:{display:true,text:'Repair Rate %',color:sc.muted}},
-            y:{grid:{display:false},ticks:{color:sc.text,font:{size:10}}}}}});
+          scales:{x:{grid:{display:false},ticks:{color:sc.text,font:{size:10}}},
+            y:{grid:{color:sc.chartGrid},ticks:{color:sc.muted,callback:v=>v+'%'},title:{display:true,text:'Repair Rate %',color:sc.muted}}}}});
     }
   }
 
   // SOR Scatter — jitter Y for same-KM points, rich tooltip with short name
   const scatterEl=document.getElementById('scatterChart');
   if(scatterEl){
-    const sorData = sorRecs ? sorRecs.filter(r=>inPeriod(r.date)).map(r=>({...r,km:r.km===null||r.km===undefined?0:r.km})) : [];
+    const sorData = sorRecs ? sorRecs.map(r=>({...r,km:r.km===null||r.km===undefined?0:r.km})) : [];
 
     const closedPts=[], openPts=[];
     const jitterStep=0.4;
@@ -3236,9 +3521,8 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
   if(ncrBarEl){
     let rows;
     if(ncrRecs){
-      const filtered=ncrRecs.filter(r=>inPeriod(r.date));
       const m={};
-      filtered.forEach(r=>{
+      ncrRecs.forEach(r=>{
         if(!m[r.againstName]) m[r.againstName]={closed:0,open:0};
         if(r.status.includes('CLOSED')) m[r.againstName].closed++; else m[r.againstName].open++;
       });
@@ -3554,6 +3838,17 @@ async function sbRpc(fn, body){
   }
   return r.json();
 }
+async function sbEdgeFn(fn, body){
+  const r=await fetchWithTimeout(`${SB_URL}/functions/v1/${fn}`,{
+    method:'POST', headers:SB_HDR, body:JSON.stringify(body||{})
+  });
+  if(!r.ok){
+    let detail=''; try{ detail=await r.text(); }catch(e){}
+    console.error(`[Edge ${fn}] HTTP ${r.status}`, detail);
+    throw new Error(`${detail||'Request failed ('+r.status+')'}`);
+  }
+  return r.json();
+}
 
 // ── Load all datasets from Supabase on page open ────
 async function loadAllFromDB(){
@@ -3633,6 +3928,361 @@ function getSession(){try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)|
 function setSession(u){sessionStorage.setItem(SESSION_KEY,JSON.stringify(u));}
 function clearSession(){sessionStorage.removeItem(SESSION_KEY);}
 
+// ── Onboarding Tour ────────────────────────────────────────────
+let _tourSteps=[], _tourIdx=0;
+
+function _tourKey(u){ return u?`wep_tour_v1_${u}`:null; }
+function _tourDone(u){ if(u) localStorage.setItem(_tourKey(u),'done'); }
+function resetTourForUser(u){ localStorage.removeItem(_tourKey(u)); }
+function _tourIsDone(u){ return u && localStorage.getItem(_tourKey(u))==='done'; }
+
+// Compute union bounding rect from one or more CSS selectors
+function _unionRect(selectors){
+  let l=Infinity,t=Infinity,r=-Infinity,b=-Infinity,found=false;
+  (Array.isArray(selectors)?selectors:[selectors]).forEach(sel=>{
+    const el=document.querySelector(sel);
+    if(!el) return;
+    const rc=el.getBoundingClientRect();
+    l=Math.min(l,rc.left); t=Math.min(t,rc.top);
+    r=Math.max(r,rc.right); b=Math.max(b,rc.bottom);
+    found=true;
+  });
+  if(!found) return null;
+  return {left:l,top:t,right:r,bottom:b,width:r-l,height:b-t};
+}
+
+function _buildTourSteps(){
+  const u=AUTH.currentUser||{};
+  const isSA=u.username===SUPER_ADMIN;
+  const canDate=!u.isGuest;
+  const canAdmin=isSA||(u.role==='admin');
+  const steps=[{type:'welcome'}];
+
+  steps.push({
+    sel:'.tb-date',
+    title: canDate?'Reporting Duration':'Reporting Duration Cutoff',
+    text: canDate
+      ?'Set the start and end dates to filter all dashboard panels to your chosen reporting period.'
+      :'The reporting period is fixed for your access level. All panels reflect data up to this cutoff date.',
+    pos:'bottom'
+  });
+  steps.push({
+    sel:'.dtb-tabs',
+    title:'Reporting Duration vs. Cumulative',
+    text:'Toggle between the selected reporting period and all-time cumulative data — all panels update instantly.',
+    pos:'bottom'
+  });
+  steps.push({
+    sel:'#sidenav',
+    title:'Navigation Sidebar',
+    text:'Access all dashboard views: Pipeline Dashboard, Manpower Deployment'
+      +(isSA?' and Quality KPIs':'')+'. '
+      +(canAdmin?'Upload data files and manage users from here too.':'Export data and change themes from here.'),
+    pos:'right'
+  });
+  steps.push({
+    sel:'[data-id="kpiStrip"]',
+    title:'Key Performance Indicators',
+    text:'At-a-glance quality metrics: Weld Repair Rate, FJC Repair Rate, NDT Backlog, NCR Overdue % and daily progress. Each card shows a trend bar against its target.',
+    pos:'bottom'
+  });
+
+  if(canAdmin){
+    // Spotlight upload button + dots + save button only
+    steps.push({
+      sel:['#btnUploadAll','.upl-dots','#btnSave'],
+      title:'File Upload Status',
+      text:'The yellow button uploads all files at once. Each dot represents a data file — green means loaded, amber means unsaved changes. Click any dot to upload that specific file. Hit the save (floppy) button to commit changes.',
+      pos:'bottom'
+    });
+    // Spotlight clear dashboard + clear period + edit layout only
+    steps.push({
+      sel:['#btnClearFiles','#btnClearPeriod','#btnEdit'],
+      title:'Dashboard Controls',
+      text:'Clear Dashboard removes all uploaded data. Clear Period resets the date slicer. Edit Layout unlocks all panels so you can drag and resize them freely — click Save Layout when done.',
+      pos:'bottom'
+    });
+  }
+
+  steps.push({
+    sel:'#dashCanvas',
+    anchorTop:'[data-id="kpiStrip"]',
+    title:'Detailed Breakdown Panels',
+    text:'Below the KPI strip are the full detail panels — RFI Status, NDT results, FJC Coating, Welder Activity, Progress, NCR and SOR reports. Scroll down to explore each panel.',
+    pos:'top'
+  });
+  return steps;
+}
+
+function maybeShowTour(){
+  const u=AUTH.currentUser||{};
+  if(u.isGuest) return;
+  if(_tourIsDone(u.username)) return;
+  _ensureTourDOM();
+  // Show full dim immediately — prevents flash of dashboard before welcome
+  const dim=document.getElementById('tourDim');
+  if(dim) dim.style.display='block';
+  setTimeout(showTour, 80);
+}
+
+function showTour(){
+  _tourSteps=_buildTourSteps();
+  _tourIdx=0;
+  _ensureTourDOM();
+  _renderTourStep();
+}
+
+function _ensureTourDOM(){
+  if(document.getElementById('tourSpotlight')) return;
+  const dim=document.createElement('div');
+  dim.id='tourDim'; dim.style.display='none';
+  document.body.appendChild(dim);
+  const sp=document.createElement('div');
+  sp.id='tourSpotlight'; sp.style.display='none';
+  document.body.appendChild(sp);
+  const card=document.createElement('div');
+  card.id='tourCard'; card.style.display='none';
+  document.body.appendChild(card);
+  const wc=document.createElement('div');
+  wc.id='tourWelcome'; wc.style.display='none';
+  document.body.appendChild(wc);
+}
+
+function _applySpotlight(rect, pad, animate){
+  const sp=document.getElementById('tourSpotlight');
+  if(!sp) return;
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const L=Math.max(0,rect.left-pad);
+  const T=Math.max(0,rect.top-pad);
+  const R=Math.min(rect.right+pad, vw-2);
+  const B=Math.min(rect.bottom+pad, vh-2);
+
+  if(animate && sp.style.display==='block'){
+    // Shrink mid-flight then expand at destination
+    sp.style.transform='scale(0.82)';
+    setTimeout(()=>{
+      sp.style.left=L+'px'; sp.style.top=T+'px';
+      sp.style.width=(R-L)+'px'; sp.style.height=(B-T)+'px';
+      setTimeout(()=>{ sp.style.transform='scale(1)'; }, 240);
+    }, 60);
+  } else {
+    // First appearance — no transition, snap into place
+    const was=sp.style.transition;
+    sp.style.transition='none';
+    sp.style.left=L+'px'; sp.style.top=T+'px';
+    sp.style.width=(R-L)+'px'; sp.style.height=(B-T)+'px';
+    sp.style.display='block';
+    requestAnimationFrame(()=>{ sp.style.transition=was||''; });
+  }
+  return {left:L+pad, top:T+pad, right:R-pad, bottom:B-pad, width:R-L-pad*2, height:B-T-pad*2};
+}
+
+function _renderTourStep(delayCard=false){
+  const step=_tourSteps[_tourIdx];
+  const sp=document.getElementById('tourSpotlight');
+  const card=document.getElementById('tourCard');
+  const wc=document.getElementById('tourWelcome');
+  const dim=document.getElementById('tourDim');
+  const total=_tourSteps.length;
+  const isFirstSpotlight=_tourIdx===1;
+
+  if(!step){ _finishTour(); return; }
+
+  if(step.type==='welcome'){
+    if(sp) sp.style.display='none';
+    if(card) card.style.display='none';
+    if(dim) dim.style.display='block'; // full dim for welcome (no spotlight)
+    if(wc){
+      wc.style.display='flex';
+      wc.innerHTML=`
+        <div class="tw-pre">Welcome to ENPPI's</div>
+        <div class="tw-main">WEP Project<br>QA/QC Dashboard</div>
+        <div class="tw-by">By Ahmed Hassan &nbsp;·&nbsp; Construction Quality Manager</div>
+        <div class="tw-actions">
+          <button class="tw-start" onclick="_tourBeginIris()">Start Tour &nbsp;→</button>
+          <button class="tw-skip-link" onclick="_tourSkip()">Skip — take me to the dashboard</button>
+        </div>`;
+    }
+    return;
+  }
+
+  if(wc) wc.style.display='none';
+  // Hide tourDim during spotlight steps — the spotlight's box-shadow provides the dim.
+  // Keeping tourDim visible would double-dim the area inside the spotlight cutout.
+  if(dim) dim.style.display='none';
+
+  let rect=_unionRect(step.sel);
+  if(!rect){ _tourNext(); return; }
+
+  if(step.anchorTop){
+    const ab=_unionRect(step.anchorTop);
+    if(ab && ab.bottom>rect.top){
+      const newT=ab.bottom+6;
+      rect={left:rect.left,top:newT,right:rect.right,bottom:rect.bottom,
+            width:rect.width,height:rect.bottom-newT};
+    }
+  }
+
+  const primaryEl=document.querySelector(Array.isArray(step.sel)?step.sel[0]:step.sel);
+  if(primaryEl) primaryEl.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    let r2=_unionRect(step.sel)||rect;
+    if(step.anchorTop){
+      const ab=_unionRect(step.anchorTop);
+      if(ab && ab.bottom>r2.top){
+        const nT=ab.bottom+6;
+        r2={left:r2.left,top:nT,right:r2.right,bottom:r2.bottom,width:r2.width,height:r2.bottom-nT};
+      }
+    }
+    const pad=10;
+    const visRect=_applySpotlight(r2, pad, !isFirstSpotlight);
+
+    const showCard=()=>{
+      const nonWelcome=total-1;
+      const curDot=_tourIdx-1;
+      const dots=Array.from({length:nonWelcome},(_,i)=>`<div class="tc-dot${i===curDot?' active':''}"></div>`).join('');
+      const isLast=_tourIdx===total-1;
+      if(card && document.getElementById('tourSpotlight')){
+        card.style.display='block';
+        card.innerHTML=`
+          <div class="tc-step">Step ${_tourIdx} of ${nonWelcome}</div>
+          <div class="tc-title">${step.title}</div>
+          <div class="tc-text">${step.text}</div>
+          <div class="tc-row1">
+            <div class="tc-progress">${dots}</div>
+            <div class="tc-right-btns">
+              <div class="tc-top-btns">
+                ${isLast?'':'<button class="tc-btn-skip" onclick="_tourSkip()">Skip</button>'}
+                <button class="tc-btn-next" onclick="_tourNext()">${isLast?'✓ Finish':'Next →'}</button>
+              </div>
+              <button class="tc-btn-dna" onclick="_tourDontShowAgain()">Do not show again</button>
+            </div>
+          </div>`;
+        _positionTourCard(card, visRect||r2, step.pos||'bottom', pad);
+      }
+    };
+
+    // Animation total: 60ms pre-shrink + 520ms transition + some settle = ~620ms
+    if(delayCard) setTimeout(showCard, 620);
+    else showCard();
+  }));
+}
+
+function _positionTourCard(card, rect, pref, pad){
+  const cw=card.offsetWidth||360, ch=card.offsetHeight||160;
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const margin=14;
+  let top, left;
+
+  if(pref==='bottom' && rect.bottom+pad+margin+ch<vh)  top=rect.bottom+pad+margin;
+  else if(pref==='top' && rect.top-pad-margin-ch>0)     top=rect.top-pad-margin-ch;
+  else if(rect.bottom+pad+margin+ch<vh)                 top=rect.bottom+pad+margin;
+  else                                                   top=Math.max(margin,rect.top-pad-margin-ch);
+
+  if(pref==='right'){
+    left=rect.right+pad+margin;
+    top=rect.top+(rect.height/2)-(ch/2);
+    if(left+cw>vw) left=rect.left-pad-margin-cw;
+  } else {
+    left=rect.left-pad;
+    if(left+cw>vw) left=vw-cw-margin;
+    if(left<margin) left=margin;
+  }
+  card.style.top=Math.max(margin,top)+'px';
+  card.style.left=Math.max(margin,left)+'px';
+}
+
+function _tourBeginIris(){
+  // Hide welcome + full dim — reveal dashboard for 1 second, then iris-close from corners
+  const wc=document.getElementById('tourWelcome');
+  const dim=document.getElementById('tourDim');
+  if(wc) wc.style.display='none';
+  if(dim) dim.style.display='none';
+
+  // Advance to step 1 so we know the target rect
+  _tourIdx=1;
+  const step=_tourSteps[_tourIdx];
+  if(!step){ _renderTourStep(); return; }
+
+  // After 1 second of seeing the dashboard, play the iris
+  setTimeout(()=>{
+    // Compute target spotlight rect
+    let rect=_unionRect(step.sel);
+    if(!rect){ _renderTourStep(); return; }
+    const pad=10;
+    const vw=window.innerWidth, vh=window.innerHeight;
+    const tL=Math.max(0,rect.left-pad), tT=Math.max(0,rect.top-pad);
+    const tR=Math.min(rect.right+pad,vw-2), tB=Math.min(rect.bottom+pad,vh-2);
+    const cx=(tL+tR)/2, cy=(tT+tB)/2;
+    const tRx=(tR-tL)/2, tRy=(tB-tT)/2;
+
+    // Create canvas overlay
+    const cv=document.createElement('canvas');
+    cv.id='tourIrisCanvas';
+    cv.style.cssText='position:fixed;inset:0;z-index:9900;pointer-events:none';
+    cv.width=vw; cv.height=vh;
+    document.body.appendChild(cv);
+    const ctx=cv.getContext('2d');
+
+    // Start as a circle large enough to cover the whole viewport from the spotlight center
+    const startR=Math.hypot(Math.max(cx,vw-cx),Math.max(cy,vh-cy))+40;
+    const dur=800; // ms
+    const start=performance.now();
+
+    function ease(t){ return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2; } // ease-in-out quad
+
+    function frame(now){
+      const t=Math.min((now-start)/dur,1);
+      const e=ease(t);
+      // rx and ry both start at startR (circle) and converge to the spotlight ellipse
+      const rx=startR+(tRx-startR)*e;
+      const ry=startR+(tRy-startR)*e;
+      // Darkness fades in from 0 → 0.92 as the iris closes
+      const alpha=e*0.92;
+
+      ctx.clearRect(0,0,vw,vh);
+      ctx.fillStyle=`rgba(0,0,0,${alpha.toFixed(3)})`;
+      ctx.fillRect(0,0,vw,vh);
+
+      // Punch out the shrinking circle→ellipse so the spotlight target stays visible
+      ctx.save();
+      ctx.globalCompositeOperation='destination-out';
+      ctx.beginPath();
+      ctx.ellipse(cx,cy,Math.max(1,rx),Math.max(1,ry),0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      if(t<1){ requestAnimationFrame(frame); }
+      else{
+        // Hand off to spotlight first — keep canvas covering screen until spotlight
+        // box-shadow has painted, then remove canvas on the next frame to avoid flash
+        _renderTourStep(false);
+        requestAnimationFrame(()=>cv.remove());
+      }
+    }
+    requestAnimationFrame(frame);
+  }, 1000);
+}
+
+function _tourNext(){
+  // Hide card immediately so it doesn't sit at the old position during the animation
+  const card=document.getElementById('tourCard');
+  if(card) card.style.display='none';
+  _tourIdx++;
+  if(_tourIdx>=_tourSteps.length){ _finishTour(); return; }
+  _renderTourStep(true); // true = delay card until spotlight arrives
+}
+function _tourSkip(){ _closeTourDOM(); }
+function _tourDontShowAgain(){ _tourDone((AUTH.currentUser||{}).username); _closeTourDOM(); }
+function _finishTour(){ _tourDone((AUTH.currentUser||{}).username); _closeTourDOM(); }
+
+function _closeTourDOM(){
+  ['tourDim','tourSpotlight','tourCard','tourWelcome','tourIrisCanvas'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.remove();
+  });
+}
+
 async function initApp(){
   // Bootstrap in background — do NOT block the login button on it
   bootstrapAdmin();
@@ -3679,6 +4329,7 @@ async function loadAndShow(){
     new Promise(res=>setTimeout(res, 20000)), // 20 s hard ceiling — always reach render()
   ]);
   render();
+  maybeShowTour();
 }
 
 function showLogin(){
@@ -3926,6 +4577,7 @@ async function renderUserList(){
         <span class="role-badge ${rc.cls}">${rc.lbl}</span>
         <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
           ${isBlocked?`<button class="umg-unblock-btn" onclick="unblockUser('${u.username}')">Unblock</button>`:''}
+          <button title="Reset onboarding tour for this user" onclick="resetTourForUser('${u.username}');this.textContent='✓ Reset';this.disabled=true;setTimeout(()=>{this.textContent='Reset Tour';this.disabled=false;},2000)" style="padding:3px 8px;border:1px solid rgba(99,179,237,.25);border-radius:5px;background:transparent;color:#60a5fa;font-size:9px;font-weight:600;cursor:pointer;letter-spacing:.04em">Reset Tour</button>
           <button class="umg-edit" title="${editing?'Close edit form':'Edit user'}" style="${editing?'background:rgba(245,158,11,.18)':''}" onclick="${editing?'cancelEditUser()':`toggleEditUser('${u.username}')`}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 4.5l4 4L8 20H4v-4L15.5 4.5z"/><line x1="12" y1="8" x2="16" y2="12" opacity=".5"/></svg></button>
           ${(!isSA&&!isMe)?`<button class="umg-del" title="Remove user" onclick="deleteUser('${u.username}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke="#f43f5e" stroke-width="1.3" opacity=".3"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#f43f5e" stroke-width="1.6"/></svg></button>`:''}
         </div>
@@ -4704,19 +5356,17 @@ let EDIT_MODE = false;
 // Defined at the original 12-col resolution, then scaled up by GRID_SCALE so
 // panels keep their exact proportions/positions on the finer 36-col grid.
 const DEFAULT_LAYOUT_BASE = [
-  {id:'rfiPeriod',  col:0,  row:0,  w:30, h:25},
-  {id:'rfiDonut',   col:30, row:0,  w:12, h:25},
-  {id:'rfiCumul',   col:42, row:0,  w:30, h:25},
-  {id:'ndtPeriod',  col:0,  row:26, w:36, h:12},
-  {id:'ndtCumul',   col:36, row:26, w:36, h:12},
-  {id:'fjcPeriod',  col:0,  row:38, w:24, h:12},
-  {id:'fjcCumul',   col:24, row:38, w:24, h:12},
-  {id:'welders',    col:48, row:38, w:24, h:23},
-  {id:'progress',   col:0,  row:50, w:48, h:11},
-  {id:'ncrTable',   col:0,  row:62, w:18, h:14},
-  {id:'ncrBar',     col:18, row:62, w:54, h:14},
-  {id:'sorTable',   col:0,  row:77, w:18, h:14},
-  {id:'sorScatter', col:18, row:77, w:54, h:14},
+  {id:'kpiStrip',   col:0,  row:0,  w:72, h:14},
+  {id:'rfiPeriod',  col:0,  row:15, w:60, h:25},
+  {id:'rfiDonut',   col:60, row:15, w:12, h:25},
+  {id:'ndtPeriod',  col:0,  row:41, w:72, h:12},
+  {id:'fjcPeriod',  col:0,  row:54, w:48, h:12},
+  {id:'welders',    col:48, row:54, w:24, h:23},
+  {id:'progress',   col:0,  row:66, w:48, h:11},
+  {id:'ncrTable',   col:0,  row:78, w:18, h:14},
+  {id:'ncrBar',     col:18, row:78, w:54, h:14},
+  {id:'sorTable',   col:0,  row:93, w:18, h:14},
+  {id:'sorScatter', col:18, row:93, w:54, h:14},
 ];
 const DEFAULT_LAYOUT = DEFAULT_LAYOUT_BASE.map(p=>({...p}));
 
@@ -4777,7 +5427,7 @@ function setActiveLayout(arr){
 // resolution would render tiny/squished on the new 36-col grid, so bumping
 // the key when the grid resolution changes makes old saves simply not match
 // (falling back to DEFAULT_LAYOUT) instead of rendering incorrectly.
-const LAYOUT_KEY    = `wep_canvas_layout_g${GRID_SCALE}_v2`;
+const LAYOUT_KEY    = `wep_canvas_layout_g${GRID_SCALE}_v4`;
 const DP_LAYOUT_KEY = `wep_dp_canvas_layout_g${GRID_SCALE}_v7`;
 const KPI_LAYOUT_KEY= `wep_kpi_canvas_layout_g${GRID_SCALE}_v1`;
 function saveLayout(){ try{ localStorage.setItem(getActiveLayoutKey(), JSON.stringify(getActiveLayout())); }catch(e){} }
@@ -4785,9 +5435,10 @@ function loadLayout(){ try{ const s=localStorage.getItem(getActiveLayoutKey()); 
 
 // ── Panel visibility (hide/show in edit mode) ─────────
 const PANEL_NAMES={
-  rfiPeriod:'Reporting Duration RFI',rfiDonut:'RFI Donut',rfiCumul:'Cumulative RFI',
-  ndtPeriod:'Reporting Duration NDT',ndtCumul:'Cumulative NDT',
-  fjcPeriod:'Reporting Duration FJC',fjcCumul:'Cumulative FJC',
+  kpiStrip:'KPI Strip',
+  rfiPeriod:'RFI Status',rfiDonut:'RFI Donut',
+  ndtPeriod:'NDT (EPCM)',
+  fjcPeriod:'FJC Status',
   welders:'Welder Activity',progress:'Progress',
   ncrTable:'NCR Table',ncrBar:'NCR Bar',
   sorTable:'SOR Table',sorScatter:'SOR Scatter',
