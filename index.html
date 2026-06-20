@@ -183,12 +183,35 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .snav-manpower:hover svg,.snav-manpower.snav-active svg{filter:drop-shadow(0 0 5px #00ff9d) drop-shadow(0 0 11px #00ff9d66)}
 .snav-export:hover{background:linear-gradient(90deg,#fbbf240d,transparent)!important;border-left-color:#fbbf24!important;color:#e2e8f0!important}
 .snav-export:hover svg{filter:drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 11px #fbbf2466)}
-.snav-wrench:hover,.snav-wrench.snav-active{background:linear-gradient(90deg,#38bdf80d,transparent)!important;border-left-color:#38bdf8!important;color:#e2e8f0!important}
-.snav-wrench:hover svg,.snav-wrench.snav-active svg{filter:drop-shadow(0 0 5px #38bdf8) drop-shadow(0 0 11px #38bdf866)}
+/* ── Q&A Assistant ── */
+#qaLauncher{position:fixed;right:26px;bottom:26px;width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;z-index:1600;background:#38bdf8;box-shadow:0 6px 24px rgba(56,189,248,.45);display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .2s}
+#qaLauncher:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 10px 30px rgba(56,189,248,.6)}
+#qaPanel{position:fixed;right:26px;bottom:26px;width:420px;max-width:calc(100vw - 36px);height:560px;max-height:calc(100vh - 100px);z-index:1600;background:#11141d;border:1px solid #232838;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.55);display:flex;flex-direction:column;overflow:hidden}
+#qaHead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #232838;background:#0d0f17;flex:none}
+#qaTitle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.04em;color:#e2e8f0}
+.qa-hbtn{background:none;border:none;cursor:pointer;padding:4px;border-radius:5px;display:flex;align-items:center}
+.qa-hbtn:hover{background:rgba(255,255,255,.06)}
+#qaBody{flex:1;min-height:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.qa-msg{max-width:86%;padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+.qa-msg.user{align-self:flex-end;background:#38bdf8;color:#06121b;border-bottom-right-radius:3px}
+.qa-msg.bot{align-self:flex-start;background:#1b2030;color:#cdd3e1;border-bottom-left-radius:3px}
+.qa-msg.bot table{border-collapse:collapse;margin:6px 0;font-size:12px}
+.qa-msg.bot th,.qa-msg.bot td{border:1px solid #2d3348;padding:4px 8px;text-align:left}
+.qa-msg.err{align-self:flex-start;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.3);color:#fca5b5}
+.qa-hint{align-self:center;font-size:11px;color:#4a5068;text-align:center;line-height:1.6;padding:0 10px}
+.qa-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 14px;background:#1b2030;border-radius:11px;border-bottom-left-radius:3px}
+.qa-typing span{width:6px;height:6px;border-radius:50%;background:#5a6379;animation:qaBlink 1.2s infinite}
+.qa-typing span:nth-child(2){animation-delay:.2s}.qa-typing span:nth-child(3){animation-delay:.4s}
+@keyframes qaBlink{0%,60%,100%{opacity:.25}30%{opacity:1}}
+#qaInputRow{flex:none;display:flex;gap:8px;padding:12px;border-top:1px solid #232838;background:#0d0f17}
+#qaInput{flex:1;resize:none;max-height:120px;background:#11141d;border:1px solid #232838;border-radius:8px;padding:9px 12px;font-size:13px;color:#e2e8f0;outline:none;font-family:inherit;line-height:1.4}
+#qaInput:focus{border-color:#38bdf8}
+#qaSendBtn{flex:none;width:38px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#qaSendBtn:disabled{opacity:.4;cursor:not-allowed}
 .snav-theme:hover{background:linear-gradient(90deg,#e879f90d,transparent)!important;border-left-color:#e879f9!important;color:#e2e8f0!important}
 .snav-theme:hover svg{filter:drop-shadow(0 0 5px #e879f9) drop-shadow(0 0 11px #e879f966)}
-.snav-users:hover{background:linear-gradient(90deg,#60a5fa0d,transparent)!important;border-left-color:#60a5fa!important;color:#e2e8f0!important}
-.snav-users:hover svg{filter:drop-shadow(0 0 5px #60a5fa) drop-shadow(0 0 11px #60a5fa66)}
+.snav-users:hover,.snav-users.snav-active{background:linear-gradient(90deg,#60a5fa0d,transparent)!important;border-left-color:#60a5fa!important;color:#e2e8f0!important}
+.snav-users:hover svg,.snav-users.snav-active svg{filter:drop-shadow(0 0 5px #60a5fa) drop-shadow(0 0 11px #60a5fa66)}
 .snav-kpi:hover,.snav-kpi.snav-active{background:linear-gradient(90deg,#f974160d,transparent)!important;border-left-color:#f97416!important;color:#e2e8f0!important}
 .snav-kpi:hover svg,.snav-kpi.snav-active svg{filter:drop-shadow(0 0 5px #f97416) drop-shadow(0 0 11px #f9741666)}
 /* ── KPI Page (canvas-based — cards rendered as .cp panels) ── */
@@ -243,8 +266,6 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .login-guest-btn{width:100%;background:none;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#4a5068;font-size:13px;font-weight:600;padding:11px;cursor:pointer;transition:border-color .2s,color .2s}
 .login-guest-btn:hover{border-color:rgba(255,255,255,.18);color:#a8afc7}
 .login-guest-note{font-size:10px;color:#2d3348;margin-top:10px;text-align:center;line-height:1.5}
-#userMgmtModal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8888;display:none;align-items:center;justify-content:center}
-#userMgmtModal.open{display:flex}
 #idleWarningModal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;display:none;align-items:center;justify-content:center}
 #idleWarningModal.open{display:flex}
 #changePwModal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9500;display:none;align-items:center;justify-content:center}
@@ -311,22 +332,55 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .exp-chk:hover{border-color:#f59e0b66}
 .exp-chk input{accent-color:#f59e0b;cursor:pointer;width:14px;height:14px;flex-shrink:0}
 .exp-note{font-size:10px;color:#7a809a;margin-top:8px;line-height:1.5}
+/* ── Users Management Page ──────────────────────────── */
+.up-user-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s;border:1px solid transparent;margin-bottom:3px}
+.up-user-row:hover{background:rgba(255,255,255,.04)}
+.up-user-row.selected{background:rgba(56,139,253,.08);border-color:rgba(56,139,253,.25)}
+.up-user-row.up-blocked{border-color:rgba(244,63,94,.25)!important;background:rgba(244,63,94,.04)!important}
+.up-tabs{display:flex;border-bottom:1px solid #2d3348;flex-shrink:0;overflow-x:auto;margin:0 -14px;padding:0 14px}
+.up-tab{padding:10px 16px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#7a809a;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s,border-color .15s}
+.up-tab.active{color:#f1f0e8;border-bottom-color:#388bfd}
+.up-tab:hover:not(.active){color:#a8afc7}
+.up-section{margin-bottom:20px}
+.up-section-title{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7a809a;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.05)}
+.up-toggle-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.up-toggle-row:last-child{border-bottom:none}
+.up-toggle-lbl{font-size:12px;color:#e2e8f0;flex:1}
+.up-toggle-sub{font-size:10px;color:#7a809a;margin-top:1px}
+.up-toggle{position:relative;width:36px;height:20px;flex:none}
+.up-toggle input{opacity:0;width:0;height:0;position:absolute}
+.up-toggle-slider{position:absolute;inset:0;border-radius:10px;background:#2d3348;cursor:pointer;transition:background .2s}
+.up-toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;border-radius:50%;background:#7a809a;transition:.2s}
+.up-toggle input:checked+.up-toggle-slider{background:#388bfd}
+.up-toggle input:checked+.up-toggle-slider::before{transform:translateX(16px);background:#fff}
+.up-toggle input:disabled+.up-toggle-slider{opacity:.45;cursor:not-allowed}
+.up-ceiling-chip{font-size:9px;font-weight:600;letter-spacing:.04em;color:#f59e0b;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:2px 7px;flex:none}
+.up-radio-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.up-radio-opt{padding:7px 14px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #2d3348;color:#7a809a;background:none;transition:all .15s;white-space:nowrap}
+.up-radio-opt.active,.up-radio-opt:hover:not([disabled]){border-color:#388bfd;color:#388bfd;background:rgba(56,139,253,.08)}
+.up-radio-opt[disabled]{opacity:.4;cursor:not-allowed}
+.up-save-bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 0 0;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;margin-top:auto}
+.up-save-btn{background:linear-gradient(135deg,#1d6fa4,#388bfd);border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;padding:8px 22px;cursor:pointer;transition:opacity .15s}
+.up-save-btn:hover{opacity:.88}
+.up-save-msg{font-size:11px}
+.up-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#4a5068;gap:10px;font-size:12px;text-align:center}
+.up-field-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#7a809a;margin-bottom:4px}
 @media print{
   .upl-bar{position:relative!important;left:0!important;box-shadow:none!important}
   .upl-strip{display:none!important}
   #uplBarSpacer,#dpBarSpacer{display:none!important}
-  #loginOverlay,#userMgmtModal,#wrongFileModal,#idleWarningModal,#changePwModal{display:none!important}
+  #loginOverlay,#wrongFileModal,#idleWarningModal,#changePwModal{display:none!important}
   body{min-width:unset!important}
   .row{break-inside:avoid}
   .card,.kpi-card{break-inside:avoid}
 }
 
 /* ── FREE CANVAS LAYOUT ── */
-#dashCanvas,#dpCanvas,#kpiCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
+#dashCanvas,#dpCanvas,#kpiCanvas,#usersCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
 .cp{position:absolute;box-sizing:border-box;padding:4px}
 .cp>.card,.cp>.kpi-card,.cp>.kpi-ed{width:100%;height:100%;box-sizing:border-box;overflow:auto}
 .cp>.kpi-ed{border-radius:0}
-#dashCanvas.edit-mode,#dpCanvas.edit-mode,#kpiCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#kpiCanvas.edit-mode,#usersCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
 .cp.editable{cursor:default}.cp.editable:hover{z-index:100}
 .cp-drag{position:absolute;top:0;left:0;right:28px;height:24px;cursor:grab;z-index:20;
   border-radius:8px 8px 0 0;display:flex;align-items:center;padding-left:8px;opacity:0;transition:opacity .2s}
@@ -360,7 +414,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
   box-shadow:0 4px 24px rgba(0,0,0,.6)}
 .canvas-mode-bar.on{display:flex}
 /* Push canvas content below the edit bar when active */
-#dashCanvas.edit-mode,#dpCanvas.edit-mode,#kpiCanvas.edit-mode{margin-top:36px}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#kpiCanvas.edit-mode,#usersCanvas.edit-mode{margin-top:36px}
 .cp-span-tip{position:absolute;top:2px;right:30px;font-size:9px;color:var(--accent,#f59e0b);
   opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:none;
   background:rgba(0,0,0,.5);padding:1px 5px;border-radius:3px}
@@ -421,7 +475,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 ════════════════════════════════════════════════════════ */
 @media (min-width:641px) and (max-width:1024px){
   /* 2-column grid canvas */
-  #dashCanvas,#dpCanvas,#kpiCanvas{
+  #dashCanvas,#dpCanvas,#kpiCanvas,#usersCanvas{
     display:grid!important;grid-template-columns:1fr 1fr!important;
     align-content:start!important;width:auto!important;height:auto!important;
     min-height:unset!important;padding:10px 10px 40px!important;gap:8px!important;
@@ -450,7 +504,7 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
   .tb-logo{height:20px}
 
   /* Single-column stacked canvas */
-  #dashCanvas,#dpCanvas,#kpiCanvas{
+  #dashCanvas,#dpCanvas,#kpiCanvas,#usersCanvas{
     display:flex!important;flex-direction:column!important;
     width:auto!important;height:auto!important;min-height:unset!important;
     padding:8px 8px 72px!important;gap:8px!important;
@@ -659,42 +713,6 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 </div>
 
 <!-- USER MANAGEMENT MODAL -->
-<div id="userMgmtModal">
-  <div class="umg-card">
-    <div class="umg-hdr">
-      <div><div class="umg-title">User Management</div><div class="umg-sub">Only the Super Admin can create, modify, or delete users</div></div>
-      <button class="btn-x" onclick="closeUserMgmt()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke="#f43f5e" stroke-width="1.3" opacity=".3"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#f43f5e" stroke-width="1.7"/></svg></button>
-    </div>
-    <div class="umg-body">
-      <div class="umg-section"><div class="umg-slbl">Active Users</div><div id="umgUserList"></div></div>
-      <div class="umg-section">
-        <div class="umg-slbl">Add New User</div>
-        <div class="umg-add-form">
-          <div class="umg-form-grid">
-            <div><div class="umg-slbl" style="margin-bottom:5px">Username</div><input class="umg-inp" id="umgNewUser" type="text" placeholder="e.g. jsmith"></div>
-            <div><div class="umg-slbl" style="margin-bottom:5px">Display Name</div><input class="umg-inp" id="umgNewName" type="text" placeholder="e.g. John Smith"></div>
-            <div><div class="umg-slbl" style="margin-bottom:5px">Password</div><input class="umg-inp" id="umgNewPass" type="password" placeholder="Min 8 characters"></div>
-            <div><div class="umg-slbl" style="margin-bottom:5px">Role</div><select class="umg-sel" id="umgNewRole"><option value="admin">Admin (upload + manage)</option><option value="viewer" selected>Viewer (read-only)</option></select></div>
-          </div>
-          <button class="umg-add-btn" onclick="addUser()">+ Create User</button>
-          <div class="umg-msg" id="umgMsg"></div>
-        </div>
-      </div>
-      <div class="umg-section" id="umgChangePwSection">
-        <div class="umg-slbl">Change Your Password</div>
-        <div class="umg-add-form">
-          <div class="umg-form-grid">
-            <div><div class="umg-slbl" style="margin-bottom:5px">New Password</div><input class="umg-inp" id="umgNewPw" type="password" placeholder="Min 8 characters"></div>
-            <div><div class="umg-slbl" style="margin-bottom:5px">Confirm Password</div><input class="umg-inp" id="umgConfPw" type="password" placeholder="Repeat password"></div>
-          </div>
-          <button class="umg-add-btn" onclick="changeMyPassword()">Update Password</button>
-          <div class="umg-msg" id="umgPwMsg"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- WRONG FILE MODAL -->
 <div id="wrongFileModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;align-items:center;justify-content:center">
   <div style="background:#161b22;border:1px solid #30363d;border-radius:12px;padding:28px 32px;max-width:460px;width:90%;box-shadow:0 24px 80px rgba(0,0,0,.7);text-align:center">
@@ -827,6 +845,38 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 <!-- Dropdown panels live OUTSIDE .sidenav so they aren't clipped by its overflow:hidden -->
 <div id="exportDrop" style="display:none;position:fixed;border-radius:8px;min-width:230px;z-index:1500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden"></div>
 <div id="schemeDropdown" style="display:none;position:fixed;border-radius:8px;min-width:190px;z-index:1500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden"></div>
+
+<!-- Q&A ASSISTANT (body-level so it persists across view switches) -->
+<button id="qaLauncher" title="Ask about the project data" onclick="qaToggle(true)" style="display:none">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path d="M4 5h16v11H9l-4 4v-4H4z" stroke="#0b0d14" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="9" cy="10.5" r="1" fill="#0b0d14"/><circle cx="12.5" cy="10.5" r="1" fill="#0b0d14"/><circle cx="16" cy="10.5" r="1" fill="#0b0d14"/>
+  </svg>
+</button>
+<div id="qaPanel" style="display:none">
+  <div id="qaHead">
+    <div id="qaTitle">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M4 5h16v11H9l-4 4v-4H4z" stroke="#38bdf8" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span>Project Q&amp;A</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="qa-hbtn" title="Clear conversation" onclick="qaClear()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7a809a" stroke-width="1.6" stroke-linecap="round"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13"/></svg>
+      </button>
+      <button class="qa-hbtn" title="Minimize" onclick="qaToggle(false)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7a809a" stroke-width="1.8" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="qaBody"></div>
+  <div id="qaInputRow">
+    <textarea id="qaInput" rows="1" placeholder="Ask about RFIs, NDT, FJC, welders, SOR, NCR…"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();qaSend();}"></textarea>
+    <button id="qaSendBtn" onclick="qaSend()" title="Send">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0b0d14" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
 
 <div id="app">
   <div id="dashCanvas"></div>
@@ -1742,6 +1792,7 @@ function bSidenavExtra(){
   const isDash=APP_VIEW==='dashboard';
   const isDep=APP_VIEW==='deployment';
   const isKPI=APP_VIEW==='kpi';
+  const isUsers=APP_VIEW==='users';
   return `
     <!-- Page Navigation -->
     <button class="sidenav-link snav-pipeline${isDash?' snav-active':''}" data-tip="Pipeline Dashboard" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('dashboard')">
@@ -1788,14 +1839,6 @@ function bSidenavExtra(){
     </button>
     `:''}
 
-    <button class="sidenav-link snav-wrench${APP_VIEW==='wrench'?' snav-active':''}" data-tip="Wrench Documents" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('wrench')">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
-        <circle cx="12" cy="12" r="9" stroke="#38bdf8" stroke-width="1.3" opacity=".3"/>
-        <path d="M9 7h6M9 12h6M9 17h4" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <span class="snav-lbl">Wrench Documents</span>
-    </button>
-
     <button class="sidenav-link snav-manpower${isDep?' snav-active':''}" data-tip="Manpower Deployment" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('deployment')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
         <circle cx="9" cy="7" r="2.5" stroke="#00ff9d" stroke-width="1.4"/>
@@ -1835,7 +1878,7 @@ function bSidenavExtra(){
     </div>
 
     ${(isSA||u.role==='admin')?`<div class="snav-users-wrap">
-      <button class="sidenav-link snav-users" data-tip="User Management" style="width:100%;background:none;border:none;cursor:pointer" onclick="openUserMgmt()">
+      <button class="sidenav-link snav-users${isUsers?' snav-active':''}" data-tip="User Management" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('users')">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
           <path d="M12 3L4 6.5v5c0 4.5 3.4 8.7 8 9.5 4.6-.8 8-5 8-9.5v-5L12 3z" stroke="#60a5fa" stroke-width="1.4" stroke-linejoin="round"/>
           <circle cx="12" cy="10" r="2.2" stroke="#60a5fa" stroke-width="1.2"/>
@@ -1987,7 +2030,7 @@ function getPeriodKPIs(){
 // ═══════════════════════════════════════════════════
 // VIEW ROUTING
 // ═══════════════════════════════════════════════════
-let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment'
+let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment' | 'kpi' | 'users'
 let DASH_TAB = 'period'; // 'period' | 'cumul'
 
 function switchDashTab(t){ DASH_TAB=t; render(); }
@@ -2051,130 +2094,11 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, dail
   </div>`;
 }
 
-// ═══════════════════════════════════════════════════
-// WRENCH DOCUMENT SEARCH
-// ═══════════════════════════════════════════════════
-const WR = { username:'', password:'', results:null, total:0, loading:false, error:'' };
-
-function renderWrench(){
-  const sc = SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
-  const loggedIn = !!(WR.username && WR.password);
-
-  const loginForm = `
-    <div class="card" style="padding:28px 32px;max-width:420px;margin:0 auto">
-      <div style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${sc.muted};margin-bottom:18px">Wrench Login</div>
-      <input id="wrU" type="text" placeholder="Wrench username" value="${esc(WR.username)}"
-        style="width:100%;box-sizing:border-box;background:${sc.bg};border:1px solid ${sc.border};border-radius:6px;padding:9px 13px;font-size:13px;color:${sc.text};outline:none;margin-bottom:10px"/>
-      <input id="wrP" type="password" placeholder="Wrench password"
-        style="width:100%;box-sizing:border-box;background:${sc.bg};border:1px solid ${sc.border};border-radius:6px;padding:9px 13px;font-size:13px;color:${sc.text};outline:none;margin-bottom:16px"/>
-      <button onclick="wrenchLogin()"
-        style="width:100%;background:#38bdf8;color:#000;border:none;border-radius:6px;padding:10px;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer">
-        CONNECT TO WRENCH
-      </button>
-      ${WR.error?`<div style="margin-top:12px;font-size:12px;color:#f43f5e">${esc(WR.error)}</div>`:''}
-    </div>`;
-
-  const searchPanel = `
-    <div class="card" style="padding:24px 28px">
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
-        <input id="wrQ" type="text" placeholder="Document number or keyword…"
-          style="flex:1;background:${sc.bg};border:1px solid ${sc.border};border-radius:6px;padding:9px 13px;font-size:13px;color:${sc.text};outline:none"
-          onkeydown="if(event.key==='Enter')wrenchSearch()"/>
-        <button onclick="wrenchSearch()"
-          style="background:#38bdf8;color:#000;border:none;border-radius:6px;padding:9px 22px;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer;white-space:nowrap">
-          ${WR.loading?'SEARCHING…':'SEARCH'}
-        </button>
-        <button onclick="wrenchLogout()" title="Disconnect"
-          style="background:none;border:1px solid ${sc.border};border-radius:6px;padding:9px 14px;font-size:11px;color:${sc.muted};cursor:pointer">
-          ✕ Logout
-        </button>
-      </div>
-      ${WR.error?`<div style="font-size:12px;color:#f43f5e;margin-bottom:8px">${esc(WR.error)}</div>`:''}
-      ${WR.results!==null ? wrenchResultsHtml(sc) : ''}
-    </div>`;
-
-  document.getElementById('app').innerHTML=`
-    ${bTopBar('Wrench Document Search')}
-    <div id="uplBarSpacer"></div>
-    <div style="padding:32px 40px;max-width:900px;margin:0 auto">
-      ${loggedIn ? searchPanel : loginForm}
-    </div>`;
-
-  if(!loggedIn){
-    document.getElementById('wrU')?.focus();
-  } else {
-    const q=document.getElementById('wrQ');
-    if(q) setTimeout(()=>q.focus(),50);
-  }
-}
-
-function wrenchResultsHtml(sc){
-  if(WR.loading) return `<div style="text-align:center;padding:24px;color:${sc.muted};font-size:13px">Searching Wrench…</div>`;
-  if(!WR.results||!WR.results.length) return `<div style="text-align:center;padding:24px;color:${sc.muted};font-size:13px">No documents found.</div>`;
-  const rows = WR.results.map(r=>`
-    <tr>
-      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border}">${esc(r.docNo)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border}">${esc(r.description)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border};text-align:center">${esc(r.rev)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border}">${esc(r.transmittal)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border};text-align:center">${esc(r.date)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid ${sc.border};text-align:center">
-        <a href="https://enppi.wrenchsp.com/ENPPI_LIVE/WrenchWeb/Document/DocumentDetails?itemId=${r.itemId}" target="_blank" rel="noopener"
-          style="color:#38bdf8;font-size:11px;font-weight:600;text-decoration:none">OPEN ↗</a>
-      </td>
-    </tr>`).join('');
-  return `
-    <div style="font-size:11px;color:${sc.muted};margin-bottom:8px">${WR.total} result${WR.total!==1?'s':''} found</div>
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead>
-          <tr style="background:rgba(255,255,255,0.04)">
-            <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">DOC NO</th>
-            <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">DESCRIPTION</th>
-            <th style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">REV</th>
-            <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">TRANSMITTAL</th>
-            <th style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}">DATE</th>
-            <th style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.06em;color:${sc.muted};border-bottom:1px solid ${sc.border}"></th>
-          </tr>
-        </thead>
-        <tbody style="color:${sc.text}">${rows}</tbody>
-      </table>
-    </div>`;
-}
-
-function wrenchLogin(){
-  WR.username=(document.getElementById('wrU')?.value||'').trim();
-  WR.password=(document.getElementById('wrP')?.value||'').trim();
-  WR.error='';
-  if(!WR.username||!WR.password){WR.error='Enter both username and password.';renderWrench();return;}
-  renderWrench();
-}
-
-function wrenchLogout(){
-  WR.username=''; WR.password=''; WR.results=null; WR.error=''; WR.loading=false;
-  renderWrench();
-}
-
-async function wrenchSearch(){
-  const q=(document.getElementById('wrQ')?.value||'').trim();
-  if(!q){return;}
-  WR.loading=true; WR.error=''; WR.results=null;
-  renderWrench();
-  try{
-    const res=await sbEdgeFn('wrench-search',{query:q,username:WR.username,password:WR.password});
-    if(res.error){WR.error=res.error;WR.results=[];}
-    else{WR.results=res.results||[];WR.total=res.total||WR.results.length;}
-  }catch(e){
-    WR.error=e.message||'Search failed';WR.results=[];
-  }
-  WR.loading=false;
-  renderWrench();
-}
-
 function switchView(v){
-  // SA-only pages: block non-SA users even if called directly
   const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
-  if((v==='kpi')&&!isSA) return;
+  const isAdmin=AUTH.currentUser&&AUTH.currentUser.role==='admin';
+  if(v==='kpi'&&!isSA) return;
+  if(v==='users'&&!isSA&&!isAdmin) return;
   APP_VIEW = v;
   toggleSidenav(false);
   render();
@@ -2196,8 +2120,8 @@ function render(){
   Object.values(CHARTS).forEach(c=>{try{c.destroy();}catch(e){}});
   Object.keys(CHARTS).forEach(k=>delete CHARTS[k]);
   if(APP_VIEW==='deployment'){ ACTIVE_CANVAS_ID='dpCanvas'; renderDeployment(); return; }
-  if(APP_VIEW==='kpi'){ ACTIVE_CANVAS_ID='kpiCanvas'; renderKPI(); return; }
-  if(APP_VIEW==='wrench'){ renderWrench(); return; }
+  if(APP_VIEW==='kpi'){        ACTIVE_CANVAS_ID='kpiCanvas'; renderKPI(); return; }
+  if(APP_VIEW==='users'){      ACTIVE_CANVAS_ID='usersCanvas'; renderUsers(); return; }
   ACTIVE_CANVAS_ID='dashCanvas';
 
   const rfiData=getRFIData();
@@ -3419,6 +3343,443 @@ function renderKPI(){
 }
 
 // ═══════════════════════════════════════════════════
+// USERS MANAGEMENT PAGE
+// ═══════════════════════════════════════════════════
+
+let UMG_SEL   = null;       // selected username
+let UMG_TAB   = 'profile';  // 'profile'|'pages'|'export'|'dates'
+let UMG_USERS = [];         // cached user list from Supabase
+let UMG_PERMS_DRAFT = {};   // {username: permObj} — in-flight edits, not yet saved
+
+const UMG_DEFAULT_PERMS = {
+  pages:   { dashboard:true, deployment:true },
+  panels:  {
+    kpiStrip:true, rfiPeriod:true, rfiDonut:true, ndtPeriod:true,
+    fjcPeriod:true, welders:true, progress:true,
+    ncrTable:true, ncrBar:true, sorTable:true, sorScatter:true,
+    dpCtrl:true, dpCats:true, dpRoles:true,
+    dpChart6m:true, dpHiring:true, dpLocRole:true, dpPersonnel:true,
+    dpUpload:false
+  },
+  export: {
+    excel:true, image:true, changeDates:false,
+    datasets:{rfi:true,ncr:true,sor:true,welders:true,fjc:true,ndt:true,daily:true,deployment:true,hiring:true}
+  },
+  dateControl:'locked', lockedFrom:null, lockedTo:null
+};
+
+// Maximum capability for each role
+function _umgCeiling(role){
+  if(role==='superadmin'||role==='admin') return {dateControl:'free',exportChangeDates:true,dpUpload:true};
+  return {dateControl:'locked',exportChangeDates:false,dpUpload:false};
+}
+
+// Merge saved permissions with defaults
+function _umgGetPerm(uname){
+  if(UMG_PERMS_DRAFT[uname]) return UMG_PERMS_DRAFT[uname];
+  const u=UMG_USERS.find(u=>u.username===uname);
+  const saved=u&&u.permissions&&typeof u.permissions==='object'?u.permissions:{};
+  const merged=JSON.parse(JSON.stringify(UMG_DEFAULT_PERMS));
+  if(saved.pages)   Object.assign(merged.pages,saved.pages);
+  if(saved.panels)  Object.assign(merged.panels,saved.panels);
+  if(saved.export){
+    const {datasets,...rest}=saved.export;
+    Object.assign(merged.export,rest);
+    if(datasets) Object.assign(merged.export.datasets,datasets);
+  }
+  if(saved.dateControl) merged.dateControl=saved.dateControl;
+  if(saved.lockedFrom!==undefined) merged.lockedFrom=saved.lockedFrom;
+  if(saved.lockedTo!==undefined)   merged.lockedTo=saved.lockedTo;
+  return merged;
+}
+
+function _umgGetDraft(uname){
+  if(!UMG_PERMS_DRAFT[uname]) UMG_PERMS_DRAFT[uname]=_umgGetPerm(uname);
+  return UMG_PERMS_DRAFT[uname];
+}
+
+async function renderUsers(){
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const isAdmin=AUTH.currentUser&&AUTH.currentUser.role==='admin';
+  if(!isSA&&!isAdmin){ render(); return; }
+
+  document.getElementById('app').innerHTML=`
+    ${bUploadBar()}
+    <div id="uplBarSpacer"></div>
+    <div id="usersCanvas"></div>
+  `;
+  const sidenavExtraEl=document.getElementById('sidenavExtra');
+  if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
+  fillSidenavDrops();
+
+  // Load users — try with permissions column first; fall back if column doesn't exist yet
+  try{
+    const rows=await sbSelect('dashboard_users','select=username,display_name,role,last_login,is_blocked,permissions&order=created_at.asc');
+    console.log('[Users] loaded',rows.length,'users');
+    UMG_USERS=rows;
+  }catch(e){
+    console.error('[Users] primary fetch failed:',e);
+    try{
+      const rows=await sbSelect('dashboard_users','select=username,display_name,role,last_login,is_blocked&order=created_at.asc');
+      console.log('[Users] fallback loaded',rows.length,'users');
+      UMG_USERS=rows.map(r=>({...r,permissions:null}));
+    }catch(e2){ console.error('[Users] fallback also failed:',e2); UMG_USERS=[]; }
+  }
+
+  // If the user hasn't saved a custom layout, fit the two panels to the viewport
+  // height so the Add-User form never sits below the fold.
+  if(!localStorage.getItem(USERS_LAYOUT_KEY)){
+    recalcUnit();
+    const availH=window.innerHeight - 60 - 24; // viewport − top bar − canvas top padding
+    const h=Math.max(14, Math.floor(availH/(UNIT+GAP)));
+    USERS_CANVAS_LAYOUT=DEFAULT_USERS_LAYOUT.map(p=>({...p,h}));
+  }
+
+  const USERS_PANELS={ usersLeft:bUsersLeft(), usersRight:bUsersRight() };
+  renderCanvas(USERS_PANELS);
+  bindEvents();
+  if(EDIT_MODE) activateEditMode();
+}
+
+// ── Refresh helpers (avoid full re-render on interaction) ──
+function _umgRefreshLeft(){
+  const c=document.getElementById('usersCanvas');
+  const el=c&&c.querySelector('.cp[data-id="usersLeft"]');
+  if(el) el.innerHTML=bUsersLeft();
+}
+function _umgRefreshRight(){
+  const c=document.getElementById('usersCanvas');
+  const el=c&&c.querySelector('.cp[data-id="usersRight"]');
+  if(el) el.innerHTML=bUsersRight();
+}
+
+// ── Left panel: user list + add-user form ─────────────────
+function bUsersLeft(){
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const rc={superadmin:{bg:'#2a1f0a',txt:'#f59e0b',cls:'role-superadmin',lbl:'Super Admin'},
+            admin:{bg:'#0f2420',txt:'#14b8a6',cls:'role-admin',lbl:'Admin'},
+            viewer:{bg:'#252a3a',txt:'#7a809a',cls:'role-viewer',lbl:'Viewer'}};
+  const rows=UMG_USERS.map(u=>{
+    const r=rc[u.role]||rc.viewer;
+    const ini=(u.display_name||u.username).substring(0,2).toUpperCase();
+    const isSel=UMG_SEL===u.username;
+    const isBlocked=!!u.is_blocked;
+    return`<div class="up-user-row${isSel?' selected':''}${isBlocked?' up-blocked':''}" onclick="selectUser('${esc(u.username)}')">
+      <div class="umg-avatar" style="background:${r.bg};color:${r.txt}">${ini}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:#f1f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.display_name||u.username)}</div>
+        <div style="font-size:10px;color:#7a809a">@${esc(u.username)}${isBlocked?' · <span style="color:#f43f5e;font-weight:600">BLOCKED</span>':''}</div>
+      </div>
+      <span class="role-badge ${r.cls}" style="font-size:8px">${r.lbl}</span>
+    </div>`;
+  }).join('');
+
+  return`<div class="card" style="display:flex;flex-direction:column;height:100%;gap:0;overflow:hidden">
+    <div class="slbl" style="flex-shrink:0;margin-bottom:8px">Users <span style="font-size:9px;color:#7a809a;font-weight:400;text-transform:none;letter-spacing:0">(${UMG_USERS.length})</span></div>
+    <div style="flex:1;min-height:0;overflow-y:auto;margin:-4px -4px 0;padding:4px">
+      ${rows||'<div style="color:#4a5068;font-size:11px;padding:8px">No users found</div>'}
+    </div>
+    ${isSA?`<div style="flex-shrink:0;padding-top:10px;border-top:1px solid rgba(255,255,255,.05);margin-top:10px">
+      <div class="up-field-lbl" style="margin-bottom:6px">Add New User</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">
+        <input class="umg-inp" id="umgNewUser" placeholder="username" style="font-size:11px;padding:6px 8px">
+        <input class="umg-inp" id="umgNewName" placeholder="Display name" style="font-size:11px;padding:6px 8px">
+        <input class="umg-inp" id="umgNewPass" type="password" placeholder="Password (min 8)" style="font-size:11px;padding:6px 8px">
+        <select class="umg-sel" id="umgNewRole" style="font-size:11px;padding:6px 8px">
+          <option value="admin">Admin</option>
+          <option value="viewer" selected>Viewer</option>
+        </select>
+      </div>
+      <button class="umg-add-btn" style="width:100%;font-size:11px" onclick="addUser()">+ Add User</button>
+      <div class="umg-msg" id="umgMsg" style="margin-top:6px"></div>
+    </div>`:''}
+  </div>`;
+}
+
+// ── Right panel: selected-user detail editor ──────────────
+function bUsersRight(){
+  if(!UMG_SEL) return`<div class="card" style="height:100%;display:flex;align-items:center;justify-content:center">
+    <div class="up-empty">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2d3348" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-7 7-7s7 3 7 7"/></svg>
+      <div>Select a user from the list to<br>view and edit their settings</div>
+    </div>
+  </div>`;
+
+  const u=UMG_USERS.find(u=>u.username===UMG_SEL);
+  if(!u) return`<div class="card" style="height:100%"></div>`;
+  const perm=_umgGetPerm(u.username);
+  const ceil=_umgCeiling(u.role);
+  const isSA_user=u.username===SUPER_ADMIN;
+  const isMe=u.username===AUTH.currentUser.username;
+  const canEdit=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const rc={superadmin:{bg:'#2a1f0a',txt:'#f59e0b',cls:'role-superadmin',lbl:'Super Admin'},
+            admin:{bg:'#0f2420',txt:'#14b8a6',cls:'role-admin',lbl:'Admin'},
+            viewer:{bg:'#252a3a',txt:'#7a809a',cls:'role-viewer',lbl:'Viewer'}};
+  const r=rc[u.role]||rc.viewer;
+
+  const tabLabels={profile:'Profile & Role',pages:'Pages & Panels',export:'Export Settings',dates:'Date Controls'};
+  let tabContent='';
+  if(UMG_TAB==='profile')       tabContent=bUpTabProfile(u,r,isSA_user,isMe,canEdit);
+  else if(UMG_TAB==='pages')    tabContent=bUpTabPages(perm,ceil);
+  else if(UMG_TAB==='export')   tabContent=bUpTabExport(perm,ceil);
+  else if(UMG_TAB==='dates')    tabContent=bUpTabDates(perm,ceil);
+
+  return`<div class="card" style="display:flex;flex-direction:column;height:100%;gap:0;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0">
+      <div class="umg-avatar" style="width:34px;height:34px;border-radius:8px;font-size:14px;background:${r.bg};color:${r.txt}">${(u.display_name||u.username).substring(0,2).toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#f1f0e8">${esc(u.display_name||u.username)}</div>
+        <div style="font-size:10px;color:#7a809a">@${esc(u.username)} · Last sign-in: ${fmtLoginTime(u.last_login)}</div>
+      </div>
+      <span class="role-badge ${r.cls}">${r.lbl}</span>
+      ${u.is_blocked?`<span class="umg-blocked-badge">BLOCKED</span>`:''}
+    </div>
+    <div class="up-tabs" style="flex-shrink:0">
+      ${['profile','pages','export','dates'].map(t=>`<button class="up-tab${UMG_TAB===t?' active':''}" onclick="switchUsersTab('${t}')">${tabLabels[t]}</button>`).join('')}
+    </div>
+    <div style="flex:1;min-height:0;overflow-y:auto;padding-top:14px">
+      ${tabContent}
+    </div>
+    ${UMG_TAB!=='profile'?`<div class="up-save-bar">
+      <span class="up-save-msg" id="upSaveMsg"></span>
+      <button class="up-save-btn" onclick="saveUserPermissions()">Save Permissions</button>
+    </div>`:''}
+  </div>`;
+}
+
+// ── Tab: Profile & Role ───────────────────────────────────
+function bUpTabProfile(u,r,isSA_user,isMe,canEdit){
+  return`<div class="up-section">
+    <div class="up-section-title">Account Details</div>
+    <div style="display:grid;grid-template-columns:1fr;gap:10px">
+      <div>
+        <div class="up-field-lbl">Display Name</div>
+        <input class="umg-inp" id="upEditName" type="text" value="${esc(u.display_name||'')}" ${canEdit?'':'disabled'}>
+      </div>
+      <div>
+        <div class="up-field-lbl">Role</div>
+        <select class="umg-sel" id="upEditRole" ${(!canEdit||isSA_user)?'disabled':''}>
+          ${isSA_user?`<option value="superadmin" selected>Super Admin</option>`:`
+          <option value="admin" ${u.role==='admin'?'selected':''}>Admin — upload, save, export</option>
+          <option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer — read-only</option>`}
+        </select>
+      </div>
+      ${canEdit?`<div>
+        <div class="up-field-lbl">Reset Password <span style="text-transform:none;font-weight:400;color:#4a5068">(leave blank to keep current)</span></div>
+        <input class="umg-inp" id="upEditPass" type="password" placeholder="Min 8 characters">
+      </div>`:''}
+    </div>
+    ${canEdit?`<div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="umg-add-btn" onclick="saveUserProfile('${esc(u.username)}')">Save Profile</button>
+      ${u.is_blocked?`<button class="umg-unblock-btn" onclick="unblockUser('${esc(u.username)}')">Unblock Account</button>`:''}
+      <button onclick="resetTourForUser('${esc(u.username)}');document.getElementById('upProfileMsg').innerHTML='<span style=color:#34d399>Onboarding tour reset — takes effect on next login.</span>'" style="padding:7px 14px;border:1px solid rgba(99,179,237,.25);border-radius:6px;background:none;color:#60a5fa;font-size:11px;font-weight:600;cursor:pointer" title="Reset onboarding tour for this user">Reset Tour</button>
+      ${(!isSA_user&&!isMe)?`<button onclick="deleteUser('${esc(u.username)}')" style="margin-left:auto;padding:7px 14px;border:1px solid rgba(244,63,94,.3);border-radius:6px;background:none;color:#f43f5e;font-size:11px;font-weight:600;cursor:pointer">Delete User</button>`:''}
+    </div>`:'<div style="color:#4a5068;font-size:11px;margin-top:10px">Only Super Admin can edit profiles.</div>'}
+    <div class="umg-msg" id="upProfileMsg" style="margin-top:8px"></div>
+  </div>`;
+}
+
+// ── Tab: Pages & Panels ───────────────────────────────────
+function bUpTabPages(perm,ceil){
+  const pages=perm.pages||{};
+  const panels=perm.panels||{};
+  const mkRow=(key,lbl,val,ceilVal,changeExpr)=>{
+    const locked=!ceilVal;
+    return`<div class="up-toggle-row">
+      <div style="flex:1"><div class="up-toggle-lbl">${lbl}</div></div>
+      ${locked?`<span class="up-ceiling-chip">Role ceiling</span>`:''}
+      <label class="up-toggle" style="margin-left:10px">
+        <input type="checkbox" ${val&&!locked?'checked':''} ${locked?'disabled':''} onchange="${changeExpr}">
+        <span class="up-toggle-slider"></span>
+      </label>
+    </div>`;
+  };
+  return`<div class="up-section">
+    <div class="up-section-title">Pages</div>
+    ${mkRow('page_dashboard','Pipeline Dashboard',pages.dashboard!==false,true,"umgTogglePanel('page_dashboard',this.checked)")}
+    ${mkRow('page_deployment','Manpower Deployment',pages.deployment!==false,true,"umgTogglePanel('page_deployment',this.checked)")}
+  </div>
+  <div class="up-section">
+    <div class="up-section-title">Dashboard Panels</div>
+    ${mkRow('kpiStrip','KPI Strip',panels.kpiStrip!==false,true,"umgTogglePanel('panel_kpiStrip',this.checked)")}
+    ${mkRow('rfiPeriod','RFI Status Table',panels.rfiPeriod!==false,true,"umgTogglePanel('panel_rfiPeriod',this.checked)")}
+    ${mkRow('rfiDonut','RFI Donut Chart',panels.rfiDonut!==false,true,"umgTogglePanel('panel_rfiDonut',this.checked)")}
+    ${mkRow('ndtPeriod','NDT (EPCM) Table',panels.ndtPeriod!==false,true,"umgTogglePanel('panel_ndtPeriod',this.checked)")}
+    ${mkRow('fjcPeriod','FJC Status Table',panels.fjcPeriod!==false,true,"umgTogglePanel('panel_fjcPeriod',this.checked)")}
+    ${mkRow('welders','Welder Activity Chart',panels.welders!==false,true,"umgTogglePanel('panel_welders',this.checked)")}
+    ${mkRow('progress','Welding Progress Bars',panels.progress!==false,true,"umgTogglePanel('panel_progress',this.checked)")}
+    ${mkRow('ncrTable','NCR Table',panels.ncrTable!==false,true,"umgTogglePanel('panel_ncrTable',this.checked)")}
+    ${mkRow('ncrBar','NCR Bar Chart',panels.ncrBar!==false,true,"umgTogglePanel('panel_ncrBar',this.checked)")}
+    ${mkRow('sorTable','SOR Table',panels.sorTable!==false,true,"umgTogglePanel('panel_sorTable',this.checked)")}
+    ${mkRow('sorScatter','SOR Scatter Plot',panels.sorScatter!==false,true,"umgTogglePanel('panel_sorScatter',this.checked)")}
+  </div>
+  <div class="up-section">
+    <div class="up-section-title">Deployment Panels</div>
+    ${mkRow('dpUpload','File Upload Panel',panels.dpUpload!==false,ceil.dpUpload,"umgTogglePanel('panel_dpUpload',this.checked)")}
+    ${mkRow('dpCtrl','Month Selector',panels.dpCtrl!==false,true,"umgTogglePanel('panel_dpCtrl',this.checked)")}
+    ${mkRow('dpCats','By Category Chart',panels.dpCats!==false,true,"umgTogglePanel('panel_dpCats',this.checked)")}
+    ${mkRow('dpRoles','By Role Chart',panels.dpRoles!==false,true,"umgTogglePanel('panel_dpRoles',this.checked)")}
+    ${mkRow('dpChart6m','6-Month Trend Chart',panels.dpChart6m!==false,true,"umgTogglePanel('panel_dpChart6m',this.checked)")}
+    ${mkRow('dpHiring','Hiring Status Chart',panels.dpHiring!==false,true,"umgTogglePanel('panel_dpHiring',this.checked)")}
+    ${mkRow('dpLocRole','Location & Role Matrix',panels.dpLocRole!==false,true,"umgTogglePanel('panel_dpLocRole',this.checked)")}
+    ${mkRow('dpPersonnel','Personnel Table',panels.dpPersonnel!==false,true,"umgTogglePanel('panel_dpPersonnel',this.checked)")}
+  </div>`;
+}
+
+// ── Tab: Export Settings ──────────────────────────────────
+function bUpTabExport(perm,ceil){
+  const ex=perm.export||{};
+  const ds=ex.datasets||{};
+  const mkRow=(lbl,val,ceilVal,changeExpr)=>{
+    const locked=!ceilVal;
+    return`<div class="up-toggle-row">
+      <div class="up-toggle-lbl">${lbl}</div>
+      ${locked?`<span class="up-ceiling-chip">Role ceiling</span>`:''}
+      <label class="up-toggle" style="margin-left:10px">
+        <input type="checkbox" ${val&&!locked?'checked':''} ${locked?'disabled':''} onchange="${changeExpr}">
+        <span class="up-toggle-slider"></span>
+      </label>
+    </div>`;
+  };
+  const DS_LABELS={rfi:'RFI Register',ncr:'NCRs',sor:'Site Observations (SOR)',welders:'Welder Activity',fjc:'FJC Coating',ndt:'NDT Backlog',daily:'Daily Progress',deployment:'Manpower Deployment',hiring:'Hiring Status'};
+  return`<div class="up-section">
+    <div class="up-section-title">Export Types</div>
+    ${mkRow('Excel Export',ex.excel!==false,true,"umgToggleExport('excel',this.checked)")}
+    ${mkRow('Image / Chart Export',ex.image!==false,true,"umgToggleExport('image',this.checked)")}
+    ${mkRow('Allow Changing Export Date Range',ex.changeDates===true,ceil.exportChangeDates,"umgToggleExport('changeDates',this.checked)")}
+  </div>
+  <div class="up-section">
+    <div class="up-section-title">Excel Datasets</div>
+    <div style="font-size:10px;color:#7a809a;margin-bottom:10px">Select which sheets appear in the exported Excel workbook for this user.</div>
+    ${Object.entries(DS_LABELS).map(([k,lbl])=>mkRow(lbl,ds[k]!==false,true,`umgToggleExportDs('${k}',this.checked)`)).join('')}
+  </div>`;
+}
+
+// ── Tab: Date Controls ────────────────────────────────────
+function bUpTabDates(perm,ceil){
+  const dc=perm.dateControl||'locked';
+  const ceilDC=ceil.dateControl;
+  const aboveCeil=(k)=>ceilDC==='locked'&&k!=='locked';
+  const opts=[
+    {k:'free',   lbl:'Free',       desc:'User can freely change start and end dates.'},
+    {k:'locked', lbl:'Locked',     desc:'Dates are fixed — you set them below and the user cannot change them.'},
+    {k:'restricted',lbl:'Restricted',desc:'User selects from a predefined list of preset periods.'},
+  ];
+  return`<div class="up-section">
+    <div class="up-section-title">Date Slicer Mode</div>
+    <div class="up-radio-row">
+      ${opts.map(o=>{
+        const above=aboveCeil(o.k);
+        return`<button class="up-radio-opt${dc===o.k?' active':''}${above?' disabled':''}" ${above?'disabled':''} onclick="umgSetDateControl('${o.k}')">${o.lbl}${above?` <span class="up-ceiling-chip" style="display:inline;margin-left:4px">ceiling</span>`:''}</button>`;
+      }).join('')}
+    </div>
+    <div style="font-size:11px;color:#7a809a;margin-bottom:16px;line-height:1.6">
+      ${opts.find(o=>o.k===dc)?.desc||''}
+    </div>
+    ${dc==='locked'?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><div class="up-field-lbl">Locked From</div><input class="umg-inp d-inp" id="upLockFrom" type="date" value="${perm.lockedFrom||''}"></div>
+      <div><div class="up-field-lbl">Locked To</div><input class="umg-inp d-inp" id="upLockTo" type="date" value="${perm.lockedTo||''}"></div>
+    </div>`:''}
+  </div>`;
+}
+
+// ── User interaction handlers ─────────────────────────────
+function selectUser(uname){
+  UMG_SEL=uname;
+  UMG_TAB='profile';
+  _umgRefreshLeft();
+  _umgRefreshRight();
+}
+
+function switchUsersTab(tab){
+  UMG_TAB=tab;
+  _umgRefreshRight();
+}
+
+function umgTogglePanel(key,val){
+  if(!UMG_SEL) return;
+  const perm=_umgGetDraft(UMG_SEL);
+  if(key.startsWith('page_')){
+    if(!perm.pages) perm.pages={};
+    perm.pages[key.replace('page_','')]=val;
+  } else if(key.startsWith('panel_')){
+    if(!perm.panels) perm.panels={};
+    perm.panels[key.replace('panel_','')]=val;
+  }
+}
+
+function umgToggleExport(key,val){
+  if(!UMG_SEL) return;
+  const perm=_umgGetDraft(UMG_SEL);
+  if(!perm.export) perm.export={};
+  perm.export[key]=val;
+}
+
+function umgToggleExportDs(dsKey,val){
+  if(!UMG_SEL) return;
+  const perm=_umgGetDraft(UMG_SEL);
+  if(!perm.export) perm.export={};
+  if(!perm.export.datasets) perm.export.datasets={};
+  perm.export.datasets[dsKey]=val;
+}
+
+function umgSetDateControl(val){
+  if(!UMG_SEL) return;
+  const perm=_umgGetDraft(UMG_SEL);
+  perm.dateControl=val;
+  _umgRefreshRight();
+}
+
+async function saveUserPermissions(){
+  if(!UMG_SEL) return;
+  const msg=document.getElementById('upSaveMsg');
+  const perm=UMG_PERMS_DRAFT[UMG_SEL]||_umgGetPerm(UMG_SEL);
+  // Capture locked date inputs if visible
+  if(perm.dateControl==='locked'){
+    perm.lockedFrom=document.getElementById('upLockFrom')?.value||null;
+    perm.lockedTo=document.getElementById('upLockTo')?.value||null;
+  }
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(UMG_SEL)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify({permissions:perm})
+    });
+    if(!r.ok) throw new Error('Save failed');
+    const u=UMG_USERS.find(u=>u.username===UMG_SEL);
+    if(u) u.permissions=JSON.parse(JSON.stringify(perm));
+    delete UMG_PERMS_DRAFT[UMG_SEL];
+    if(msg){msg.style.color='#14b8a6';msg.textContent='Saved successfully.';}
+    setTimeout(()=>{if(msg)msg.textContent='';},2500);
+  }catch(e){
+    if(msg){msg.style.color='#f43f5e';msg.textContent='Error: '+e.message;}
+  }
+}
+
+async function saveUserProfile(uname){
+  const nameEl=document.getElementById('upEditName');
+  const roleEl=document.getElementById('upEditRole');
+  const passEl=document.getElementById('upEditPass');
+  const msg=document.getElementById('upProfileMsg');
+  const showMsg=(txt,ok)=>{if(msg){msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');}};
+  const dname=(nameEl?.value||'').trim();
+  const role=roleEl?.value;
+  const pw=(passEl?.value||'');
+  if(pw&&pw.length<8) return showMsg('Password must be at least 8 characters.',false);
+  const patch={display_name:dname||uname};
+  if(role&&uname!==SUPER_ADMIN) patch.role=role;
+  try{
+    if(pw) patch.pw_hash=await hashPw(pw);
+    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uname)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
+    });
+    if(!r.ok) throw new Error('Update failed');
+    const u=UMG_USERS.find(u=>u.username===uname);
+    if(u){ u.display_name=dname||uname; if(role) u.role=role; }
+    showMsg(pw?'Profile updated and password reset.':'Profile updated.',true);
+    setTimeout(()=>{ _umgRefreshLeft(); _umgRefreshRight(); },700);
+  }catch(e){ showMsg('Error: '+e.message,false); }
+}
+
+// ═══════════════════════════════════════════════════
 // CHART INIT
 // ═══════════════════════════════════════════════════
 function initCharts(rfiData, welderData, sorRecs, ncrRecs){
@@ -3772,9 +4133,9 @@ const SB_HDR  = {'Content-Type':'application/json','apikey':SB_KEY,'Authorizatio
 
 // ── Low-level REST helpers ──────────────────────────
 const SB_TIMEOUT_MS = 15000; // 15 s — prevents fetch from hanging indefinitely
-function fetchWithTimeout(url, opts={}){
+function fetchWithTimeout(url, opts={}, timeoutMs){
   const ctrl=new AbortController();
-  const tid=setTimeout(()=>ctrl.abort(),SB_TIMEOUT_MS);
+  const tid=setTimeout(()=>ctrl.abort(),timeoutMs||SB_TIMEOUT_MS);
   return fetch(url,{...opts,signal:ctrl.signal}).finally(()=>clearTimeout(tid));
 }
 
@@ -3823,7 +4184,26 @@ async function sbUpsert(table, row){
     headers:{...SB_HDR,'Prefer':'resolution=merge-duplicates,return=minimal'},
     body:JSON.stringify(row)
   });
-  if(!r.ok) throw new Error(`DB upsert failed (${table}): ${r.status}`);
+  if(!r.ok){
+    let detail=''; try{ detail=await r.text(); }catch(e){}
+    console.error(`[upsert ${table}] HTTP ${r.status}`, detail);
+    throw new Error(`DB upsert failed (${table}): ${r.status}${detail?' — '+detail:''}`);
+  }
+}
+// Plain INSERT (no merge-duplicates). Needs only INSERT privilege — unlike upsert,
+// which PostgREST requires table-level SELECT for. Use when the caller has already
+// confirmed the row is new (e.g. addUser checks the username first).
+async function sbInsert(table, row){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{...SB_HDR,'Prefer':'return=minimal'},
+    body:JSON.stringify(row)
+  });
+  if(!r.ok){
+    let detail=''; try{ detail=await r.text(); }catch(e){}
+    console.error(`[insert ${table}] HTTP ${r.status}`, detail);
+    throw new Error(`DB insert failed (${table}): ${r.status}${detail?' — '+detail:''}`);
+  }
 }
 // Call a Postgres function (RPC). Used for login/password so the pw_hash check
 // runs inside the DB and the hash never reaches the client (see supabase_security.sql).
@@ -3841,13 +4221,98 @@ async function sbRpc(fn, body){
 async function sbEdgeFn(fn, body){
   const r=await fetchWithTimeout(`${SB_URL}/functions/v1/${fn}`,{
     method:'POST', headers:SB_HDR, body:JSON.stringify(body||{})
-  });
+  }, 60000);
   if(!r.ok){
     let detail=''; try{ detail=await r.text(); }catch(e){}
     console.error(`[Edge ${fn}] HTTP ${r.status}`, detail);
-    throw new Error(`${detail||'Request failed ('+r.status+')'}`);
+    throw new Error(detail||`Request failed (${r.status})`);
   }
   return r.json();
+}
+
+// ═══════════════════════════════════════════════════
+// Q&A ASSISTANT (chat widget)
+// ═══════════════════════════════════════════════════
+const QA = { history: [], busy: false };
+
+// Show the launcher for logged-in non-guest users; hide for guests / logged-out.
+function qaSyncVisibility(){
+  const u=AUTH.currentUser;
+  const allowed=!!u && !u.isGuest;
+  const launcher=document.getElementById('qaLauncher');
+  const panel=document.getElementById('qaPanel');
+  if(!launcher||!panel) return;
+  if(!allowed){ launcher.style.display='none'; panel.style.display='none'; return; }
+  // Keep whichever state it was in; default to collapsed launcher.
+  if(panel.style.display==='flex'){ launcher.style.display='none'; }
+  else { launcher.style.display='flex'; panel.style.display='none'; }
+}
+
+function qaToggle(open){
+  const launcher=document.getElementById('qaLauncher');
+  const panel=document.getElementById('qaPanel');
+  if(!launcher||!panel) return;
+  if(open){
+    launcher.style.display='none';
+    panel.style.display='flex';
+    if(!QA.history.length) qaRender();
+    setTimeout(()=>document.getElementById('qaInput')?.focus(),50);
+  } else {
+    panel.style.display='none';
+    launcher.style.display='flex';
+  }
+}
+
+function qaClear(){ QA.history=[]; qaRender(); }
+
+function qaRender(){
+  const body=document.getElementById('qaBody');
+  if(!body) return;
+  if(!QA.history.length){
+    body.innerHTML=`<div class="qa-hint">Ask me about the project data — RFIs, NDT &amp; FJC progress, welder repair rates, SOR observations, or NCRs.<br><br>e.g. “How many open NCRs are there?” · “Which welders are above 3% repair rate?” · “Total joints welded in Section 1.”</div>`;
+    return;
+  }
+  body.innerHTML=QA.history.map(m=>{
+    if(m.role==='user') return `<div class="qa-msg user">${esc(m.text)}</div>`;
+    if(m.role==='error') return `<div class="qa-msg err">${esc(m.text)}</div>`;
+    return `<div class="qa-msg bot">${qaFmt(m.text)}</div>`;
+  }).join('') + (QA.busy?`<div class="qa-typing"><span></span><span></span><span></span></div>`:'');
+  body.scrollTop=body.scrollHeight;
+}
+
+// Minimal, safe formatting: escape everything, then allow simple **bold** and line breaks.
+function qaFmt(s){
+  return esc(s).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+}
+
+async function qaSend(){
+  const inp=document.getElementById('qaInput');
+  const btn=document.getElementById('qaSendBtn');
+  if(!inp||QA.busy) return;
+  const q=inp.value.trim();
+  if(!q) return;
+  inp.value='';
+  QA.history.push({role:'user',text:q});
+  QA.busy=true;
+  if(btn) btn.disabled=true;
+  qaRender();
+  try{
+    // Send a short rolling history (text only) for follow-up context.
+    const hist=QA.history.filter(m=>m.role==='user'||m.role==='bot').slice(-6)
+      .map(m=>({role:m.role==='bot'?'assistant':'user', content:m.text}));
+    const res=await sbEdgeFn('qa-assistant',{
+      question:q,
+      role:AUTH.currentUser?.role||'viewer',
+      history:hist.slice(0,-1) // exclude the question we just pushed
+    });
+    if(res.error) QA.history.push({role:'error',text:res.error});
+    else QA.history.push({role:'bot',text:res.answer||'No answer returned.'});
+  }catch(e){
+    QA.history.push({role:'error',text:e.message||'Request failed.'});
+  }
+  QA.busy=false;
+  if(btn) btn.disabled=false;
+  qaRender();
 }
 
 // ── Load all datasets from Supabase on page open ────
@@ -3917,7 +4382,7 @@ async function bootstrapAdmin(){
     const rows=await sbSelect('dashboard_users',`username=eq.admin&select=username`);
     if(!rows.length){
       const hash=await hashPw('Admin@2025!');
-      await sbUpsert('dashboard_users',{username:'admin',display_name:'Super Admin',role:'superadmin',pw_hash:hash,created_by:'system'});
+      await sbInsert('dashboard_users',{username:'admin',display_name:'Super Admin',role:'superadmin',pw_hash:hash,created_by:'system'});
       const hint=document.getElementById('loginFirstCred');
       if(hint) hint.style.display='block';
     }
@@ -3936,13 +4401,17 @@ function _tourDone(u){ if(u) localStorage.setItem(_tourKey(u),'done'); }
 function resetTourForUser(u){ localStorage.removeItem(_tourKey(u)); }
 function _tourIsDone(u){ return u && localStorage.getItem(_tourKey(u))==='done'; }
 
-// Compute union bounding rect from one or more CSS selectors
+// Compute union bounding rect from one or more CSS selectors.
+// Invisible / zero-size elements (e.g. display:none at a breakpoint) are skipped
+// so the tour never spotlights a degenerate (0,0,0,0) rect at the top-left corner.
 function _unionRect(selectors){
   let l=Infinity,t=Infinity,r=-Infinity,b=-Infinity,found=false;
   (Array.isArray(selectors)?selectors:[selectors]).forEach(sel=>{
-    const el=document.querySelector(sel);
+    let el;
+    try{ el=document.querySelector(sel); }catch(e){ return; }
     if(!el) return;
     const rc=el.getBoundingClientRect();
+    if(rc.width<=0 || rc.height<=0) return; // hidden / not laid out
     l=Math.min(l,rc.left); t=Math.min(t,rc.top);
     r=Math.max(r,rc.right); b=Math.max(b,rc.bottom);
     found=true;
@@ -4017,6 +4486,10 @@ function _buildTourSteps(){
 function maybeShowTour(){
   const u=AUTH.currentUser||{};
   if(u.isGuest) return;
+  // Desktop-only: below the 640px breakpoint the date selector and several
+  // controls are hidden by CSS, so the tour has no sensible targets. Skip it
+  // WITHOUT marking done, so the user still gets the tour on a desktop later.
+  if(window.innerWidth<=640) return;
   if(_tourIsDone(u.username)) return;
   _ensureTourDOM();
   // Show full dim immediately — prevents flash of dashboard before welcome
@@ -4026,10 +4499,15 @@ function maybeShowTour(){
 }
 
 function showTour(){
-  _tourSteps=_buildTourSteps();
-  _tourIdx=0;
-  _ensureTourDOM();
-  _renderTourStep();
+  try{
+    _tourSteps=_buildTourSteps();
+    _tourIdx=0;
+    _ensureTourDOM();
+    _renderTourStep();
+  }catch(e){
+    console.error('[tour] failed to start — tearing down so the page stays usable',e);
+    _closeTourDOM();
+  }
 }
 
 function _ensureTourDOM(){
@@ -4127,6 +4605,7 @@ function _renderTourStep(delayCard=false){
   if(primaryEl) primaryEl.scrollIntoView({behavior:'smooth',block:'nearest'});
 
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   try{
     let r2=_unionRect(step.sel)||rect;
     if(step.anchorTop){
       const ab=_unionRect(step.anchorTop);
@@ -4166,6 +4645,10 @@ function _renderTourStep(delayCard=false){
     // Animation total: 60ms pre-shrink + 520ms transition + some settle = ~620ms
     if(delayCard) setTimeout(showCard, 620);
     else showCard();
+   }catch(e){
+    console.error('[tour] step render failed — tearing down',e);
+    _closeTourDOM();
+   }
   }));
 }
 
@@ -4207,6 +4690,7 @@ function _tourBeginIris(){
 
   // After 1 second of seeing the dashboard, play the iris
   setTimeout(()=>{
+   try{
     // Compute target spotlight rect
     let rect=_unionRect(step.sel);
     if(!rect){ _renderTourStep(); return; }
@@ -4255,13 +4739,17 @@ function _tourBeginIris(){
 
       if(t<1){ requestAnimationFrame(frame); }
       else{
-        // Hand off to spotlight first — keep canvas covering screen until spotlight
-        // box-shadow has painted, then remove canvas on the next frame to avoid flash
+        // _renderTourStep uses a double-rAF before painting the spotlight.
+        // Remove canvas only after 3 frames so it never goes dark between the two.
         _renderTourStep(false);
-        requestAnimationFrame(()=>cv.remove());
+        requestAnimationFrame(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>cv.remove())));
       }
     }
     requestAnimationFrame(frame);
+   }catch(e){
+    console.error('[tour] iris animation failed — tearing down',e);
+    _closeTourDOM();
+   }
   }, 1000);
 }
 
@@ -4329,6 +4817,7 @@ async function loadAndShow(){
     new Promise(res=>setTimeout(res, 20000)), // 20 s hard ceiling — always reach render()
   ]);
   render();
+  qaSyncVisibility();
   maybeShowTour();
 }
 
@@ -4336,6 +4825,7 @@ function showLogin(){
   const ov=document.getElementById('loginOverlay');
   if(ov) ov.style.display='flex';
   document.getElementById('app').innerHTML='';
+  qaSyncVisibility();
   // Reset login button + error in case they were left in a "Signing in…" state from a prior session
   const btn=document.getElementById('loginBtn');
   if(btn){ btn.disabled=false; btn.textContent='Sign In'; }
@@ -4512,18 +5002,6 @@ function logout(){
 }
 
 // ── User Management ─────────────────────────────────
-function openUserMgmt(){
-  if(!AUTH.currentUser||(!['superadmin','admin'].includes(AUTH.currentUser.role))){alert('Access denied.');return;}
-  renderUserList();
-  document.getElementById('userMgmtModal').classList.add('open');
-}
-function closeUserMgmt(){
-  document.getElementById('userMgmtModal').classList.remove('open');
-  UMG_EDITING=null;
-  ['umgNewUser','umgNewName','umgNewPass','umgNewPw','umgConfPw'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['umgMsg','umgPwMsg'].forEach(id=>{const el=document.getElementById(id);if(el){el.className='umg-msg';el.textContent='';}});
-}
-let UMG_EDITING=null;
 function fmtLoginTime(iso){
   if(!iso) return 'Never';
   const d=new Date(iso);
@@ -4531,92 +5009,6 @@ function fmtLoginTime(iso){
   return d.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 
-async function renderUserList(){
-  const list=document.getElementById('umgUserList');
-  if(!list) return;
-  list.innerHTML='<div style="color:#484f58;font-size:11px;padding:8px">Loading…</div>';
-  const users=await sbSelect('dashboard_users','select=username,display_name,role,created_at,is_blocked&order=created_at.asc');
-  // Last-sign-in is an optional column — fetched separately so a missing
-  // `last_login` column never breaks the core user list.
-  try{
-    const llRows=await sbSelect('dashboard_users','select=username,last_login');
-    const llMap=Object.fromEntries(llRows.map(r=>[r.username,r.last_login]));
-    users.forEach(u=>{ u.last_login=llMap[u.username]||null; });
-  }catch(e){}
-  const roleColors={superadmin:{bg:'#1a0f3a',txt:'#a371f7',cls:'role-superadmin',lbl:'Super Admin'},admin:{bg:'#0d1f4f',txt:'#388bfd',cls:'role-admin',lbl:'Admin'},viewer:{bg:'#1a1a1a',txt:'#8b949e',cls:'role-viewer',lbl:'Viewer'}};
-  list.innerHTML=users.map(u=>{
-    const rc=roleColors[u.role]||roleColors.viewer;
-    const initials=(u.display_name||u.username).substring(0,2).toUpperCase();
-    const isMe=u.username===AUTH.currentUser.username;
-    const isSA=u.username===SUPER_ADMIN;
-    const isBlocked=!!u.is_blocked;
-    const editing=UMG_EDITING===u.username;
-    const editForm=editing?`<div class="umg-edit-form">
-      <div class="umg-form-grid">
-        <div><div class="umg-slbl" style="margin-bottom:5px">Display Name</div><input class="umg-inp" id="umgEditName_${u.username}" type="text" value="${(u.display_name||'').replace(/"/g,'&quot;')}"></div>
-        <div><div class="umg-slbl" style="margin-bottom:5px">Role</div><select class="umg-sel" id="umgEditRole_${u.username}" ${isSA?'disabled':''}>
-          <option value="admin" ${u.role==='admin'?'selected':''}>Admin (upload + manage)</option>
-          <option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer (read-only)</option>
-          ${isSA?`<option value="superadmin" selected>Super Admin</option>`:''}
-        </select></div>
-        <div><div class="umg-slbl" style="margin-bottom:5px">Reset Password <span style="text-transform:none;font-weight:400;color:#4a5068">(leave blank to keep current)</span></div><input class="umg-inp" id="umgEditPass_${u.username}" type="password" placeholder="Min 8 characters"></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="umg-add-btn" onclick="saveUserEdit('${u.username}')">Save Changes</button>
-        <button class="umg-add-btn" style="background:#2d3348" onclick="cancelEditUser()">Cancel</button>
-      </div>
-      <div class="umg-msg" id="umgEditMsg_${u.username}"></div>
-    </div>`:'';
-    return`<div class="umg-user-row ${isBlocked?'umg-blocked-row':''}" style="${editing?'flex-direction:column;align-items:stretch':''}">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;${editing?'margin-bottom:10px':''}">
-        <div class="umg-avatar" style="background:${rc.bg};color:${rc.txt}">${initials}</div>
-        <div style="flex:1;min-width:0">
-          <div class="umg-uname">${esc(u.username)}${isMe?' <span style="color:#8b949e;font-size:9px">(you)</span>':''}${isBlocked?' <span class="umg-blocked-badge">BLOCKED</span>':''}</div>
-          <div class="umg-disp">${esc(u.display_name||'')} ${u.created_at?'· joined '+u.created_at.slice(0,10):''} · last sign-in: ${fmtLoginTime(u.last_login)}</div>
-        </div>
-        <span class="role-badge ${rc.cls}">${rc.lbl}</span>
-        <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
-          ${isBlocked?`<button class="umg-unblock-btn" onclick="unblockUser('${u.username}')">Unblock</button>`:''}
-          <button title="Reset onboarding tour for this user" onclick="resetTourForUser('${u.username}');this.textContent='✓ Reset';this.disabled=true;setTimeout(()=>{this.textContent='Reset Tour';this.disabled=false;},2000)" style="padding:3px 8px;border:1px solid rgba(99,179,237,.25);border-radius:5px;background:transparent;color:#60a5fa;font-size:9px;font-weight:600;cursor:pointer;letter-spacing:.04em">Reset Tour</button>
-          <button class="umg-edit" title="${editing?'Close edit form':'Edit user'}" style="${editing?'background:rgba(245,158,11,.18)':''}" onclick="${editing?'cancelEditUser()':`toggleEditUser('${u.username}')`}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 4.5l4 4L8 20H4v-4L15.5 4.5z"/><line x1="12" y1="8" x2="16" y2="12" opacity=".5"/></svg></button>
-          ${(!isSA&&!isMe)?`<button class="umg-del" title="Remove user" onclick="deleteUser('${u.username}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke="#f43f5e" stroke-width="1.3" opacity=".3"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#f43f5e" stroke-width="1.6"/></svg></button>`:''}
-        </div>
-      </div>
-      ${editForm}
-    </div>`;
-  }).join('');
-}
-function toggleEditUser(uname){
-  UMG_EDITING=uname;
-  renderUserList();
-}
-function cancelEditUser(){
-  UMG_EDITING=null;
-  renderUserList();
-}
-async function saveUserEdit(uname){
-  const nameEl=document.getElementById(`umgEditName_${uname}`);
-  const roleEl=document.getElementById(`umgEditRole_${uname}`);
-  const passEl=document.getElementById(`umgEditPass_${uname}`);
-  const msg=document.getElementById(`umgEditMsg_${uname}`);
-  const showMsg=(txt,ok)=>{if(msg){msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');}};
-  const dname=(nameEl?.value||'').trim();
-  const role=roleEl?roleEl.value:undefined;
-  const pw=(passEl?.value||'');
-  if(pw && pw.length<8) return showMsg('Password must be at least 8 characters.',false);
-  const patch={display_name:dname||uname};
-  if(role && uname!==SUPER_ADMIN) patch.role=role;
-  try{
-    if(pw){ patch.pw_hash=await hashPw(pw); }
-    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uname)}`,{
-      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
-    });
-    if(!r.ok) throw new Error('Update failed');
-    showMsg(pw?'User updated and password reset.':'User updated.',true);
-    UMG_EDITING=null;
-    setTimeout(renderUserList,700);
-  }catch(e){ showMsg('Error: '+e.message,false); }
-}
 async function addUser(){
   const uname=(document.getElementById('umgNewUser').value||'').trim().toLowerCase();
   const dname=(document.getElementById('umgNewName').value||'').trim();
@@ -4631,10 +5023,15 @@ async function addUser(){
     const existing=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(uname)}&select=username`);
     if(existing.length) return showMsg(`User "${uname}" already exists.`,false);
     const hash=await hashPw(pw);
-    await sbUpsert('dashboard_users',{username:uname,display_name:dname||uname,role,pw_hash:hash,created_by:AUTH.currentUser.username});
+    await sbInsert('dashboard_users',{username:uname,display_name:dname||uname,role,pw_hash:hash,created_by:AUTH.currentUser.username});
     showMsg(`User "${uname}" created as ${role}.`,true);
     document.getElementById('umgNewUser').value='';document.getElementById('umgNewName').value='';document.getElementById('umgNewPass').value='';
-    renderUserList();
+    // Re-fetch to get the new user into cache, then refresh the live panel
+    try{
+      const rows=await sbSelect('dashboard_users','select=username,display_name,role,last_login,is_blocked,permissions&order=created_at.asc');
+      UMG_USERS=rows;
+    }catch(e){}
+    _umgRefreshLeft();
   }catch(e){ showMsg('Error: '+e.message,false); }
 }
 async function deleteUser(uname){
@@ -4642,7 +5039,11 @@ async function deleteUser(uname){
   if(!confirm(`Remove user "${uname}"?`)) return;
   try{
     await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uname)}`,{method:'DELETE',headers:SB_HDR});
-    renderUserList();
+    UMG_USERS=UMG_USERS.filter(u=>u.username!==uname);
+    delete UMG_PERMS_DRAFT[uname];
+    if(UMG_SEL===uname){ UMG_SEL=null; UMG_TAB='profile'; }
+    _umgRefreshLeft();
+    _umgRefreshRight();
   }catch(e){alert('Delete failed: '+e.message);}
 }
 // ── Change Password Modal (all non-guest roles) ──────
@@ -4721,28 +5122,13 @@ async function unblockUser(uname){
     }catch(e){ ST.blockedCount=0; }
     const sidenavExtraEl=document.getElementById('sidenavExtra');
     if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
-    renderUserList();
+    // Update cache and refresh canvas panels
+    const uu=UMG_USERS.find(u=>u.username===uname);
+    if(uu){ uu.is_blocked=false; uu.login_attempts=0; }
+    _umgRefreshLeft();
+    _umgRefreshRight();
   }catch(e){ alert('Error: '+e.message); }
 }
-
-async function changeMyPassword(){
-  const np=(document.getElementById('umgNewPw').value||'');
-  const cp=(document.getElementById('umgConfPw').value||'');
-  const msg=document.getElementById('umgPwMsg');
-  const showMsg=(txt,ok)=>{msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');};
-  if(np.length<8) return showMsg('Password must be at least 8 characters.',false);
-  if(np!==cp) return showMsg('Passwords do not match.',false);
-  try{
-    const hash=await hashPw(np);
-    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(AUTH.currentUser.username)}`,{
-      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify({pw_hash:hash})
-    });
-    if(!r.ok) throw new Error('Update failed');
-    showMsg('Password updated successfully.',true);
-    document.getElementById('umgNewPw').value='';document.getElementById('umgConfPw').value='';
-  }catch(e){ showMsg('Error: '+e.message,false); }
-}
-document.getElementById('userMgmtModal').addEventListener('click',function(e){if(e.target===this)closeUserMgmt();});
 
 // ═══════════════════════════════════════════════════
 // SUPABASE WRITE — called after parsing each file
@@ -5404,22 +5790,34 @@ const DEFAULT_KPI_LAYOUT_BASE = [
 const DEFAULT_KPI_LAYOUT = DEFAULT_KPI_LAYOUT_BASE.map(p=>({...p}));
 let KPI_CANVAS_LAYOUT = DEFAULT_KPI_LAYOUT.map(p=>({...p}));
 
-// Which canvas is currently active ('dashCanvas' | 'dpCanvas' | 'kpiCanvas')
+// ── Users Management Canvas ──────────────────────────
+const DEFAULT_USERS_LAYOUT_BASE=[
+  {id:'usersLeft',  col:0,  row:0, w:18, h:48},
+  {id:'usersRight', col:18, row:0, w:54, h:48},
+];
+const DEFAULT_USERS_LAYOUT=DEFAULT_USERS_LAYOUT_BASE.map(p=>({...p}));
+let USERS_CANVAS_LAYOUT=DEFAULT_USERS_LAYOUT.map(p=>({...p}));
+const USERS_LAYOUT_KEY=`wep_users_canvas_layout_g${GRID_SCALE}_v2`;
+
+// Which canvas is currently active ('dashCanvas' | 'dpCanvas' | 'kpiCanvas' | 'usersCanvas')
 let ACTIVE_CANVAS_ID = 'dashCanvas';
 function getActiveLayout(){
-  if(ACTIVE_CANVAS_ID==='dpCanvas')  return DP_CANVAS_LAYOUT;
-  if(ACTIVE_CANVAS_ID==='kpiCanvas') return KPI_CANVAS_LAYOUT;
+  if(ACTIVE_CANVAS_ID==='dpCanvas')     return DP_CANVAS_LAYOUT;
+  if(ACTIVE_CANVAS_ID==='kpiCanvas')    return KPI_CANVAS_LAYOUT;
+  if(ACTIVE_CANVAS_ID==='usersCanvas')  return USERS_CANVAS_LAYOUT;
   return CANVAS_LAYOUT;
 }
 function getActiveLayoutKey(){
-  if(ACTIVE_CANVAS_ID==='dpCanvas')  return DP_LAYOUT_KEY;
-  if(ACTIVE_CANVAS_ID==='kpiCanvas') return KPI_LAYOUT_KEY;
+  if(ACTIVE_CANVAS_ID==='dpCanvas')     return DP_LAYOUT_KEY;
+  if(ACTIVE_CANVAS_ID==='kpiCanvas')    return KPI_LAYOUT_KEY;
+  if(ACTIVE_CANVAS_ID==='usersCanvas')  return USERS_LAYOUT_KEY;
   return LAYOUT_KEY;
 }
 function setActiveLayout(arr){
-  if(ACTIVE_CANVAS_ID==='dpCanvas')       DP_CANVAS_LAYOUT=arr;
-  else if(ACTIVE_CANVAS_ID==='kpiCanvas') KPI_CANVAS_LAYOUT=arr;
-  else                                    CANVAS_LAYOUT=arr;
+  if(ACTIVE_CANVAS_ID==='dpCanvas')        DP_CANVAS_LAYOUT=arr;
+  else if(ACTIVE_CANVAS_ID==='kpiCanvas')  KPI_CANVAS_LAYOUT=arr;
+  else if(ACTIVE_CANVAS_ID==='usersCanvas') USERS_CANVAS_LAYOUT=arr;
+  else                                     CANVAS_LAYOUT=arr;
 }
 
 // Saved layout (persists in localStorage per session).
@@ -5452,13 +5850,16 @@ const PANEL_NAMES={
   kpiNcrOpen:'NCR Open Rate',kpiNcrRepeat:'Repeat NCR Rate',
   kpiSorObs:'Quality Observations',
   kpiOrg:'Org. Resources',kpiInspec:'Inspection Resourcing',
+  usersLeft:'User List',usersRight:'User Editor',
 };
 const HIDDEN_KEY_DASH='wep_hidden_dash';
 const HIDDEN_KEY_DP='wep_hidden_dp';
 const HIDDEN_KEY_KPI='wep_hidden_kpi';
+const HIDDEN_KEY_USERS='wep_hidden_users';
 function getHiddenKey(){
-  if(ACTIVE_CANVAS_ID==='dpCanvas')  return HIDDEN_KEY_DP;
-  if(ACTIVE_CANVAS_ID==='kpiCanvas') return HIDDEN_KEY_KPI;
+  if(ACTIVE_CANVAS_ID==='dpCanvas')     return HIDDEN_KEY_DP;
+  if(ACTIVE_CANVAS_ID==='kpiCanvas')    return HIDDEN_KEY_KPI;
+  if(ACTIVE_CANVAS_ID==='usersCanvas')  return HIDDEN_KEY_USERS;
   return HIDDEN_KEY_DASH;
 }
 function getHiddenPanels(){ try{return new Set(JSON.parse(localStorage.getItem(getHiddenKey())||'[]'));}catch{return new Set();} }
@@ -5689,9 +6090,10 @@ function deactivateEditMode(){
 
 function resetLayout(){
   saveHiddenPanels(new Set());
-  if(ACTIVE_CANVAS_ID==='dpCanvas')       setActiveLayout(DEFAULT_DP_LAYOUT.map(p=>({...p})));
-  else if(ACTIVE_CANVAS_ID==='kpiCanvas') setActiveLayout(DEFAULT_KPI_LAYOUT.map(p=>({...p})));
-  else                                    setActiveLayout(DEFAULT_LAYOUT.map(p=>({...p})));
+  if(ACTIVE_CANVAS_ID==='dpCanvas')         setActiveLayout(DEFAULT_DP_LAYOUT.map(p=>({...p})));
+  else if(ACTIVE_CANVAS_ID==='kpiCanvas')   setActiveLayout(DEFAULT_KPI_LAYOUT.map(p=>({...p})));
+  else if(ACTIVE_CANVAS_ID==='usersCanvas') setActiveLayout(DEFAULT_USERS_LAYOUT.map(p=>({...p})));
+  else                                      setActiveLayout(DEFAULT_LAYOUT.map(p=>({...p})));
   doSaveLayout();
   render();
 }
