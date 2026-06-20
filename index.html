@@ -195,8 +195,15 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .qa-msg{max-width:86%;padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
 .qa-msg.user{align-self:flex-end;background:#38bdf8;color:#06121b;border-bottom-right-radius:3px}
 .qa-msg.bot{align-self:flex-start;background:#1b2030;color:#cdd3e1;border-bottom-left-radius:3px}
-.qa-msg.bot table{border-collapse:collapse;margin:6px 0;font-size:12px}
-.qa-msg.bot th,.qa-msg.bot td{border:1px solid #2d3348;padding:4px 8px;text-align:left}
+.qa-tbl-wrap{margin:8px 0;overflow-x:auto;border:1px solid #232838;border-radius:8px}
+table.qa-tbl{border-collapse:collapse;width:100%;font-size:12px}
+table.qa-tbl th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7a809a;padding:6px 9px;background:#0d0f17;border-bottom:1px solid #2d3348;white-space:nowrap;position:sticky;top:0}
+table.qa-tbl td{padding:6px 9px;color:#cdd3e1;border-bottom:1px solid #1c2230;vertical-align:top}
+table.qa-tbl td.num{font-family:'Courier New',monospace;text-align:right;white-space:nowrap}
+table.qa-tbl tbody tr:nth-child(even){background:rgba(255,255,255,.025)}
+table.qa-tbl tbody tr:last-child td{border-bottom:none}
+.qa-xls{margin-top:9px;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#38bdf8;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.28);border-radius:7px;padding:5px 10px;cursor:pointer}
+.qa-xls:hover{background:rgba(56,189,248,.18)}
 .qa-msg.err{align-self:flex-start;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.3);color:#fca5b5}
 .qa-hint{align-self:center;font-size:11px;color:#4a5068;text-align:center;line-height:1.6;padding:0 10px}
 .qa-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 14px;background:#1b2030;border-radius:11px;border-bottom-left-radius:3px}
@@ -4272,17 +4279,129 @@ function qaRender(){
     body.innerHTML=`<div class="qa-hint">Ask me about the project data — RFIs, NDT &amp; FJC progress, welder repair rates, SOR observations, or NCRs.<br><br>e.g. “How many open NCRs are there?” · “Which welders are above 3% repair rate?” · “Total joints welded in Section 1.”</div>`;
     return;
   }
-  body.innerHTML=QA.history.map(m=>{
+  body.innerHTML=QA.history.map((m,i)=>{
     if(m.role==='user') return `<div class="qa-msg user">${esc(m.text)}</div>`;
     if(m.role==='error') return `<div class="qa-msg err">${esc(m.text)}</div>`;
-    return `<div class="qa-msg bot">${qaFmt(m.text)}</div>`;
+    const hasTable=qaExtractTables(m.text).length>0;
+    const exp=hasTable?`<button class="qa-xls" onclick="qaExportExcel(${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M9 11l6 6M15 11l-6 6"/></svg> Export to Excel</button>`:'';
+    return `<div class="qa-msg bot">${qaFmt(m.text)}${exp}</div>`;
   }).join('') + (QA.busy?`<div class="qa-typing"><span></span><span></span><span></span></div>`:'');
   body.scrollTop=body.scrollHeight;
 }
 
-// Minimal, safe formatting: escape everything, then allow simple **bold** and line breaks.
+// Inline formatting for a single cell / line: escape, then **bold**.
+function qaInline(s){ return esc(s).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>'); }
+// Is a cell value numeric (int, decimal, %, with thousands separators)?
+function qaIsNum(s){ return /^-?[\d,]+(\.\d+)?%?$/.test(String(s).trim()); }
+
+// Parse all GitHub-style markdown tables out of a text block.
+// Returns [{headers:[...], rows:[[...]]}].
+function qaExtractTables(text){
+  const lines=String(text||'').split('\n');
+  const tables=[];
+  for(let i=0;i<lines.length;i++){
+    const isRow=l=>/^\s*\|.*\|\s*$/.test(l);
+    const isSep=l=>/^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$/.test(l)&&l.includes('-');
+    if(isRow(lines[i])&&i+1<lines.length&&isSep(lines[i+1])){
+      const cells=l=>l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
+      const headers=cells(lines[i]);
+      const rows=[];
+      let j=i+2;
+      while(j<lines.length&&isRow(lines[j])){ rows.push(cells(lines[j])); j++; }
+      tables.push({headers,rows});
+      i=j-1;
+    }
+  }
+  return tables;
+}
+
+// Render: convert markdown tables to styled HTML; format remaining text inline.
 function qaFmt(s){
-  return esc(s).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+  const lines=String(s||'').split('\n');
+  let out='', i=0;
+  const isRow=l=>/^\s*\|.*\|\s*$/.test(l);
+  const isSep=l=>/^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$/.test(l)&&l.includes('-');
+  const cells=l=>l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
+  let textBuf=[];
+  const flush=()=>{ if(textBuf.length){ out+=`<div>${textBuf.map(qaInline).join('<br>')}</div>`; textBuf=[]; } };
+  while(i<lines.length){
+    if(isRow(lines[i])&&i+1<lines.length&&isSep(lines[i+1])){
+      flush();
+      const headers=cells(lines[i]);
+      const rows=[]; let j=i+2;
+      while(j<lines.length&&isRow(lines[j])){ rows.push(cells(lines[j])); j++; }
+      out+=`<div class="qa-tbl-wrap"><table class="qa-tbl"><thead><tr>${
+        headers.map(h=>`<th>${qaInline(h)}</th>`).join('')
+      }</tr></thead><tbody>${
+        rows.map(r=>`<tr>${r.map(c=>`<td class="${qaIsNum(c)?'num':''}">${qaInline(c)}</td>`).join('')}</tr>`).join('')
+      }</tbody></table></div>`;
+      i=j;
+    } else {
+      textBuf.push(lines[i]); i++;
+    }
+  }
+  flush();
+  return out;
+}
+
+// Lazy-load ExcelJS (styling-capable) only when the user exports.
+function qaLoadExcelJS(){
+  if(window.ExcelJS) return Promise.resolve(window.ExcelJS);
+  return new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+    s.onload=()=>res(window.ExcelJS);
+    s.onerror=()=>rej(new Error('Could not load the Excel library.'));
+    document.head.appendChild(s);
+  });
+}
+
+// Export the table(s) in a bot answer to a marked-up .xlsx (borders + header fill).
+async function qaExportExcel(idx){
+  const msg=QA.history[idx];
+  if(!msg) return;
+  const tables=qaExtractTables(msg.text);
+  if(!tables.length) return;
+  let ExcelJS;
+  try{ ExcelJS=await qaLoadExcelJS(); }
+  catch(e){ alert(e.message); return; }
+  const wb=new ExcelJS.Workbook();
+  wb.creator='P30312 WEP QA/QC Dashboard';
+  const thin={style:'thin',color:{argb:'FF2D3348'}};
+  const border={top:thin,left:thin,bottom:thin,right:thin};
+  tables.forEach((t,ti)=>{
+    const ws=wb.addWorksheet(tables.length>1?`Table ${ti+1}`:'Answer');
+    const hdr=ws.addRow(t.headers);
+    hdr.eachCell(c=>{
+      c.font={bold:true,color:{argb:'FFFFFFFF'},size:11};
+      c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1E6FA8'}};
+      c.alignment={vertical:'middle',horizontal:'left'};
+      c.border=border;
+    });
+    t.rows.forEach((r,ri)=>{
+      const row=ws.addRow(r);
+      row.eachCell(c=>{
+        c.border=border;
+        c.alignment={vertical:'middle'};
+        if(ri%2===1) c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F6FA'}};
+        if(typeof c.value==='string'&&qaIsNum(c.value)) c.alignment={vertical:'middle',horizontal:'right'};
+      });
+    });
+    // Auto-ish column widths from longest cell
+    t.headers.forEach((h,ci)=>{
+      let w=String(h).length;
+      t.rows.forEach(r=>{ w=Math.max(w,String(r[ci]??'').length); });
+      ws.getColumn(ci+1).width=Math.min(Math.max(w+3,10),48);
+    });
+    ws.views=[{state:'frozen',ySplit:1}];
+  });
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`WEP_QA_Answer_${new Date().toISOString().slice(0,10)}.xlsx`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
 
 async function qaSend(){
