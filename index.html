@@ -184,17 +184,43 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 .snav-export:hover{background:linear-gradient(90deg,#fbbf240d,transparent)!important;border-left-color:#fbbf24!important;color:#e2e8f0!important}
 .snav-export:hover svg{filter:drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 11px #fbbf2466)}
 /* ── Q&A Assistant ── */
-#qaLauncher{position:fixed;right:26px;bottom:26px;width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;z-index:1600;background:#38bdf8;box-shadow:0 6px 24px rgba(56,189,248,.45);display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .2s}
-#qaLauncher:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 10px 30px rgba(56,189,248,.6)}
-#qaPanel{position:fixed;right:26px;bottom:26px;width:420px;max-width:calc(100vw - 36px);height:560px;max-height:calc(100vh - 100px);z-index:1600;background:#11141d;border:1px solid #232838;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.55);display:flex;flex-direction:column;overflow:hidden}
-#qaHead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #232838;background:#0d0f17;flex:none}
-#qaTitle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.04em;color:#e2e8f0}
+/* ── QA Launcher — engineer avatar with Siri color-flow ring ── */
+@property --qa-hue{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes qaColorFlow{to{--qa-hue:360deg}}
+@keyframes qaHatBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
+@keyframes qaGlint{0%,82%,100%{opacity:0}88%{opacity:.7}}
+@keyframes qaStatusBlink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes qaGearSpin{to{transform:rotate(360deg)}}
+@keyframes qaGlowPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.55;transform:scale(1.14)}}
+@keyframes qaPanelIn{from{transform:scale(.85) translateY(12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+@keyframes qaPanelOut{from{transform:scale(1) translateY(0);opacity:1}to{transform:scale(.85) translateY(12px);opacity:0}}
+.qa-gear-spin{transform-box:fill-box;transform-origin:center;animation:qaGearSpin 4s linear infinite}
+#qaLauncher{position:fixed;right:26px;bottom:26px;width:62px;height:62px;border-radius:50%;border:none;cursor:pointer;z-index:1600;background:none;padding:0;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+#qaLauncher:hover{transform:scale(1.08)}
+#qaLauncher:active{transform:scale(.95)}
+#qaLauncher .ql-glow{position:absolute;inset:-10px;border-radius:50%;background:conic-gradient(from var(--qa-hue),#ff006e,#fb5607,#ffbe0b,#06d6a0,#118ab2,#8338ec,#ff006e);filter:blur(10px);animation:qaColorFlow 5s linear infinite,qaGlowPulse 2.8s ease-in-out infinite;z-index:0}
+#qaLauncher .ql-ring{position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(from var(--qa-hue),#ff006e,#fb5607,#ffbe0b,#06d6a0,#118ab2,#8338ec,#ff006e);animation:qaColorFlow 5s linear infinite;z-index:1}
+#qaLauncher .ql-inner{width:62px;height:62px;border-radius:50%;background:#e8f0fb;overflow:hidden;display:flex;align-items:center;justify-content:center;border:2.5px solid #fff;position:relative;z-index:2}
+#qaLauncher svg{animation:qaHatBob 3s ease-in-out infinite}
+.qa-glint{animation:qaGlint 4s ease-in-out infinite}
+/* ── QA Panel ── */
+#qaPanel{position:fixed;right:26px;bottom:100px;width:430px;max-width:calc(100vw - 36px);height:580px;max-height:calc(100vh - 120px);z-index:1600;padding:2.5px;border-radius:18px;background:conic-gradient(from var(--qa-hue),#ff006e,#fb5607,#ffbe0b,#06d6a0,#118ab2,#8338ec,#ff006e);animation:qaColorFlow 5s linear infinite,qaPanelIn .38s cubic-bezier(.34,1.5,.64,1) both;display:flex;flex-direction:column;overflow:hidden}
+#qaPanel::after{content:'';position:absolute;inset:-6px;border-radius:24px;background:conic-gradient(from var(--qa-hue),#ff006e,#fb5607,#ffbe0b,#06d6a0,#118ab2,#8338ec,#ff006e);filter:blur(14px);opacity:.38;z-index:-1;animation:qaColorFlow 5s linear infinite}
+#qaInner{flex:1;min-height:0;background:#11141d;border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
+#qaHead{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid #1c2230;background:#0b1929;flex:none}
+#qaHeadAvatar{width:34px;height:34px;border-radius:50%;background:#e8f0fb;overflow:hidden;flex-shrink:0;border:1.5px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center}
+#qaTitle{flex:1}
+#qaTitle b{display:block;font-size:13px;font-weight:500;color:#e6edf3;letter-spacing:.01em}
+#qaTitle span{font-size:10px;color:#5d7a99;display:flex;align-items:center;gap:5px}
+#qaTitle span::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#06d6a0;animation:qaStatusBlink 2s ease-in-out infinite;flex-shrink:0}
 .qa-hbtn{background:none;border:none;cursor:pointer;padding:4px;border-radius:5px;display:flex;align-items:center}
-.qa-hbtn:hover{background:rgba(255,255,255,.06)}
+.qa-hbtn:hover{background:rgba(255,255,255,.08)}
 #qaBody{flex:1;min-height:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
-.qa-msg{max-width:86%;padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
-.qa-msg.user{align-self:flex-end;background:#38bdf8;color:#06121b;border-bottom-right-radius:3px}
-.qa-msg.bot{align-self:flex-start;background:#1b2030;color:#cdd3e1;border-bottom-left-radius:3px}
+#qaBody::-webkit-scrollbar{width:3px}
+#qaBody::-webkit-scrollbar-thumb{background:#232838;border-radius:2px}
+.qa-msg{max-width:86%;padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.55;word-wrap:break-word}
+.qa-msg.user{align-self:flex-end;background:#185FA5;color:#e6f1fb;border-bottom-right-radius:3px}
+.qa-msg.bot{align-self:flex-start;background:#1b2030;color:#cdd3e1;border-bottom-left-radius:3px;white-space:pre-wrap}
 .qa-tbl-wrap{margin:8px 0;overflow-x:auto;border:1px solid #232838;border-radius:8px}
 table.qa-tbl{border-collapse:collapse;width:100%;font-size:12px}
 table.qa-tbl th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7a809a;padding:6px 9px;background:#0d0f17;border-bottom:1px solid #2d3348;white-space:nowrap;position:sticky;top:0}
@@ -205,41 +231,21 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 .qa-xls{margin-top:9px;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#38bdf8;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.28);border-radius:7px;padding:5px 10px;cursor:pointer}
 .qa-xls:hover{background:rgba(56,189,248,.18)}
 .qa-msg.err{align-self:flex-start;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.3);color:#fca5b5}
-.qa-hint{align-self:center;font-size:11px;color:#4a5068;text-align:center;line-height:1.6;padding:0 10px}
+.qa-hint{align-self:center;font-size:11px;color:#5c6480;text-align:center;line-height:1.6;padding:0 10px}
 .qa-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 14px;background:#1b2030;border-radius:11px;border-bottom-left-radius:3px}
 .qa-typing span{width:6px;height:6px;border-radius:50%;background:#5a6379;animation:qaBlink 1.2s infinite}
 .qa-typing span:nth-child(2){animation-delay:.2s}.qa-typing span:nth-child(3){animation-delay:.4s}
 @keyframes qaBlink{0%,60%,100%{opacity:.25}30%{opacity:1}}
-#qaInputRow{flex:none;display:flex;gap:8px;padding:12px;border-top:1px solid #232838;background:#0d0f17}
+#qaInputRow{flex:none;display:flex;gap:8px;padding:12px;border-top:1px solid #1c2230;background:#0b1929}
 #qaInput{flex:1;resize:none;max-height:120px;background:#11141d;border:1px solid #232838;border-radius:8px;padding:9px 12px;font-size:13px;color:#e2e8f0;outline:none;font-family:inherit;line-height:1.4}
 #qaInput:focus{border-color:#38bdf8}
-#qaSendBtn{flex:none;width:38px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#qaSendBtn{flex:none;width:38px;border:none;border-radius:8px;background:#185FA5;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+#qaSendBtn:hover{background:#1e6fa8}
 #qaSendBtn:disabled{opacity:.4;cursor:not-allowed}
 .snav-theme:hover{background:linear-gradient(90deg,#e879f90d,transparent)!important;border-left-color:#e879f9!important;color:#e2e8f0!important}
 .snav-theme:hover svg{filter:drop-shadow(0 0 5px #e879f9) drop-shadow(0 0 11px #e879f966)}
 .snav-users:hover,.snav-users.snav-active{background:linear-gradient(90deg,#60a5fa0d,transparent)!important;border-left-color:#60a5fa!important;color:#e2e8f0!important}
 .snav-users:hover svg,.snav-users.snav-active svg{filter:drop-shadow(0 0 5px #60a5fa) drop-shadow(0 0 11px #60a5fa66)}
-.snav-kpi:hover,.snav-kpi.snav-active{background:linear-gradient(90deg,#f974160d,transparent)!important;border-left-color:#f97416!important;color:#e2e8f0!important}
-.snav-kpi:hover svg,.snav-kpi.snav-active svg{filter:drop-shadow(0 0 5px #f97416) drop-shadow(0 0 11px #f9741666)}
-/* ── KPI Page (canvas-based — cards rendered as .cp panels) ── */
-.kpi-ed{background:#090912;border:1px solid #161929;border-radius:12px;overflow:hidden;transition:transform .15s,box-shadow .2s,border-color .2s}
-.kpi-ed:hover{transform:translateY(-2px)}
-.kpi-ed.good{--kc:#00ff9d}.kpi-ed.warn{--kc:#fbbf24}.kpi-ed.bad{--kc:#f43f5e}.kpi-ed.na{--kc:#3b4260}
-.kpi-ed:hover{border-color:rgba(255,255,255,.12);box-shadow:0 10px 28px rgba(0,0,0,.5),0 0 20px rgba(0,0,0,.08)}
-.kpi-ed-head{padding:10px 13px 8px;border-bottom:1px solid rgba(255,255,255,.035);display:flex;justify-content:space-between;align-items:flex-start}
-.kpi-ed-lbl{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#4a5068;line-height:1.3}
-.kpi-ed-id{font-size:8.5px;color:#2d3348;font-weight:600;letter-spacing:.06em;font-family:'Courier New',monospace;flex-shrink:0;margin-left:4px}
-.kpi-ed-body{padding:10px 13px 8px}
-.kpi-ed-num{font-size:34px;font-weight:900;letter-spacing:-.03em;line-height:1;color:var(--kc,#4a5068);text-shadow:0 0 12px rgba(0,0,0,.3),0 0 28px rgba(0,0,0,.12)}
-.kpi-ed-unit{font-size:12px;color:#4a5068;font-weight:500;margin-left:3px}
-.kpi-ed-row{display:flex;align-items:center;gap:7px;margin-top:6px}
-.kpi-ed-pill{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.06);color:var(--kc,#4a5068);border:1px solid rgba(255,255,255,.1);white-space:nowrap}
-.kpi-ed-vs{font-size:9.5px;color:#3b4260;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kpi-ed-foot{background:rgba(0,0,0,.22);padding:7px 13px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.025)}
-.kpi-ed-spark{display:flex;align-items:flex-end;gap:3px;height:20px}
-.kpi-ed-bar{width:5px;border-radius:2px 2px 0 0;background:rgba(255,255,255,.06)}
-.kpi-ed-bar.hi{background:var(--kc,#2d3348);box-shadow:0 0 5px rgba(0,0,0,.45)}
-.kpi-ed-period{font-size:9px;color:#3b4260;letter-spacing:.04em}
 /* spinning SVG arc */
 .svg-spin{animation:spin .9s linear infinite;transform-origin:center;display:block}
 /* ── Login overlay — Option C full-bleed illustration ── */
@@ -383,11 +389,10 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 }
 
 /* ── FREE CANVAS LAYOUT ── */
-#dashCanvas,#dpCanvas,#kpiCanvas,#usersCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
+#dashCanvas,#dpCanvas,#usersCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
 .cp{position:absolute;box-sizing:border-box;padding:4px}
-.cp>.card,.cp>.kpi-card,.cp>.kpi-ed{width:100%;height:100%;box-sizing:border-box;overflow:auto}
-.cp>.kpi-ed{border-radius:0}
-#dashCanvas.edit-mode,#dpCanvas.edit-mode,#kpiCanvas.edit-mode,#usersCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
+.cp>.card,.cp>.kpi-card{width:100%;height:100%;box-sizing:border-box;overflow:auto}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
 .cp.editable{cursor:default}.cp.editable:hover{z-index:100}
 .cp-drag{position:absolute;top:0;left:0;right:28px;height:24px;cursor:grab;z-index:20;
   border-radius:8px 8px 0 0;display:flex;align-items:center;padding-left:8px;opacity:0;transition:opacity .2s}
@@ -421,7 +426,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
   box-shadow:0 4px 24px rgba(0,0,0,.6)}
 .canvas-mode-bar.on{display:flex}
 /* Push canvas content below the edit bar when active */
-#dashCanvas.edit-mode,#dpCanvas.edit-mode,#kpiCanvas.edit-mode,#usersCanvas.edit-mode{margin-top:36px}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode{margin-top:36px}
 .cp-span-tip{position:absolute;top:2px;right:30px;font-size:9px;color:var(--accent,#f59e0b);
   opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:none;
   background:rgba(0,0,0,.5);padding:1px 5px;border-radius:3px}
@@ -482,7 +487,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 ════════════════════════════════════════════════════════ */
 @media (min-width:641px) and (max-width:1024px){
   /* 2-column grid canvas */
-  #dashCanvas,#dpCanvas,#kpiCanvas,#usersCanvas{
+  #dashCanvas,#dpCanvas,#usersCanvas{
     display:grid!important;grid-template-columns:1fr 1fr!important;
     align-content:start!important;width:auto!important;height:auto!important;
     min-height:unset!important;padding:10px 10px 40px!important;gap:8px!important;
@@ -490,7 +495,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 
   .cp{position:relative!important;left:auto!important;top:auto!important;
     width:auto!important;height:auto!important;min-height:200px}
-  .cp>.card,.cp>.kpi-card,.cp>.kpi-ed{height:auto!important;overflow:visible!important}
+  .cp>.card,.cp>.kpi-card{height:auto!important;overflow:visible!important}
 
   /* Full-width panels */
   .cp[data-id="rfiPeriod"]{grid-column:span 2}
@@ -511,7 +516,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
   .tb-logo{height:20px}
 
   /* Single-column stacked canvas */
-  #dashCanvas,#dpCanvas,#kpiCanvas,#usersCanvas{
+  #dashCanvas,#dpCanvas,#usersCanvas{
     display:flex!important;flex-direction:column!important;
     width:auto!important;height:auto!important;min-height:unset!important;
     padding:8px 8px 72px!important;gap:8px!important;
@@ -519,7 +524,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 
   .cp{position:relative!important;left:auto!important;top:auto!important;
     width:100%!important;height:auto!important;min-height:160px}
-  .cp>.card,.cp>.kpi-card,.cp>.kpi-ed{height:auto!important;overflow:visible!important}
+  .cp>.card,.cp>.kpi-card{height:auto!important;overflow:visible!important}
 
   /* Show mobile tab bar */
   #mobTabBar{display:flex}
@@ -854,34 +859,106 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 <div id="schemeDropdown" style="display:none;position:fixed;border-radius:8px;min-width:190px;z-index:1500;box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden"></div>
 
 <!-- Q&A ASSISTANT (body-level so it persists across view switches) -->
-<button id="qaLauncher" title="Ask about the project data" onclick="qaToggle(true)" style="display:none">
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M4 5h16v11H9l-4 4v-4H4z" stroke="#0b0d14" stroke-width="1.6" stroke-linejoin="round"/>
-    <circle cx="9" cy="10.5" r="1" fill="#0b0d14"/><circle cx="12.5" cy="10.5" r="1" fill="#0b0d14"/><circle cx="16" cy="10.5" r="1" fill="#0b0d14"/>
-  </svg>
+<button id="qaLauncher" title="Toggle Q&A assistant" onclick="qaToggle()" style="display:none">
+  <div class="ql-glow"></div>
+  <div class="ql-ring"></div>
+  <div class="ql-inner">
+    <svg viewBox="0 0 100 100" width="56" height="56" xmlns="http://www.w3.org/2000/svg">
+      <!-- body -->
+      <rect x="22" y="72" width="56" height="30" rx="10" fill="#1565c0"/>
+      <!-- chest gear -->
+      <circle cx="50" cy="88" r="8" fill="white"/>
+      <g class="qa-gear-spin">
+        <path d="M50 82a6 6 0 100 12 6 6 0 000-12zm0 2.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7z" fill="#1565c0"/>
+        <rect x="48.8" y="80.2" width="2.4" height="2.8" rx=".8" fill="#1565c0"/>
+        <rect x="48.8" y="93" width="2.4" height="2.8" rx=".8" fill="#1565c0"/>
+        <rect x="42" y="86.8" width="2.8" height="2.4" rx=".8" fill="#1565c0"/>
+        <rect x="55.2" y="86.8" width="2.8" height="2.4" rx=".8" fill="#1565c0"/>
+        <rect x="44.5" y="82.5" width="2.4" height="2.4" rx=".6" fill="#1565c0" transform="rotate(45 45.7 83.7)"/>
+        <rect x="53.1" y="82.5" width="2.4" height="2.4" rx=".6" fill="#1565c0" transform="rotate(45 54.3 83.7)"/>
+        <rect x="44.5" y="91.1" width="2.4" height="2.4" rx=".6" fill="#1565c0" transform="rotate(45 45.7 92.3)"/>
+        <rect x="53.1" y="91.1" width="2.4" height="2.4" rx=".6" fill="#1565c0" transform="rotate(45 54.3 92.3)"/>
+      </g>
+      <!-- neck -->
+      <rect x="43" y="65" width="14" height="10" rx="3" fill="#b0bec5"/>
+      <!-- head -->
+      <rect x="24" y="36" width="52" height="42" rx="12" fill="#e8f0fb"/>
+      <!-- ears -->
+      <rect x="18" y="46" width="8" height="14" rx="4" fill="#1565c0"/>
+      <rect x="74" y="46" width="8" height="14" rx="4" fill="#1565c0"/>
+      <rect x="20" y="49" width="4" height="8" rx="2" fill="#90caf9"/>
+      <rect x="76" y="49" width="4" height="8" rx="2" fill="#90caf9"/>
+      <!-- sunglasses -->
+      <rect x="27" y="50" width="20" height="13" rx="4" fill="#1a2744"/>
+      <rect x="53" y="50" width="20" height="13" rx="4" fill="#1a2744"/>
+      <rect x="47" y="54" width="6" height="3" rx="1.5" fill="#263a5c"/>
+      <!-- nose -->
+      <ellipse cx="50" cy="67" rx="3" ry="2" fill="#c9d6e8"/>
+      <!-- smile -->
+      <path d="M40 72 Q50 80 60 72" stroke="#1565c0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- lens glints -->
+      <rect class="qa-glint" x="30" y="52" width="7" height="2" rx="1" fill="white"/>
+      <rect class="qa-glint" x="56" y="52" width="7" height="2" rx="1" fill="white" style="animation-delay:.35s"/>
+      <!-- hard hat -->
+      <path d="M20 42 Q20 18 50 16 Q80 18 80 42 Z" fill="white"/>
+      <path d="M20 42 Q20 18 50 16 Q80 18 80 42" stroke="#0d47a1" stroke-width="3" fill="none"/>
+      <rect x="15" y="39" width="70" height="6" rx="3" fill="white" stroke="#0d47a1" stroke-width="2.5"/>
+      <line x1="20" y1="42" x2="80" y2="42" stroke="#d0d8e4" stroke-width="1.2"/>
+      <path d="M50 17 L50 40" stroke="#d0d8e4" stroke-width="1.2"/>
+      <!-- hat gear badge -->
+      <circle cx="35" cy="32" r="8.5" fill="#1976d2" stroke="white" stroke-width="2"/>
+      <circle cx="35" cy="32" r="5" fill="none" stroke="white" stroke-width="1.5"/>
+      <circle cx="35" cy="32" r="2" fill="white"/>
+      <g class="qa-gear-spin" style="animation-duration:6s">
+        <rect x="33.8" y="23" width="2.4" height="2.8" rx=".7" fill="white"/>
+        <rect x="33.8" y="38.2" width="2.4" height="2.8" rx=".7" fill="white"/>
+        <rect x="27" y="30.8" width="2.8" height="2.4" rx=".7" fill="white"/>
+        <rect x="40.2" y="30.8" width="2.8" height="2.4" rx=".7" fill="white"/>
+      </g>
+    </svg>
+  </div>
 </button>
 <div id="qaPanel" style="display:none">
-  <div id="qaHead">
-    <div id="qaTitle">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M4 5h16v11H9l-4 4v-4H4z" stroke="#38bdf8" stroke-width="1.6" stroke-linejoin="round"/></svg>
-      <span>Project Q&amp;A</span>
+  <div id="qaInner">
+    <div id="qaHead">
+      <div id="qaHeadAvatar">
+        <svg viewBox="0 0 100 100" width="30" height="30">
+          <rect x="22" y="68" width="56" height="34" rx="10" fill="#1565c0"/>
+          <rect x="43" y="62" width="14" height="10" rx="3" fill="#b0bec5"/>
+          <rect x="24" y="36" width="52" height="40" rx="12" fill="#e8f0fb"/>
+          <rect x="18" y="46" width="8" height="14" rx="4" fill="#1565c0"/>
+          <rect x="74" y="46" width="8" height="14" rx="4" fill="#1565c0"/>
+          <rect x="27" y="50" width="20" height="13" rx="4" fill="#1a2744"/>
+          <rect x="53" y="50" width="20" height="13" rx="4" fill="#1a2744"/>
+          <rect x="47" y="54" width="6" height="3" rx="1.5" fill="#263a5c"/>
+          <path d="M40 72 Q50 79 60 72" stroke="#1565c0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M20 42 Q20 18 50 16 Q80 18 80 42 Z" fill="white"/>
+          <rect x="15" y="39" width="70" height="6" rx="3" fill="white" stroke="#0d47a1" stroke-width="2.5"/>
+          <circle cx="35" cy="32" r="8.5" fill="#1976d2" stroke="white" stroke-width="2"/>
+          <circle cx="35" cy="32" r="2" fill="white"/>
+        </svg>
+      </div>
+      <div id="qaTitle">
+        <b>Project Q&amp;A</b>
+        <span>Online · Ask me anything</span>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="qa-hbtn" title="Clear conversation" onclick="qaClear()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7a809a" stroke-width="1.6" stroke-linecap="round"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13"/></svg>
+        </button>
+        <button class="qa-hbtn" title="Minimize" onclick="qaToggle(false)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7a809a" stroke-width="1.8" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>
+        </button>
+      </div>
     </div>
-    <div style="display:flex;gap:6px">
-      <button class="qa-hbtn" title="Clear conversation" onclick="qaClear()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7a809a" stroke-width="1.6" stroke-linecap="round"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13"/></svg>
-      </button>
-      <button class="qa-hbtn" title="Minimize" onclick="qaToggle(false)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7a809a" stroke-width="1.8" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>
+    <div id="qaBody"></div>
+    <div id="qaInputRow">
+      <textarea id="qaInput" rows="1" placeholder="Ask about RFIs, NDT, FJC, welders, SOR, NCR…"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();qaSend();}"></textarea>
+      <button id="qaSendBtn" onclick="qaSend()" title="Send">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 12V2M2 7l5-5 5 5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
-  </div>
-  <div id="qaBody"></div>
-  <div id="qaInputRow">
-    <textarea id="qaInput" rows="1" placeholder="Ask about RFIs, NDT, FJC, welders, SOR, NCR…"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();qaSend();}"></textarea>
-    <button id="qaSendBtn" onclick="qaSend()" title="Send">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0b0d14" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </button>
   </div>
 </div>
 
@@ -899,10 +976,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
     <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="2.5" stroke="#00ff9d" stroke-width="1.4"/><path d="M4 19c0-3 2.2-5 5-5s5 2 5 5" stroke="#00ff9d" stroke-width="1.4" stroke-linecap="round"/><circle cx="17" cy="8" r="1.8" stroke="#00ff9d" stroke-width="1.2" opacity=".7"/></svg>
     <span class="mob-tab-lbl">Manpower</span>
   </button>
-  <button class="mob-tab" data-view="kpi" onclick="switchView('kpi')">
-    <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V14" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/><path d="M9 20V9" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/><path d="M14 20V12" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/><path d="M19 20V5" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/><path d="M4 14l5-5 5 3 5-7" stroke="#f97416" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg>
-    <span class="mob-tab-lbl">KPIs</span>
-  </button>
+
   <button class="mob-tab" data-view="export" onclick="openExportOptions()">
     <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v11" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round"/><path d="M8 10l4 4 4-4" stroke="#fbbf24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/></svg>
     <span class="mob-tab-lbl">Export</span>
@@ -1798,7 +1872,6 @@ function bSidenavExtra(){
 
   const isDash=APP_VIEW==='dashboard';
   const isDep=APP_VIEW==='deployment';
-  const isKPI=APP_VIEW==='kpi';
   const isUsers=APP_VIEW==='users';
   return `
     <!-- Page Navigation -->
@@ -1834,17 +1907,7 @@ function bSidenavExtra(){
       <span class="snav-lbl">Stations Dashboard <span style="font-size:9px;font-weight:600;letter-spacing:.04em;opacity:.7">· SA only</span></span>
     </button>
 
-    <button class="sidenav-link snav-kpi${isKPI?' snav-active':''}" data-tip="Quality KPIs — SA preview" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('kpi')">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
-        <path d="M4 20V14" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M9 20V9"  stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M14 20V12" stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M19 20V5"  stroke="#f97416" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M4 14l5-5 5 3 5-7" stroke="#f97416" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/>
-      </svg>
-      <span class="snav-lbl">Quality KPIs <span style="font-size:9px;font-weight:600;letter-spacing:.04em;opacity:.7">· SA only</span></span>
-    </button>
-    `:''}
+`:''}
 
     <button class="sidenav-link snav-manpower${isDep?' snav-active':''}" data-tip="Manpower Deployment" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('deployment')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
@@ -2037,7 +2100,7 @@ function getPeriodKPIs(){
 // ═══════════════════════════════════════════════════
 // VIEW ROUTING
 // ═══════════════════════════════════════════════════
-let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment' | 'kpi' | 'users'
+let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment' | 'users'
 let DASH_TAB = 'period'; // 'period' | 'cumul'
 
 function switchDashTab(t){ DASH_TAB=t; render(); }
@@ -2104,7 +2167,6 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, dail
 function switchView(v){
   const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
   const isAdmin=AUTH.currentUser&&AUTH.currentUser.role==='admin';
-  if(v==='kpi'&&!isSA) return;
   if(v==='users'&&!isSA&&!isAdmin) return;
   APP_VIEW = v;
   toggleSidenav(false);
@@ -2112,11 +2174,8 @@ function switchView(v){
   updateMobTabBar();
 }
 function updateMobTabBar(){
-  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
   document.querySelectorAll('#mobTabBar .mob-tab').forEach(t=>{
     t.classList.toggle('active', t.dataset.view===APP_VIEW);
-    // Hide SA-only tabs from non-SA users
-    if(t.dataset.view==='kpi') t.style.display=isSA?'':'none';
   });
 }
 
@@ -2127,7 +2186,6 @@ function render(){
   Object.values(CHARTS).forEach(c=>{try{c.destroy();}catch(e){}});
   Object.keys(CHARTS).forEach(k=>delete CHARTS[k]);
   if(APP_VIEW==='deployment'){ ACTIVE_CANVAS_ID='dpCanvas'; renderDeployment(); return; }
-  if(APP_VIEW==='kpi'){        ACTIVE_CANVAS_ID='kpiCanvas'; renderKPI(); return; }
   if(APP_VIEW==='users'){      ACTIVE_CANVAS_ID='usersCanvas'; renderUsers(); return; }
   ACTIVE_CANVAS_ID='dashCanvas';
 
@@ -3161,195 +3219,6 @@ function exportHiringChart(){
 }
 
 // ═══════════════════════════════════════════════════
-// KPI PAGE
-// ═══════════════════════════════════════════════════
-
-function getKPIMetrics(){
-  // ── Weld / NDT (from existing aggregators) ───────
-  const {weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal} = getNDTKPIs();
-
-  // ── NCR ──────────────────────────────────────────
-  const ncr = ST.data.ncr;
-  let ncrOpenRate=null, ncrOpenCount=0, ncrTotal=0;
-  let ncrRepeatRate=null, ncrRepeatCount=0;
-  if(ncr && ncr.length){
-    ncrTotal = ncr.length;
-    // Same closed/open convention as the NCR table: anything not CLOSED counts as open
-    ncrOpenCount = ncr.filter(r=>!(r.status||'').includes('CLOSED')).length;
-    ncrOpenRate = ncrTotal>0 ? ncrOpenCount/ncrTotal*100 : null;
-    // repeat: status contains REPEAT or description mentions it
-    ncrRepeatCount = ncr.filter(r=>(r.status||'').includes('REPEAT')||(r.desc||'').toUpperCase().includes('REPEAT')).length;
-    ncrRepeatRate = ncrTotal>0 ? ncrRepeatCount/ncrTotal*100 : null;
-  }
-
-  // ── Quality Observations from SOR ────────────────
-  const sor = ST.data.sor;
-  let sorPeriodCount=0, sorOpenCount=0, sorClosedCount=0;
-  if(sor && sor.length){
-    sorPeriodCount = sor.filter(r=>inPeriod(r.date)).length;
-    sorClosedCount = sor.filter(r=>(r.status||'').includes('CLOSED')).length;
-    sorOpenCount   = sor.length - sorClosedCount;
-  }
-
-  // ── Coating Rejection — derived from FJC columns (coated=fjcTotal, repair=fjcRepair)
-  let coatRate=null, coatRejected=0, coatTotal=0;
-  ['daily1','daily2','daily3'].forEach(k=>{
-    const rows=ST.data[k]; if(!rows) return;
-    const snap=getDailySnapshot(rows, ST.end);
-    if(snap){ coatTotal+=snap.fjcTotal||0; coatRejected+=snap.fjcRepair||0; }
-  });
-  if(coatTotal>0) coatRate = coatRejected/coatTotal*100;
-
-  // ── Deployment: Org Resources & Inspection ───────
-  let orgRate=null, orgActual=0, orgPlan=0;
-  let inspecRate=null, inspecActual=0, inspecPlan=0;
-  const dep=ST.data.deployment;
-  if(dep && dep.plan && dep.actual){
-    // Rows store monthly values in r.vals (array indexed by dep.months position).
-    // Headcount is concurrent — peak across the selected months, not a sum.
-    const selMonths = ST.dpMonths && ST.dpMonths.length ? ST.dpMonths : (dep.months.length?[dep.months[dep.months.length-1]]:[]);
-    const selIdxs = selMonths.map(m=>dep.months.indexOf(m)).filter(i=>i>=0);
-    const isInspec=r=>(r.cat||'').toUpperCase().includes('INSP')||(r.role||'').toUpperCase().includes('INSPECT');
-    const peak=r=>selIdxs.length?Math.max(0,...selIdxs.map(i=>+(r.vals[i]||0))):0;
-    dep.plan.forEach(r=>{ const v=peak(r); orgPlan+=v; if(isInspec(r)) inspecPlan+=v; });
-    dep.actual.forEach(r=>{ const v=peak(r); orgActual+=v; if(isInspec(r)) inspecActual+=v; });
-    orgRate    = orgPlan>0    ? orgActual/orgPlan*100       : null;
-    inspecRate = inspecPlan>0 ? inspecActual/inspecPlan*100 : null;
-  }
-
-  return {
-    weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal,
-    ncrOpenRate, ncrOpenCount, ncrTotal,
-    ncrRepeatRate, ncrRepeatCount,
-    sorPeriodCount, sorOpenCount, sorClosedCount,
-    coatRate, coatRejected, coatTotal,
-    orgRate, orgActual, orgPlan,
-    inspecRate, inspecActual, inspecPlan,
-  };
-}
-
-// Build a single KPI card (E+D style)
-function bKPICard({id, label, value, unit, target, targetDir, targetVal, sub, pill, spark, na}){
-  // targetDir: 'lt' (lower is better, target < X) | 'gt' (higher is better, target > X)
-  let status='na';
-  if(value!==null && !na){
-    if(targetDir==='lt') status = value<=targetVal ? 'good' : (value<=targetVal*1.5 ? 'warn' : 'bad');
-    if(targetDir==='gt') status = value>=targetVal ? 'good' : (value>=targetVal*0.9 ? 'warn' : 'bad');
-    if(targetDir==='trend') status = 'warn'; // no hard target
-  }
-  const pillLabels={good:'Pass',warn:'Monitor',bad:'Fail',na:'No Data'};
-  const pillTxt = pill || pillLabels[status];
-  const numTxt  = value!==null && !na ? (Number.isInteger(value)?value:value.toFixed(1)) : '—';
-
-  // Static sparkline heights — placeholder until historical series available
-  const bars = spark || [30,40,35,50,45,60];
-  const sparkHtml = bars.map((h,i)=>`<div class="kpi-ed-bar${i===bars.length-1?' hi':''}" style="height:${h}%"></div>`).join('');
-
-  return `<div class="kpi-ed ${status}">
-    <div class="kpi-ed-head">
-      <div class="kpi-ed-lbl">${label}</div>
-      <div class="kpi-ed-id">${id}</div>
-    </div>
-    <div class="kpi-ed-body">
-      <div><span class="kpi-ed-num">${numTxt}</span><span class="kpi-ed-unit">${unit}</span></div>
-      <div class="kpi-ed-row">
-        <span class="kpi-ed-pill">${pillTxt}</span>
-        <span class="kpi-ed-vs">${target}</span>
-      </div>
-    </div>
-    <div class="kpi-ed-foot">
-      <div class="kpi-ed-spark">${sparkHtml}</div>
-      <div class="kpi-ed-period">${sub}</div>
-    </div>
-  </div>`;
-}
-
-function renderKPI(){
-  const sc      = SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
-  const m       = getKPIMetrics();
-  const dailyLive = !!(ST.data.daily1||ST.data.daily2||ST.data.daily3);
-  const ncrLive   = !!ST.data.ncr;
-  const sorLive   = !!ST.data.sor;
-  const depLive   = !!ST.data.deployment;
-
-  const KPI_PANELS = {
-    kpiWeld:      bKPICard({id:'KPI-11', label:'Weld Repair Rate',
-                    value:m.weldRepair, unit:'%', targetDir:'lt', targetVal:3,
-                    target:'Target &lt; 3%', sub:'Cumulative',
-                    spark:[30,45,38,55,50,m.weldRepair!==null?Math.min(100,m.weldRepair/5*100):40],
-                    na:!dailyLive}),
-
-    kpiNdtPipe:   bKPICard({id:'KPI-12', label:'NDT Backlog — Pipeline',
-                    value:m.ndtBacklog, unit:'joints', targetDir:'lt',
-                    targetVal:m.ndtBacklogGoal||99,
-                    target:'Target ≤ 2 days prod.', sub:'Current',
-                    spark:[80,70,65,60,50,m.ndtBacklog!==null?Math.min(100,(m.ndtBacklog/(m.ndtBacklogGoal||50))*60):40],
-                    na:!dailyLive}),
-
-    kpiFjc:       bKPICard({id:'KPI-FJC', label:'FJC Repair Rate',
-                    value:m.fjcRepair, unit:'%', targetDir:'lt', targetVal:1,
-                    target:'Target &lt; 1%', sub:'Cumulative',
-                    spark:[40,50,45,35,30,m.fjcRepair!==null?Math.min(100,m.fjcRepair*30):25],
-                    na:!dailyLive}),
-
-    kpiCoat:      bKPICard({id:'KPI-15', label:'Coating Rejection Rate',
-                    value:m.coatRate, unit:'%', targetDir:'lt', targetVal:1,
-                    target:'Target &lt; 1%',
-                    sub:m.coatTotal>0?`${m.coatRejected} rejected / ${m.coatTotal} total`:'No data',
-                    na:m.coatTotal===0}),
-
-    kpiNcrOpen:   bKPICard({id:'KPI-08', label:'NCR Open Rate',
-                    value:m.ncrOpenRate, unit:'%', targetDir:'lt', targetVal:5,
-                    target:'Target &lt; 5%',
-                    sub:ncrLive?`${m.ncrOpenCount} open / ${m.ncrTotal} total`:'No data',
-                    spark:[30,40,50,45,55,m.ncrOpenRate!==null?Math.min(100,m.ncrOpenRate*10):40],
-                    na:!ncrLive}),
-
-    kpiNcrRepeat: bKPICard({id:'KPI-09', label:'Repeat NCR Rate',
-                    value:m.ncrRepeatRate, unit:'%', targetDir:'lt', targetVal:5,
-                    target:'Target &lt; 5%',
-                    sub:ncrLive?`${m.ncrRepeatCount} repeat / ${m.ncrTotal} total`:'No data',
-                    na:!ncrLive}),
-
-    kpiSorObs:    bKPICard({id:'KPI-10', label:'Quality Observations',
-                    value:m.sorPeriodCount, unit:'', targetDir:'trend', targetVal:null,
-                    target:'No hard target — trend only',
-                    sub:sorLive?`${m.sorOpenCount} open · ${m.sorClosedCount} closed · SOR`:'No data',
-                    pill:m.sorPeriodCount>0?'Active':'No Data',
-                    spark:[20,30,25,40,50,m.sorPeriodCount?Math.min(100,m.sorPeriodCount*7):30],
-                    na:!sorLive}),
-
-    kpiOrg:       bKPICard({id:'KPI-07', label:'Org. Resources',
-                    value:m.orgRate, unit:'%', targetDir:'gt', targetVal:90,
-                    target:'Target &gt; 90%',
-                    sub:depLive?`${m.orgActual} actual / ${m.orgPlan} planned`:'No data',
-                    spark:[70,75,80,85,88,m.orgRate!==null?Math.min(100,m.orgRate):80],
-                    na:!depLive}),
-
-    kpiInspec:    bKPICard({id:'KPI-26', label:'Inspection Resourcing',
-                    value:m.inspecRate, unit:'%', targetDir:'gt', targetVal:90,
-                    target:'Target &gt; 90%',
-                    sub:depLive?`${m.inspecActual} actual / ${m.inspecPlan} planned · inspectors`:'No data',
-                    spark:[75,78,80,82,84,m.inspecRate!==null?Math.min(100,m.inspecRate):80],
-                    na:!depLive}),
-  };
-
-  document.getElementById('app').innerHTML=`
-    ${bUploadBar()}
-    <div id="uplBarSpacer"></div>
-    <div id="kpiCanvas"></div>
-  `;
-
-  const sidenavExtraEl=document.getElementById('sidenavExtra');
-  if(sidenavExtraEl) sidenavExtraEl.innerHTML=bSidenavExtra();
-  fillSidenavDrops();
-
-  renderCanvas(KPI_PANELS);
-  bindEvents();
-  if(EDIT_MODE) activateEditMode();
-}
-
-// ═══════════════════════════════════════════════════
 // USERS MANAGEMENT PAGE
 // ═══════════════════════════════════════════════════
 
@@ -3372,7 +3241,7 @@ const UMG_DEFAULT_PERMS = {
     excel:true, image:true, changeDates:false,
     datasets:{rfi:true,ncr:true,sor:true,welders:true,fjc:true,ndt:true,daily:true,deployment:true,hiring:true}
   },
-  dateControl:'locked', lockedFrom:null, lockedTo:null
+  dateControl:'locked', lockedFrom:null, lockedTo:null, restrictedCutoff:null
 };
 
 // Maximum capability for each role
@@ -3395,8 +3264,9 @@ function _umgGetPerm(uname){
     if(datasets) Object.assign(merged.export.datasets,datasets);
   }
   if(saved.dateControl) merged.dateControl=saved.dateControl;
-  if(saved.lockedFrom!==undefined) merged.lockedFrom=saved.lockedFrom;
-  if(saved.lockedTo!==undefined)   merged.lockedTo=saved.lockedTo;
+  if(saved.lockedFrom!==undefined)      merged.lockedFrom=saved.lockedFrom;
+  if(saved.lockedTo!==undefined)        merged.lockedTo=saved.lockedTo;
+  if(saved.restrictedCutoff!==undefined) merged.restrictedCutoff=saved.restrictedCutoff;
   return merged;
 }
 
@@ -3558,7 +3428,7 @@ function bUsersRight(){
 function bUpTabProfile(u,r,isSA_user,isMe,canEdit){
   return`<div class="up-section">
     <div class="up-section-title">Account Details</div>
-    <div style="display:grid;grid-template-columns:1fr;gap:10px">
+    <div style="display:grid;grid-template-columns:1fr;gap:10px;max-width:360px">
       <div>
         <div class="up-field-lbl">Display Name</div>
         <input class="umg-inp" id="upEditName" type="text" value="${esc(u.display_name||'')}" ${canEdit?'':'disabled'}>
@@ -3662,6 +3532,25 @@ function bUpTabExport(perm,ceil){
   </div>`;
 }
 
+// Returns last n Fridays as [{iso:'YYYY-MM-DD', label:'DD/MM/YYYY'}, ...]
+function genCutoffFridays(n=52){
+  const out=[];
+  const d=new Date();
+  // Step back to most recent Friday (day 5)
+  d.setHours(0,0,0,0);
+  const dow=d.getDay(); // 0=Sun
+  d.setDate(d.getDate()-((dow+2)%7)); // land on Friday
+  for(let i=0;i<n;i++){
+    const iso=d.toISOString().slice(0,10);
+    const dd=String(d.getDate()).padStart(2,'0');
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const yyyy=d.getFullYear();
+    out.push({iso,label:`${dd}/${mm}/${yyyy}`});
+    d.setDate(d.getDate()-7);
+  }
+  return out;
+}
+
 // ── Tab: Date Controls ────────────────────────────────────
 function bUpTabDates(perm,ceil){
   const dc=perm.dateControl||'locked';
@@ -3683,10 +3572,21 @@ function bUpTabDates(perm,ceil){
     <div style="font-size:11px;color:#7a809a;margin-bottom:16px;line-height:1.6">
       ${opts.find(o=>o.k===dc)?.desc||''}
     </div>
-    ${dc==='locked'?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    ${dc==='locked'?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:360px">
       <div><div class="up-field-lbl">Locked From</div><input class="umg-inp d-inp" id="upLockFrom" type="date" value="${perm.lockedFrom||''}"></div>
       <div><div class="up-field-lbl">Locked To</div><input class="umg-inp d-inp" id="upLockTo" type="date" value="${perm.lockedTo||''}"></div>
     </div>`:''}
+    ${dc==='restricted'?(()=>{
+      const fridays=genCutoffFridays(52);
+      return`<div style="max-width:220px">
+        <div class="up-field-lbl">Cutoff Friday</div>
+        <select class="umg-sel" id="upRestrictedCutoff">
+          <option value="">— select —</option>
+          ${fridays.map(({iso,label})=>`<option value="${iso}"${perm.restrictedCutoff===iso?' selected':''}>${label}</option>`).join('')}
+        </select>
+        <div style="font-size:10px;color:#4a5068;margin-top:5px">Period: Saturday before selected Friday → selected Friday</div>
+      </div>`;
+    })():''}
   </div>`;
 }
 
@@ -3745,6 +3645,9 @@ async function saveUserPermissions(){
   if(perm.dateControl==='locked'){
     perm.lockedFrom=document.getElementById('upLockFrom')?.value||null;
     perm.lockedTo=document.getElementById('upLockTo')?.value||null;
+  }
+  if(perm.dateControl==='restricted'){
+    perm.restrictedCutoff=document.getElementById('upRestrictedCutoff')?.value||null;
   }
   try{
     const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(UMG_SEL)}`,{
@@ -4245,28 +4148,29 @@ const QA = { history: [], busy: false };
 // Show the launcher for logged-in non-guest users; hide for guests / logged-out.
 function qaSyncVisibility(){
   const u=AUTH.currentUser;
-  const allowed=!!u && !u.isGuest;
+  const visible=!!u && !u.isGuest;
   const launcher=document.getElementById('qaLauncher');
   const panel=document.getElementById('qaPanel');
   if(!launcher||!panel) return;
-  if(!allowed){ launcher.style.display='none'; panel.style.display='none'; return; }
-  // Keep whichever state it was in; default to collapsed launcher.
-  if(panel.style.display==='flex'){ launcher.style.display='none'; }
-  else { launcher.style.display='flex'; panel.style.display='none'; }
+  if(!visible){ launcher.style.display='none'; panel.style.display='none'; return; }
+  launcher.style.display='flex';
 }
 
-function qaToggle(open){
+function qaToggle(){
   const launcher=document.getElementById('qaLauncher');
   const panel=document.getElementById('qaPanel');
   if(!launcher||!panel) return;
-  if(open){
-    launcher.style.display='none';
+  const isOpen=panel.style.display==='flex';
+  if(!isOpen){
+    panel.style.removeProperty('animation');
+    void panel.offsetWidth;
+    panel.style.animation='qaColorFlow 5s linear infinite,qaPanelIn .38s cubic-bezier(.34,1.5,.64,1) both';
     panel.style.display='flex';
     if(!QA.history.length) qaRender();
     setTimeout(()=>document.getElementById('qaInput')?.focus(),50);
   } else {
-    panel.style.display='none';
-    launcher.style.display='flex';
+    panel.style.animation='qaColorFlow 5s linear infinite,qaPanelOut .28s cubic-bezier(.4,0,.6,1) both';
+    setTimeout(()=>{ panel.style.display='none'; },260);
   }
 }
 
@@ -4275,8 +4179,22 @@ function qaClear(){ QA.history=[]; qaRender(); }
 function qaRender(){
   const body=document.getElementById('qaBody');
   if(!body) return;
+  const u=AUTH.currentUser||{};
+  const isAdmin=u.role==='admin'||u.role==='superadmin';
+  if(!isAdmin){
+    body.innerHTML=`<div class=”qa-hint” style=”text-align:center;padding-top:32px”>This feature is not available for your access level.</div>`;
+    const inp=document.getElementById('qaInput');
+    const btn=document.querySelector('#qaPanel .qa-send');
+    if(inp){ inp.disabled=true; inp.placeholder=''; }
+    if(btn) btn.disabled=true;
+    return;
+  }
+  const inp=document.getElementById('qaInput');
+  const btn=document.querySelector('#qaPanel .qa-send');
+  if(inp){ inp.disabled=false; inp.placeholder='Ask about the project data…'; }
+  if(btn) btn.disabled=false;
   if(!QA.history.length){
-    body.innerHTML=`<div class="qa-hint">Ask me about the project data — RFIs, NDT &amp; FJC progress, welder repair rates, SOR observations, or NCRs.<br><br>e.g. “How many open NCRs are there?” · “Which welders are above 3% repair rate?” · “Total joints welded in Section 1.”</div>`;
+    body.innerHTML=`<div class=”qa-hint” style=”color:#5c6480”>Ask me about the project data — RFIs, NDT &amp; FJC progress, welder repair rates, SOR observations, or NCRs.<br><br>e.g. “How many open NCRs are there?” · “Which welders are above 3% repair rate?” · “Total joints welded in Section 1.”</div>`;
     return;
   }
   body.innerHTML=QA.history.map((m,i)=>{
@@ -4404,6 +4322,75 @@ async function qaExportExcel(idx){
   setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
 
+// Progressive word-by-word reveal, mimicking Claude/ChatGPT streaming.
+// Appends words to a pre-created .qa-msg.bot element already in #qaBody.
+function qaStream(text, msgEl, historyIdx){
+  return new Promise(resolve=>{
+    // Split on word boundaries but keep whitespace/newlines as tokens so
+    // formatting is preserved. Tables arrive as a block at the end.
+    const tableMarker='__TABLES__';
+    const tables=qaExtractTables(text);
+    // Strip table markdown from the plain-text portion for word streaming,
+    // then append rendered tables as HTML once streaming completes.
+    let plain=text;
+    tables.forEach(t=>{
+      // Remove the raw markdown table block
+      const lines=plain.split('\n');
+      let i=0;
+      while(i<lines.length){
+        if(/^\s*\|/.test(lines[i])&&i+1<lines.length&&/^\s*\|?[\s:|-]*-/.test(lines[i+1])){
+          let j=i;
+          while(j<lines.length&&/^\s*\|/.test(lines[j])) j++;
+          lines.splice(i,j-i,tableMarker);
+          break;
+        }
+        i++;
+      }
+      plain=lines.join('\n');
+    });
+
+    const tokens=plain.split(/(\s+)/);
+    let i=0;
+    let accumulated='';
+    let tableIdx=0;
+
+    const body=document.getElementById('qaBody');
+    const tick=()=>{
+      if(i>=tokens.length){
+        // Streaming done — render final HTML including tables
+        msgEl.innerHTML=qaFmt(text);
+        const hasTable=tables.length>0;
+        if(hasTable){
+          const expBtn=document.createElement('button');
+          expBtn.className='qa-xls';
+          expBtn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M9 11l6 6M15 11l-6 6"/></svg> Export to Excel`;
+          expBtn.onclick=()=>qaExportExcel(historyIdx);
+          msgEl.appendChild(expBtn);
+        }
+        if(body) body.scrollTop=body.scrollHeight;
+        resolve();
+        return;
+      }
+      // Batch a few tokens per frame for a smooth but fast feel
+      const batch=3;
+      for(let b=0;b<batch&&i<tokens.length;b++,i++){
+        const tok=tokens[i];
+        if(tok===tableMarker){
+          accumulated+='\n[table]\n';
+        } else {
+          accumulated+=tok;
+        }
+      }
+      // Show accumulated plain text (no table rendering mid-stream)
+      const displayText=accumulated.replace(/\[table\]/g,'').replace(/\n{3,}/g,'\n\n');
+      msgEl.textContent=displayText;
+      if(body) body.scrollTop=body.scrollHeight;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
 async function qaSend(){
   const inp=document.getElementById('qaInput');
   const btn=document.getElementById('qaSendBtn');
@@ -4415,23 +4402,45 @@ async function qaSend(){
   QA.busy=true;
   if(btn) btn.disabled=true;
   qaRender();
+  let answerText='';
   try{
-    // Send a short rolling history (text only) for follow-up context.
     const hist=QA.history.filter(m=>m.role==='user'||m.role==='bot').slice(-6)
       .map(m=>({role:m.role==='bot'?'assistant':'user', content:m.text}));
     const res=await sbEdgeFn('qa-assistant',{
       question:q,
       role:AUTH.currentUser?.role||'viewer',
-      history:hist.slice(0,-1) // exclude the question we just pushed
+      history:hist.slice(0,-1)
     });
-    if(res.error) QA.history.push({role:'error',text:res.error});
-    else QA.history.push({role:'bot',text:res.answer||'No answer returned.'});
+    if(res.error){
+      QA.history.push({role:'error',text:res.error});
+      QA.busy=false;
+      if(btn) btn.disabled=false;
+      qaRender();
+      return;
+    }
+    answerText=res.answer||'No answer returned.';
   }catch(e){
     QA.history.push({role:'error',text:e.message||'Request failed.'});
+    QA.busy=false;
+    if(btn) btn.disabled=false;
+    qaRender();
+    return;
   }
+  // Commit to history first so the export button index is valid
+  QA.history.push({role:'bot',text:answerText});
   QA.busy=false;
   if(btn) btn.disabled=false;
-  qaRender();
+  // Remove typing indicator, inject empty bot bubble, stream into it
+  const body=document.getElementById('qaBody');
+  if(body){
+    const typing=body.querySelector('.qa-typing');
+    if(typing) typing.remove();
+    const msgEl=document.createElement('div');
+    msgEl.className='qa-msg bot';
+    body.appendChild(msgEl);
+    body.scrollTop=body.scrollHeight;
+    await qaStream(answerText, msgEl, QA.history.length-1);
+  }
 }
 
 // ── Load all datasets from Supabase on page open ────
@@ -4563,8 +4572,7 @@ function _buildTourSteps(){
   steps.push({
     sel:'#sidenav',
     title:'Navigation Sidebar',
-    text:'Access all dashboard views: Pipeline Dashboard, Manpower Deployment'
-      +(isSA?' and Quality KPIs':'')+'. '
+    text:'Access all dashboard views: Pipeline Dashboard and Manpower Deployment. '
       +(canAdmin?'Upload data files and manage users from here too.':'Export data and change themes from here.'),
     pos:'right'
   });
@@ -4604,12 +4612,13 @@ function _buildTourSteps(){
 
 function maybeShowTour(){
   const u=AUTH.currentUser||{};
-  if(u.isGuest) return;
   // Desktop-only: below the 640px breakpoint the date selector and several
   // controls are hidden by CSS, so the tour has no sensible targets. Skip it
   // WITHOUT marking done, so the user still gets the tour on a desktop later.
   if(window.innerWidth<=640) return;
-  if(_tourIsDone(u.username)) return;
+  // Guests always see the tour (ephemeral session — never persisted).
+  // Named users: skip if already dismissed.
+  if(!u.isGuest && _tourIsDone(u.username)) return;
   _ensureTourDOM();
   // Show full dim immediately — prevents flash of dashboard before welcome
   const dim=document.getElementById('tourDim');
@@ -4881,8 +4890,8 @@ function _tourNext(){
   _renderTourStep(true); // true = delay card until spotlight arrives
 }
 function _tourSkip(){ _closeTourDOM(); }
-function _tourDontShowAgain(){ _tourDone((AUTH.currentUser||{}).username); _closeTourDOM(); }
-function _finishTour(){ _tourDone((AUTH.currentUser||{}).username); _closeTourDOM(); }
+function _tourDontShowAgain(){ const u=AUTH.currentUser||{}; if(!u.isGuest) _tourDone(u.username); _closeTourDOM(); }
+function _finishTour(){ const u=AUTH.currentUser||{}; if(!u.isGuest) _tourDone(u.username); _closeTourDOM(); }
 
 function _closeTourDOM(){
   ['tourDim','tourSpotlight','tourCard','tourWelcome','tourIrisCanvas'].forEach(id=>{
@@ -5112,6 +5121,7 @@ function logout(){
   if(m) m.classList.remove('open');
   toggleSidenav(false);
   clearSession(); AUTH.currentUser=null;
+  qaClear();
   Object.keys(ST.data).forEach(k=>ST.data[k]=null);
   Object.keys(ST.files).forEach(k=>ST.files[k]='');
   Object.keys(ST.errors).forEach(k=>ST.errors[k]='');
@@ -5739,9 +5749,8 @@ async function exportDashboardImage(){
   const ALL_PAGES=[
     {view:'dashboard',  label:'Main Dashboard'},
     {view:'deployment', label:'Manpower Deployment'},
-    {view:'kpi',        label:'Quality KPIs'},
   ];
-  const pages=isAdmin?ALL_PAGES:isGuest?ALL_PAGES.slice(0,1):ALL_PAGES.slice(0,2);
+  const pages=isAdmin?ALL_PAGES:isGuest?ALL_PAGES.slice(0,1):ALL_PAGES;
 
   const origView=APP_VIEW;
   const origLabel=btn?btn.innerHTML:null;
@@ -5893,22 +5902,6 @@ const DEFAULT_DP_LAYOUT_BASE = [
 const DEFAULT_DP_LAYOUT = DEFAULT_DP_LAYOUT_BASE.map(p=>({...p}));
 let DP_CANVAS_LAYOUT = DEFAULT_DP_LAYOUT.map(p=>({...p}));
 
-// ── KPI page canvas layout ──
-// 9 KPI cards in a 3×3 grid, each 24 cols wide × 14 rows tall, gap of 1 row
-const DEFAULT_KPI_LAYOUT_BASE = [
-  {id:'kpiWeld',      col:0,  row:0,  w:24, h:14},
-  {id:'kpiNdtPipe',   col:24, row:0,  w:24, h:14},
-  {id:'kpiFjc',       col:48, row:0,  w:24, h:14},
-  {id:'kpiCoat',      col:0,  row:15, w:24, h:14},
-  {id:'kpiNcrOpen',   col:24, row:15, w:24, h:14},
-  {id:'kpiNcrRepeat', col:48, row:15, w:24, h:14},
-  {id:'kpiSorObs',    col:0,  row:30, w:24, h:14},
-  {id:'kpiOrg',       col:24, row:30, w:24, h:14},
-  {id:'kpiInspec',    col:48, row:30, w:24, h:14},
-];
-const DEFAULT_KPI_LAYOUT = DEFAULT_KPI_LAYOUT_BASE.map(p=>({...p}));
-let KPI_CANVAS_LAYOUT = DEFAULT_KPI_LAYOUT.map(p=>({...p}));
-
 // ── Users Management Canvas ──────────────────────────
 const DEFAULT_USERS_LAYOUT_BASE=[
   {id:'usersLeft',  col:0,  row:0, w:18, h:48},
@@ -5918,23 +5911,20 @@ const DEFAULT_USERS_LAYOUT=DEFAULT_USERS_LAYOUT_BASE.map(p=>({...p}));
 let USERS_CANVAS_LAYOUT=DEFAULT_USERS_LAYOUT.map(p=>({...p}));
 const USERS_LAYOUT_KEY=`wep_users_canvas_layout_g${GRID_SCALE}_v2`;
 
-// Which canvas is currently active ('dashCanvas' | 'dpCanvas' | 'kpiCanvas' | 'usersCanvas')
+// Which canvas is currently active ('dashCanvas' | 'dpCanvas' | 'usersCanvas')
 let ACTIVE_CANVAS_ID = 'dashCanvas';
 function getActiveLayout(){
   if(ACTIVE_CANVAS_ID==='dpCanvas')     return DP_CANVAS_LAYOUT;
-  if(ACTIVE_CANVAS_ID==='kpiCanvas')    return KPI_CANVAS_LAYOUT;
   if(ACTIVE_CANVAS_ID==='usersCanvas')  return USERS_CANVAS_LAYOUT;
   return CANVAS_LAYOUT;
 }
 function getActiveLayoutKey(){
   if(ACTIVE_CANVAS_ID==='dpCanvas')     return DP_LAYOUT_KEY;
-  if(ACTIVE_CANVAS_ID==='kpiCanvas')    return KPI_LAYOUT_KEY;
   if(ACTIVE_CANVAS_ID==='usersCanvas')  return USERS_LAYOUT_KEY;
   return LAYOUT_KEY;
 }
 function setActiveLayout(arr){
   if(ACTIVE_CANVAS_ID==='dpCanvas')        DP_CANVAS_LAYOUT=arr;
-  else if(ACTIVE_CANVAS_ID==='kpiCanvas')  KPI_CANVAS_LAYOUT=arr;
   else if(ACTIVE_CANVAS_ID==='usersCanvas') USERS_CANVAS_LAYOUT=arr;
   else                                     CANVAS_LAYOUT=arr;
 }
@@ -5946,7 +5936,6 @@ function setActiveLayout(arr){
 // (falling back to DEFAULT_LAYOUT) instead of rendering incorrectly.
 const LAYOUT_KEY    = `wep_canvas_layout_g${GRID_SCALE}_v4`;
 const DP_LAYOUT_KEY = `wep_dp_canvas_layout_g${GRID_SCALE}_v7`;
-const KPI_LAYOUT_KEY= `wep_kpi_canvas_layout_g${GRID_SCALE}_v1`;
 function saveLayout(){ try{ localStorage.setItem(getActiveLayoutKey(), JSON.stringify(getActiveLayout())); }catch(e){} }
 function loadLayout(){ try{ const s=localStorage.getItem(getActiveLayoutKey()); if(s) setActiveLayout(JSON.parse(s)); }catch(e){} }
 
@@ -5964,20 +5953,13 @@ const PANEL_NAMES={
   dpChart6m:'6-Month Chart',
   dpHiring:'Hiring Status',
   dpLocRole:'Location & Role',dpPersonnel:'Personnel Table',
-  kpiWeld:'Weld Repair Rate',kpiNdtPipe:'NDT Backlog — Pipeline',
-  kpiFjc:'FJC Repair Rate',kpiCoat:'Coating Rejection',
-  kpiNcrOpen:'NCR Open Rate',kpiNcrRepeat:'Repeat NCR Rate',
-  kpiSorObs:'Quality Observations',
-  kpiOrg:'Org. Resources',kpiInspec:'Inspection Resourcing',
   usersLeft:'User List',usersRight:'User Editor',
 };
 const HIDDEN_KEY_DASH='wep_hidden_dash';
 const HIDDEN_KEY_DP='wep_hidden_dp';
-const HIDDEN_KEY_KPI='wep_hidden_kpi';
 const HIDDEN_KEY_USERS='wep_hidden_users';
 function getHiddenKey(){
   if(ACTIVE_CANVAS_ID==='dpCanvas')     return HIDDEN_KEY_DP;
-  if(ACTIVE_CANVAS_ID==='kpiCanvas')    return HIDDEN_KEY_KPI;
   if(ACTIVE_CANVAS_ID==='usersCanvas')  return HIDDEN_KEY_USERS;
   return HIDDEN_KEY_DASH;
 }
@@ -6210,7 +6192,6 @@ function deactivateEditMode(){
 function resetLayout(){
   saveHiddenPanels(new Set());
   if(ACTIVE_CANVAS_ID==='dpCanvas')         setActiveLayout(DEFAULT_DP_LAYOUT.map(p=>({...p})));
-  else if(ACTIVE_CANVAS_ID==='kpiCanvas')   setActiveLayout(DEFAULT_KPI_LAYOUT.map(p=>({...p})));
   else if(ACTIVE_CANVAS_ID==='usersCanvas') setActiveLayout(DEFAULT_USERS_LAYOUT.map(p=>({...p})));
   else                                      setActiveLayout(DEFAULT_LAYOUT.map(p=>({...p})));
   doSaveLayout();
