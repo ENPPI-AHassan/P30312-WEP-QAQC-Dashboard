@@ -232,6 +232,9 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 .qa-xls:hover{background:rgba(56,189,248,.18)}
 .qa-msg.err{align-self:flex-start;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.3);color:#fca5b5}
 .qa-hint{align-self:center;font-size:11px;color:#5c6480;text-align:center;line-height:1.6;padding:0 10px}
+.qa-ex-wrap{align-self:stretch;display:flex;flex-direction:column;gap:6px;padding:4px 6px;margin-top:4px}
+.qa-ex{display:block;width:100%;text-align:left;padding:8px 11px;font-size:11.5px;color:#9aa3bd;background:rgba(255,255,255,.03);border:1px solid #232838;border-radius:8px;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s,color .15s}
+.qa-ex:hover{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.32);color:#cdd3e1}
 .qa-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 14px;background:#1b2030;border-radius:11px;border-bottom-left-radius:3px}
 .qa-typing span{width:6px;height:6px;border-radius:50%;background:#5a6379;animation:qaBlink 1.2s infinite}
 .qa-typing span:nth-child(2){animation-delay:.2s}.qa-typing span:nth-child(3){animation-delay:.4s}
@@ -4128,17 +4131,6 @@ async function sbRpc(fn, body){
   }
   return r.json();
 }
-async function sbEdgeFn(fn, body){
-  const r=await fetchWithTimeout(`${SB_URL}/functions/v1/${fn}`,{
-    method:'POST', headers:SB_HDR, body:JSON.stringify(body||{})
-  }, 60000);
-  if(!r.ok){
-    let detail=''; try{ detail=await r.text(); }catch(e){}
-    console.error(`[Edge ${fn}] HTTP ${r.status}`, detail);
-    throw new Error(detail||`Request failed (${r.status})`);
-  }
-  return r.json();
-}
 
 // ═══════════════════════════════════════════════════
 // Q&A ASSISTANT (chat widget)
@@ -4182,19 +4174,26 @@ function qaRender(){
   const u=AUTH.currentUser||{};
   const isAdmin=u.role==='admin'||u.role==='superadmin';
   if(!isAdmin){
-    body.innerHTML=`<div class=”qa-hint” style=”text-align:center;padding-top:32px”>This feature is not available for your access level.</div>`;
+    body.innerHTML=`<div class="qa-hint" style="text-align:center;padding-top:32px">This feature is not available for your access level.</div>`;
     const inp=document.getElementById('qaInput');
-    const btn=document.querySelector('#qaPanel .qa-send');
+    const btn=document.getElementById('qaSendBtn');
     if(inp){ inp.disabled=true; inp.placeholder=''; }
     if(btn) btn.disabled=true;
     return;
   }
   const inp=document.getElementById('qaInput');
-  const btn=document.querySelector('#qaPanel .qa-send');
+  const btn=document.getElementById('qaSendBtn');
   if(inp){ inp.disabled=false; inp.placeholder='Ask about the project data…'; }
   if(btn) btn.disabled=false;
   if(!QA.history.length){
-    body.innerHTML=`<div class=”qa-hint” style=”color:#5c6480”>Ask me about the project data — RFIs, NDT &amp; FJC progress, welder repair rates, SOR observations, or NCRs.<br><br>e.g. “How many open NCRs are there?” · “Which welders are above 3% repair rate?” · “Total joints welded in Section 1.”</div>`;
+    body.innerHTML=`<div class="qa-hint" style="color:#5c6480">Ask about RFIs, NCRs, SORs, welders, or pipeline progress — tap an example to try it:</div>
+    <div class="qa-ex-wrap">
+      <button class="qa-ex" onclick="qaAsk('How many rejected RFIs in March 2026?')">How many rejected RFIs in March 2026?</button>
+      <button class="qa-ex" onclick="qaAsk('RFI status breakdown')">RFI status breakdown</button>
+      <button class="qa-ex" onclick="qaAsk('List welders exceeding 7% repair rate')">List welders exceeding 7% repair rate</button>
+      <button class="qa-ex" onclick="qaAsk('How many open NCRs?')">How many open NCRs?</button>
+      <button class="qa-ex" onclick="qaAsk('Total joints welded in Section 2 in January 2026')">Total joints welded in Section 2 in January 2026</button>
+    </div>`;
     return;
   }
   body.innerHTML=QA.history.map((m,i)=>{
@@ -4391,10 +4390,189 @@ function qaStream(text, msgEl, historyIdx){
   });
 }
 
+// ═══════════════════════════════════════════════════
+// LOCAL Q&A ENGINE — deterministic, no AI, no network.
+// Answers from in-memory ST.data. Returns a markdown string;
+// tables render via qaFmt → Option-A styling + Excel export.
+// ═══════════════════════════════════════════════════
+const QA_MONTHS={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+const QA_DISC=['civil','mechanical','electrical','piping','instrument','structural','process','telecom','architectural','rotating','static'];
+const QA_IC=['binasheer','cpecc','mpm','gulfrock'];
+function qaCap(s){ return s?s[0].toUpperCase()+s.slice(1):s; }
+function qaCell(v){ return (v==null||v==='')?'—':String(v).replace(/\|/g,'/').replace(/\s*\n\s*/g,' ').trim(); }
+function qaSection(q){ const m=q.match(/(?:section|sec)[\s-]*([123])\b/); return m?m[1]:null; }
+function qaDiscipline(q){ return QA_DISC.find(d=>q.includes(d))||null; }
+function qaIC(q){ const nq=q.replace(/\s+/g,''); return QA_IC.find(c=>nq.includes(c))||null; }
+function qaDateFilter(q){
+  let m=q.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{4})\b/);
+  if(m) return {prefix:`${m[2]}-${QA_MONTHS[m[1].slice(0,3)]}`, label:`${qaCap(m[1].slice(0,3))} ${m[2]}`};
+  m=q.match(/\b(\d{4})-(\d{2})\b/);
+  if(m) return {prefix:`${m[1]}-${m[2]}`, label:`${m[1]}-${m[2]}`};
+  m=q.match(/\b(20\d{2})\b/);
+  if(m) return {prefix:m[1], label:m[1]};
+  return null;
+}
+function qaInDate(r,df){ return !df || String(r.date||'').startsWith(df.prefix); }
+function qaDataset(q){
+  if(/ncr|non[\s-]?conform/.test(q)) return 'ncr';
+  if(/\bsor\b|observation/.test(q)) return 'sor';
+  if(/rfi|request for inspection|inspection request/.test(q)) return 'rfi';
+  if(/welder/.test(q)) return 'welders';
+  if(/deployment|personnel|manpower|mobiliz|staff/.test(q)) return 'deployment';
+  if(/weld|joint|ndt|fjc|coat|pipeline|progress/.test(q)) return 'daily';
+  return null;
+}
+function qaOp(q){
+  if(/break\s?down|by status|by section|per section|by discipline|by contractor|by ic\b/.test(q)) return 'breakdown';
+  if(/average|avg|\bmean\b/.test(q)) return 'avg';
+  if(/\btotal\b|\bsum\b/.test(q)) return 'sum';
+  if(/\blist\b|show |which |\bwho\b|name the|give me/.test(q)) return 'list';
+  if(/how many|number of|\bcount\b|how much/.test(q)) return 'count';
+  return null;
+}
+function qaRfiStatus(q){
+  if(/with com|as noted/.test(q)) return {code:'ACC W/COMM',label:'Accepted with comments'};
+  if(/reject/.test(q)) return {code:'REJ',label:'Rejected'};
+  if(/cancel/.test(q)) return {code:'CAN',label:'Cancelled'};
+  if(/\bopen\b/.test(q)) return {code:'OPEN',label:'Open'};
+  if(/accept|approv/.test(q)) return {code:'ACC',label:'Accepted',strict:true};
+  return null;
+}
+function qaBreakdown(rows,keyFn,title,colLabel){
+  if(!rows.length) return 'No matching records.';
+  const m={}; rows.forEach(r=>{const k=keyFn(r)||'(blank)'; m[k]=(m[k]||0)+1;});
+  const body=Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`| ${qaCell(k)} | ${v} |`).join('\n');
+  return `${title}\n\n| ${colLabel} | COUNT |\n| --- | --- |\n${body}\n| **TOTAL** | **${rows.length}** |`;
+}
+function qaTable(headers,rows,title,total){
+  if(!rows.length) return `No matching records${title?` for ${title}`:''}.`;
+  const head=`| ${headers.join(' | ')} |`;
+  const sep=`| ${headers.map(()=>'---').join(' | ')} |`;
+  const shown=rows.slice(0,200);
+  const body=shown.map(r=>`| ${r.map(qaCell).join(' | ')} |`).join('\n');
+  const note=total>shown.length?`\n\n_Showing first ${shown.length} of ${total}._`:'';
+  return `${title} — ${total} total\n\n${head}\n${sep}\n${body}${note}`;
+}
+function qaRFI(q,op,df){
+  let rows=ST.data.rfi||[]; if(!rows.length) return 'No RFI data is loaded.';
+  const sc=[]; const st=qaRfiStatus(q);
+  if(st){ rows=rows.filter(r=>{const s=String(r.status||'').toUpperCase().trim(); return st.strict?s==='ACC':(st.code==='ACC W/COMM'?s==='ACC W/COMM':s.includes(st.code));}); sc.push(st.label); }
+  const d=qaDiscipline(q); if(d){ rows=rows.filter(r=>String(r.discipline||'').toLowerCase().includes(d)); sc.push(qaCap(d)); }
+  const se=qaSection(q); if(se){ rows=rows.filter(r=>String(r.section||'').includes(se)); sc.push('Section '+se); }
+  const ic=qaIC(q); if(ic){ rows=rows.filter(r=>String(r.ic||'').toLowerCase().replace(/\s+/g,'').includes(ic)); sc.push(ic.toUpperCase()); }
+  if(df){ rows=rows.filter(r=>qaInDate(r,df)); sc.push(df.label); }
+  const sct=sc.length?` (${sc.join(', ')})`:'';
+  if(op==='breakdown'||(!op&&!st&&/status/.test(q))) return qaBreakdown(rows,r=>String(r.status||'').toUpperCase(),'RFI status breakdown'+sct,'STATUS');
+  if(op==='list') return qaTable(['DATE','DISCIPLINE','SECTION','IC','STATUS'],rows.map(r=>[r.date,r.discipline,r.section,r.ic,r.status]),'RFIs'+sct,rows.length);
+  return `${rows.length} RFI${rows.length===1?'':'s'}${sct}.`;
+}
+function qaNCR(q,op,df){
+  let rows=ST.data.ncr||[]; if(!rows.length) return 'No NCR data is loaded.';
+  const sc=[];
+  if(/\bopen\b/.test(q)){ rows=rows.filter(r=>!/clos/i.test(r.status||'')); sc.push('Open'); }
+  else if(/clos/.test(q)){ rows=rows.filter(r=>/clos/i.test(r.status||'')); sc.push('Closed'); }
+  if(df){ rows=rows.filter(r=>qaInDate(r,df)); sc.push(df.label); }
+  const sct=sc.length?` (${sc.join(', ')})`:'';
+  if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdown(rows,r=>String(r.status||'').toUpperCase(),'NCR status breakdown'+sct,'STATUS');
+  if(op==='list') return qaTable(['NCR NO','DATE','STATUS','RAISED BY','AGAINST'],rows.map(r=>[r.ncrNo,r.date,r.status,r.raisedBy,r.againstName]),'NCRs'+sct,rows.length);
+  return `${rows.length} NCR${rows.length===1?'':'s'}${sct}.`;
+}
+function qaSOR(q,op,df){
+  let rows=ST.data.sor||[]; if(!rows.length) return 'No SOR data is loaded.';
+  const sc=[];
+  if(/\bopen\b/.test(q)){ rows=rows.filter(r=>!/clos/i.test(r.status||'')); sc.push('Open'); }
+  else if(/clos/.test(q)){ rows=rows.filter(r=>/clos/i.test(r.status||'')); sc.push('Closed'); }
+  const ic=qaIC(q); if(ic){ rows=rows.filter(r=>String(r.ic||'').toLowerCase().replace(/\s+/g,'').includes(ic)); sc.push(ic.toUpperCase()); }
+  if(df){ rows=rows.filter(r=>qaInDate(r,df)); sc.push(df.label); }
+  const sct=sc.length?` (${sc.join(', ')})`:'';
+  if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdown(rows,r=>String(r.status||'').toUpperCase(),'SOR status breakdown'+sct,'STATUS');
+  if(op==='list') return qaTable(['SOR NO','DATE','STATUS','IC','KM'],rows.map(r=>[r.sorNo,r.date,r.status,r.ic,r.km]),'SORs'+sct,rows.length);
+  return `${rows.length} SOR${rows.length===1?'':'s'}${sct}.`;
+}
+function qaWelders(q,op){
+  let rows=(ST.data.welders||[]).slice(); if(!rows.length) return 'No welder data is loaded.';
+  const weekly=/weekly|this week|\bwk\b/.test(q);
+  const f=weekly?'wkPct':'cumPct', lbl=weekly?'weekly':'cumulative';
+  let sc='';
+  const m=q.match(/(?:exceed(?:ing)?|above|over|greater than|more than|higher than|>=?)\s*(\d+(?:\.\d+)?)/);
+  const m2=q.match(/(?:below|under|less than|lower than|<=?)\s*(\d+(?:\.\d+)?)/);
+  if(m){ const n=+m[1]; rows=rows.filter(r=>(+r[f]||0)>n); sc=` exceeding ${n}% ${lbl} repair rate`; }
+  else if(m2){ const n=+m2[1]; rows=rows.filter(r=>(+r[f]||0)<n); sc=` below ${n}% ${lbl} repair rate`; }
+  rows.sort((a,b)=>(+b[f]||0)-(+a[f]||0));
+  if(op==='count') return `${rows.length} welder${rows.length===1?'':'s'}${sc}.`;
+  if(op==='avg'){ const a=rows.reduce((s,r)=>s+(+r[f]||0),0)/(rows.length||1); return `Average ${lbl} repair rate: ${a.toFixed(2)}% across ${rows.length} welders.`; }
+  return qaTable(['WELDER ID','NAME','SEC','REPAIR %'],rows.map(r=>[r.id,r.name,r.section,(+r[f]||0).toFixed(2)+'%']),'Welders'+sc,rows.length);
+}
+function qaDailyDelta(arr,field,df){
+  const s=(arr||[]).filter(r=>r.date).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  if(!s.length) return 0;
+  if(!df) return +s[s.length-1][field]||0;
+  const inP=s.filter(r=>String(r.date).startsWith(df.prefix)); if(!inP.length) return 0;
+  const lastIn=+inP[inP.length-1][field]||0;
+  const before=s.filter(r=>String(r.date)<df.prefix);
+  const prev=before.length?(+before[before.length-1][field]||0):0;
+  return Math.max(0,lastIn-prev);
+}
+function qaDaily(q,op,df){
+  const map=[
+    {re:/ndt.*repair|repair.*ndt/,f:'ndtRepair',l:'NDT repairs'},
+    {re:/ndt/,f:'ndtAppr',l:'NDT approved (EPCM)'},
+    {re:/fjc.*repair/,f:'fjcRepair',l:'FJC repairs'},
+    {re:/fjc.*balance|\bbalance\b/,f:'fjcBalance',l:'FJC balance'},
+    {re:/fjc/,f:'fjcTotal',l:'FJC total'},
+    {re:/weld|joint/,f:'welded',l:'joints welded'},
+  ];
+  const sel=map.find(x=>x.re.test(q))||map[map.length-1];
+  const se=qaSection(q);
+  const keys=se?['daily'+se]:['daily1','daily2','daily3'];
+  let total=0,any=false;
+  keys.forEach(k=>{ const a=ST.data[k]; if(a&&a.length){ any=true; total+=qaDailyDelta(a,sel.f,df); } });
+  if(!any) return 'No daily pipeline data is loaded'+(se?` for Section ${se}.`:'.');
+  const where=se?`Section ${se}`:'all sections';
+  const when=df?` in ${df.label}`:' (cumulative to date)';
+  return `${total.toLocaleString()} ${sel.l} — ${where}${when}.`;
+}
+function qaDeployment(){
+  const d=ST.data.deployment; if(!d||!d.actual) return 'No deployment data is loaded.';
+  const n=Array.isArray(d.actual)?d.actual.length:0;
+  return `${n} personnel in the actual mobilization record. Open the Manpower page for the full plan-vs-actual breakdown by location, role, and month.`;
+}
+function qaHelp(){
+  return `I can answer questions about RFIs, NCRs, SORs, welders, and pipeline progress. Try:\n\n- How many rejected RFIs in March 2026?\n- RFI status breakdown for Section 1\n- List welders exceeding 7% repair rate\n- How many open NCRs?\n- Total joints welded in Section 2 in January 2026`;
+}
+// Log a question the engine couldn't map to any dataset, so it can be reviewed
+// later to improve the parser. Fire-and-forget — never blocks or breaks the UI.
+function qaLogUnanswered(question){
+  try{
+    const u=(AUTH.currentUser||{}).username||'unknown';
+    sbInsert('qa_unanswered',{username:u,question:String(question||'').slice(0,500)})
+      .catch(e=>console.warn('[QA] miss-log failed',e));
+  }catch(e){/* logging must never break the assistant */}
+}
+function qaAnswerLocal(rawq,isAdmin){
+  const q=String(rawq||'').toLowerCase().trim();
+  if(!q) return 'Please type a question.';
+  const ds=qaDataset(q);
+  if(!ds){ qaLogUnanswered(rawq); return qaHelp(); }
+  if(ds==='deployment'&&!isAdmin) return 'Deployment data is available to admins only.';
+  const df=qaDateFilter(q), op=qaOp(q);
+  if(ds==='rfi') return qaRFI(q,op,df);
+  if(ds==='ncr') return qaNCR(q,op,df);
+  if(ds==='sor') return qaSOR(q,op,df);
+  if(ds==='welders') return qaWelders(q,op);
+  if(ds==='daily') return qaDaily(q,op,df);
+  if(ds==='deployment') return qaDeployment();
+  return qaHelp();
+}
+function qaAsk(t){ const inp=document.getElementById('qaInput'); if(!inp||inp.disabled||QA.busy) return; inp.value=t; qaSend(); }
+
 async function qaSend(){
   const inp=document.getElementById('qaInput');
   const btn=document.getElementById('qaSendBtn');
   if(!inp||QA.busy) return;
+  const u=AUTH.currentUser||{};
+  const isAdmin=u.role==='admin'||u.role==='superadmin';
+  if(!isAdmin) return;
   const q=inp.value.trim();
   if(!q) return;
   inp.value='';
@@ -4403,30 +4581,8 @@ async function qaSend(){
   if(btn) btn.disabled=true;
   qaRender();
   let answerText='';
-  try{
-    const hist=QA.history.filter(m=>m.role==='user'||m.role==='bot').slice(-6)
-      .map(m=>({role:m.role==='bot'?'assistant':'user', content:m.text}));
-    const res=await sbEdgeFn('qa-assistant',{
-      question:q,
-      role:AUTH.currentUser?.role||'viewer',
-      history:hist.slice(0,-1)
-    });
-    if(res.error){
-      QA.history.push({role:'error',text:res.error});
-      QA.busy=false;
-      if(btn) btn.disabled=false;
-      qaRender();
-      return;
-    }
-    answerText=res.answer||'No answer returned.';
-  }catch(e){
-    QA.history.push({role:'error',text:e.message||'Request failed.'});
-    QA.busy=false;
-    if(btn) btn.disabled=false;
-    qaRender();
-    return;
-  }
-  // Commit to history first so the export button index is valid
+  try{ answerText=qaAnswerLocal(q,isAdmin)||'I could not find an answer.'; }
+  catch(e){ console.error('[QA local]',e); answerText='Sorry — something went wrong reading the data.'; }
   QA.history.push({role:'bot',text:answerText});
   QA.busy=false;
   if(btn) btn.disabled=false;
