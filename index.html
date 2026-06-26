@@ -230,6 +230,7 @@ table.qa-tbl tbody tr:nth-child(even){background:rgba(255,255,255,.025)}
 table.qa-tbl tbody tr:last-child td{border-bottom:none}
 .qa-xls{margin-top:9px;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#38bdf8;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.28);border-radius:7px;padding:5px 10px;cursor:pointer}
 .qa-xls:hover{background:rgba(56,189,248,.18)}
+.qa-src{margin-top:6px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5c6480;opacity:.75}
 .qa-msg.err{align-self:flex-start;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.3);color:#fca5b5}
 .qa-hint{align-self:center;font-size:11px;color:#5c6480;text-align:center;line-height:1.6;padding:0 10px}
 .qa-ex-wrap{align-self:stretch;display:flex;flex-direction:column;gap:6px;padding:4px 6px;margin-top:4px}
@@ -4201,7 +4202,8 @@ function qaRender(){
     if(m.role==='error') return `<div class="qa-msg err">${esc(m.text)}</div>`;
     const hasTable=qaExtractTables(m.text).length>0;
     const exp=hasTable?`<button class="qa-xls" onclick="qaExportExcel(${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M9 11l6 6M15 11l-6 6"/></svg> Export to Excel</button>`:'';
-    return `<div class="qa-msg bot">${qaFmt(m.text)}${exp}</div>`;
+    const src=m.source?`<div class="qa-src">${esc(m.source)}</div>`:'';
+    return `<div class="qa-msg bot">${qaFmt(m.text)}${exp}${src}</div>`;
   }).join('') + (QA.busy?`<div class="qa-typing"><span></span><span></span><span></span></div>`:'');
   body.scrollTop=body.scrollHeight;
 }
@@ -4494,8 +4496,8 @@ function qaWelders(q,op){
   const weekly=/weekly|this week|\bwk\b/.test(q);
   const f=weekly?'wkPct':'cumPct', lbl=weekly?'weekly':'cumulative';
   let sc='';
-  const m=q.match(/(?:exceed(?:ing)?|above|over|greater than|more than|higher than|>=?)\s*(\d+(?:\.\d+)?)/);
-  const m2=q.match(/(?:below|under|less than|lower than|<=?)\s*(\d+(?:\.\d+)?)/);
+  const m=q.match(/(?:exceed\w*|above|over|greater|more|higher|>=?)[^\d]{0,6}(\d+(?:\.\d+)?)/);
+  const m2=q.match(/(?:below|under|less|lower|<=?)[^\d]{0,6}(\d+(?:\.\d+)?)/);
   if(m){ const n=+m[1]; rows=rows.filter(r=>(+r[f]||0)>n); sc=` exceeding ${n}% ${lbl} repair rate`; }
   else if(m2){ const n=+m2[1]; rows=rows.filter(r=>(+r[f]||0)<n); sc=` below ${n}% ${lbl} repair rate`; }
   rows.sort((a,b)=>(+b[f]||0)-(+a[f]||0));
@@ -4549,11 +4551,14 @@ function qaLogUnanswered(question){
       .catch(e=>console.warn('[QA] miss-log failed',e));
   }catch(e){/* logging must never break the assistant */}
 }
+// Returns a markdown answer string when the parser understands the question,
+// or null when it cannot (a "miss") — null tells qaSend to fall back to the LLM.
+// Every miss is logged (fire-and-forget) so the parser can be hardened later.
 function qaAnswerLocal(rawq,isAdmin){
   const q=String(rawq||'').toLowerCase().trim();
   if(!q) return 'Please type a question.';
   const ds=qaDataset(q);
-  if(!ds){ qaLogUnanswered(rawq); return qaHelp(); }
+  if(!ds){ qaLogUnanswered(rawq); return null; }
   if(ds==='deployment'&&!isAdmin) return 'Deployment data is available to admins only.';
   const df=qaDateFilter(q), op=qaOp(q);
   if(ds==='rfi') return qaRFI(q,op,df);
@@ -4562,7 +4567,28 @@ function qaAnswerLocal(rawq,isAdmin){
   if(ds==='welders') return qaWelders(q,op);
   if(ds==='daily') return qaDaily(q,op,df);
   if(ds==='deployment') return qaDeployment();
-  return qaHelp();
+  qaLogUnanswered(rawq); return null;
+}
+// LLM fallback — called only when the local parser returns null (a miss).
+// Hits the Supabase Edge Function (qa-assistant), which runs a tool-use loop
+// against the DB. Returns {ok, answer} | {ok:false, rateLimited, retry}.
+async function qaLLM(question){
+  const u=AUTH.currentUser||{};
+  const hist=QA.history.slice(-7,-1)
+    .filter(m=>m.role==='user'||m.role==='bot')
+    .map(m=>({role:m.role==='user'?'user':'assistant',content:String(m.text||'').slice(0,500)}));
+  let r;
+  try{
+    r=await fetch(`${SB_URL}/functions/v1/qa-assistant`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`},
+      body:JSON.stringify({question,role:u.role,history:hist})
+    });
+  }catch(e){ console.warn('[QA LLM] network',e); return {ok:false,answer:qaHelp()}; }
+  let data={}; try{ data=await r.json(); }catch(e){/* non-JSON */}
+  if(r.status===429||data.rateLimited){ return {ok:false,rateLimited:true,retry:+data.retry||30}; }
+  if(!r.ok||data.error){ console.warn('[QA LLM]',r.status,data.error); return {ok:false,answer:qaHelp()}; }
+  return {ok:true,answer:data.answer||'I could not find an answer.'};
 }
 function qaAsk(t){ const inp=document.getElementById('qaInput'); if(!inp||inp.disabled||QA.busy) return; inp.value=t; qaSend(); }
 
@@ -4580,10 +4606,19 @@ async function qaSend(){
   QA.busy=true;
   if(btn) btn.disabled=true;
   qaRender();
-  let answerText='';
-  try{ answerText=qaAnswerLocal(q,isAdmin)||'I could not find an answer.'; }
-  catch(e){ console.error('[QA local]',e); answerText='Sorry — something went wrong reading the data.'; }
-  QA.history.push({role:'bot',text:answerText});
+  let answerText='', source=null;
+  try{
+    const local=qaAnswerLocal(q,isAdmin);
+    if(local!=null){ answerText=local; source='Local'; }
+    else {
+      // Parser miss → LLM fallback.
+      const r=await qaLLM(q);
+      if(r.ok){ answerText=r.answer; source='LLM'; }
+      else if(r.rateLimited){ answerText=`Oops! Limit reached.. try again in ${r.retry} seconds.`; }
+      else { answerText=r.answer||'Sorry — the assistant is unavailable right now.'; }
+    }
+  }catch(e){ console.error('[QA]',e); answerText='Sorry — something went wrong reading the data.'; }
+  QA.history.push({role:'bot',text:answerText,source});
   QA.busy=false;
   if(btn) btn.disabled=false;
   // Remove typing indicator, inject empty bot bubble, stream into it
@@ -4596,6 +4631,8 @@ async function qaSend(){
     body.appendChild(msgEl);
     body.scrollTop=body.scrollHeight;
     await qaStream(answerText, msgEl, QA.history.length-1);
+    // Repaint from history so the source footnote (Local/LLM) is attached.
+    qaRender();
   }
 }
 
