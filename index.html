@@ -240,6 +240,9 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 .qa-typing span{width:6px;height:6px;border-radius:50%;background:#5a6379;animation:qaBlink 1.2s infinite}
 .qa-typing span:nth-child(2){animation-delay:.2s}.qa-typing span:nth-child(3){animation-delay:.4s}
 @keyframes qaBlink{0%,60%,100%{opacity:.25}30%{opacity:1}}
+@keyframes qaCursor{0%,100%{opacity:1}50%{opacity:0}}
+.qa-cursor{display:inline-block;width:1.5px;height:1.1em;background:#7a90b0;vertical-align:text-bottom;margin-left:1px;animation:qaCursor .65s step-start infinite}
+@keyframes qaRowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
 #qaInputRow{flex:none;display:flex;gap:8px;padding:12px;border-top:1px solid #1c2230;background:#0b1929}
 #qaInput{flex:1;resize:none;max-height:120px;background:#11141d;border:1px solid #232838;border-radius:8px;padding:9px 12px;font-size:13px;color:#e2e8f0;outline:none;font-family:inherit;line-height:1.4}
 #qaInput:focus{border-color:#38bdf8}
@@ -4136,7 +4139,7 @@ async function sbRpc(fn, body){
 // ═══════════════════════════════════════════════════
 // Q&A ASSISTANT (chat widget)
 // ═══════════════════════════════════════════════════
-const QA = { history: [], busy: false };
+const QA = { history: [], busy: false, lastCtx: null };
 
 // Show the launcher for logged-in non-guest users; hide for guests / logged-out.
 function qaSyncVisibility(){
@@ -4323,73 +4326,106 @@ async function qaExportExcel(idx){
   setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
 
-// Progressive word-by-word reveal, mimicking Claude/ChatGPT streaming.
-// Appends words to a pre-created .qa-msg.bot element already in #qaBody.
-function qaStream(text, msgEl, historyIdx){
-  return new Promise(resolve=>{
-    // Split on word boundaries but keep whitespace/newlines as tokens so
-    // formatting is preserved. Tables arrive as a block at the end.
-    const tableMarker='__TABLES__';
-    const tables=qaExtractTables(text);
-    // Strip table markdown from the plain-text portion for word streaming,
-    // then append rendered tables as HTML once streaming completes.
-    let plain=text;
-    tables.forEach(t=>{
-      // Remove the raw markdown table block
-      const lines=plain.split('\n');
-      let i=0;
-      while(i<lines.length){
-        if(/^\s*\|/.test(lines[i])&&i+1<lines.length&&/^\s*\|?[\s:|-]*-/.test(lines[i+1])){
-          let j=i;
-          while(j<lines.length&&/^\s*\|/.test(lines[j])) j++;
-          lines.splice(i,j-i,tableMarker);
-          break;
-        }
-        i++;
-      }
-      plain=lines.join('\n');
-    });
+// AI-style streaming: think delay → char-by-char text → formatted swap → table rows animated in.
+// Self-contained: creates its own msgEl, removes the typing indicator, adds source footnote.
+async function qaStream(text, historyIdx, thinkMs=0){
+  const body=document.getElementById('qaBody');
+  if(!body) return;
 
-    const tokens=plain.split(/(\s+)/);
-    let i=0;
-    let accumulated='';
-    let tableIdx=0;
+  // Phase 1: think delay — typing dots stay visible while "thinking"
+  if(thinkMs>0) await new Promise(r=>setTimeout(r,thinkMs));
 
-    const body=document.getElementById('qaBody');
-    const tick=()=>{
-      if(i>=tokens.length){
-        // Streaming done — render final HTML including tables
-        msgEl.innerHTML=qaFmt(text);
-        const hasTable=tables.length>0;
-        if(hasTable){
-          const expBtn=document.createElement('button');
-          expBtn.className='qa-xls';
-          expBtn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M9 11l6 6M15 11l-6 6"/></svg> Export to Excel`;
-          expBtn.onclick=()=>qaExportExcel(historyIdx);
-          msgEl.appendChild(expBtn);
-        }
-        if(body) body.scrollTop=body.scrollHeight;
-        resolve();
-        return;
+  // Remove typing indicator, inject empty bot bubble
+  const typing=body.querySelector('.qa-typing');
+  if(typing) typing.remove();
+  const msgEl=document.createElement('div');
+  msgEl.className='qa-msg bot';
+  body.appendChild(msgEl);
+  body.scrollTop=body.scrollHeight;
+
+  // Phase 2: separate plain text from markdown table blocks
+  const TBL='\x00TBL\x00';
+  const tables=qaExtractTables(text);
+  let plain=text;
+  tables.forEach(()=>{
+    const lines=plain.split('\n'); let i=0;
+    while(i<lines.length){
+      if(/^\s*\|/.test(lines[i])&&i+1<lines.length&&/^\s*\|?[\s:|-]*-/.test(lines[i+1])){
+        let j=i; while(j<lines.length&&/^\s*\|/.test(lines[j])) j++;
+        lines.splice(i,j-i,TBL); break;
       }
-      // Batch a few tokens per frame for a smooth but fast feel
-      const batch=3;
-      for(let b=0;b<batch&&i<tokens.length;b++,i++){
-        const tok=tokens[i];
-        if(tok===tableMarker){
-          accumulated+='\n[table]\n';
-        } else {
-          accumulated+=tok;
-        }
-      }
-      // Show accumulated plain text (no table rendering mid-stream)
-      const displayText=accumulated.replace(/\[table\]/g,'').replace(/\n{3,}/g,'\n\n');
-      msgEl.textContent=displayText;
-      if(body) body.scrollTop=body.scrollHeight;
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+      i++;
+    }
+    plain=lines.join('\n');
   });
+  const plainText=plain.replace(new RegExp(TBL,'g'),'').trim();
+
+  // Phase 3: char-by-char stream with blinking cursor
+  if(plainText){
+    const textNode=document.createTextNode('');
+    const cursor=document.createElement('span');
+    cursor.className='qa-cursor';
+    msgEl.appendChild(textNode);
+    msgEl.appendChild(cursor);
+    const chars=[...plainText];
+    let ci=0;
+    const BATCH=3;
+    await new Promise(r=>{
+      const tick=()=>{
+        if(ci>=chars.length){ cursor.remove(); r(); return; }
+        let chunk='';
+        for(let b=0;b<BATCH&&ci<chars.length;b++,ci++) chunk+=chars[ci];
+        textNode.nodeValue=(textNode.nodeValue||'')+chunk;
+        body.scrollTop=body.scrollHeight;
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  // Phase 4: swap plain text with fully formatted HTML (bold, line breaks)
+  const textFormatted=qaFmt(plain.replace(new RegExp(TBL,'g'),''));
+  msgEl.innerHTML=textFormatted||'';
+  body.scrollTop=body.scrollHeight;
+
+  // Phase 5: animate table rows in one by one
+  const ROW_DELAY=tables.reduce((s,t)=>s+t.rows.length,0)>40?20:50;
+  for(const t of tables){
+    const wrap=document.createElement('div'); wrap.className='qa-tbl-wrap';
+    const tbl=document.createElement('table'); tbl.className='qa-tbl';
+    const thead=document.createElement('thead');
+    const hdrTr=document.createElement('tr');
+    t.headers.forEach(h=>{ const th=document.createElement('th'); th.innerHTML=qaInline(h); hdrTr.appendChild(th); });
+    thead.appendChild(hdrTr); tbl.appendChild(thead);
+    const tbody=document.createElement('tbody'); tbl.appendChild(tbody);
+    wrap.appendChild(tbl); msgEl.appendChild(wrap);
+    body.scrollTop=body.scrollHeight;
+    for(let ri=0;ri<t.rows.length;ri++){
+      await new Promise(r=>setTimeout(r,ROW_DELAY));
+      const tr=document.createElement('tr');
+      tr.style.cssText='animation:qaRowIn .18s ease both';
+      t.rows[ri].forEach(c=>{
+        const td=document.createElement('td');
+        if(qaIsNum(c)) td.className='num';
+        td.innerHTML=qaInline(c);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+      body.scrollTop=body.scrollHeight;
+    }
+  }
+
+  // Phase 6: export button + source footnote
+  if(tables.length){
+    const expBtn=document.createElement('button');
+    expBtn.className='qa-xls';
+    expBtn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M9 11l6 6M15 11l-6 6"/></svg> Export to Excel`;
+    expBtn.onclick=()=>qaExportExcel(historyIdx);
+    msgEl.appendChild(expBtn);
+  }
+  const src=(QA.history[historyIdx]||{}).source;
+  if(src){ const s=document.createElement('div'); s.className='qa-src'; s.textContent=src; msgEl.appendChild(s); }
+  body.scrollTop=body.scrollHeight;
 }
 
 // ═══════════════════════════════════════════════════
@@ -4406,15 +4442,24 @@ function qaSection(q){ const m=q.match(/(?:section|sec)[\s-]*([123])\b/); return
 function qaDiscipline(q){ return QA_DISC.find(d=>q.includes(d))||null; }
 function qaIC(q){ const nq=q.replace(/\s+/g,''); return QA_IC.find(c=>nq.includes(c))||null; }
 function qaDateFilter(q){
-  let m=q.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{4})\b/);
-  if(m) return {prefix:`${m[2]}-${QA_MONTHS[m[1].slice(0,3)]}`, label:`${qaCap(m[1].slice(0,3))} ${m[2]}`};
-  m=q.match(/\b(\d{4})-(\d{2})\b/);
+  const all=[...q.matchAll(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{4})\b/g)];
+  if(all.length>1){
+    const parts=all.map(m=>({prefix:`${m[2]}-${QA_MONTHS[m[1].slice(0,3)]}`,label:`${qaCap(m[1].slice(0,3))} ${m[2]}`}));
+    return {multi:true,parts,label:parts.map(p=>p.label).join(' & ')};
+  }
+  if(all.length===1){const m=all[0]; return {prefix:`${m[2]}-${QA_MONTHS[m[1].slice(0,3)]}`,label:`${qaCap(m[1].slice(0,3))} ${m[2]}`};}
+  let m=q.match(/\b(\d{4})-(\d{2})\b/);
   if(m) return {prefix:`${m[1]}-${m[2]}`, label:`${m[1]}-${m[2]}`};
   m=q.match(/\b(20\d{2})\b/);
   if(m) return {prefix:m[1], label:m[1]};
   return null;
 }
-function qaInDate(r,df){ return !df || String(r.date||'').startsWith(df.prefix); }
+function qaInDate(r,df){
+  if(!df) return true;
+  const d=String(r.date||'');
+  if(df.multi) return df.parts.some(p=>d.startsWith(p.prefix));
+  return d.startsWith(df.prefix);
+}
 function qaDataset(q){
   if(/ncr|non[\s-]?conform/.test(q)) return 'ncr';
   if(/\bsor\b|observation/.test(q)) return 'sor';
@@ -4471,12 +4516,16 @@ function qaRFI(q,op,df){
 function qaNCR(q,op,df){
   let rows=ST.data.ncr||[]; if(!rows.length) return 'No NCR data is loaded.';
   const sc=[];
-  if(/\bopen\b/.test(q)){ rows=rows.filter(r=>!/clos/i.test(r.status||'')); sc.push('Open'); }
+  if(/overdue|past.{0,6}due|exceed.{0,10}target|target.{0,10}exceed/.test(q)){
+    const today=new Date().toISOString().slice(0,10);
+    rows=rows.filter(r=>!/clos/i.test(r.status||'')&&r.targetClose&&String(r.targetClose)<today);
+    sc.push('Overdue');
+  } else if(/\bopen\b/.test(q)){ rows=rows.filter(r=>!/clos/i.test(r.status||'')); sc.push('Open'); }
   else if(/clos/.test(q)){ rows=rows.filter(r=>/clos/i.test(r.status||'')); sc.push('Closed'); }
   if(df){ rows=rows.filter(r=>qaInDate(r,df)); sc.push(df.label); }
   const sct=sc.length?` (${sc.join(', ')})`:'';
   if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdown(rows,r=>String(r.status||'').toUpperCase(),'NCR status breakdown'+sct,'STATUS');
-  if(op==='list') return qaTable(['NCR NO','DATE','STATUS','RAISED BY','AGAINST'],rows.map(r=>[r.ncrNo,r.date,r.status,r.raisedBy,r.againstName]),'NCRs'+sct,rows.length);
+  if(op==='list') return qaTable(['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST'],rows.map(r=>[r.ncrNo,r.date,r.targetClose||'—',r.status,r.againstName]),'NCRs'+sct,rows.length);
   return `${rows.length} NCR${rows.length===1?'':'s'}${sct}.`;
 }
 function qaSOR(q,op,df){
@@ -4557,17 +4606,24 @@ function qaLogUnanswered(question){
 function qaAnswerLocal(rawq,isAdmin){
   const q=String(rawq||'').toLowerCase().trim();
   if(!q) return 'Please type a question.';
-  const ds=qaDataset(q);
+  let ds=qaDataset(q);
+  // Follow-up resolution: "how many of which/them/those/these are X?" inherits the last dataset.
+  if(!ds && QA.lastCtx && /\b(of (which|them|those|these)|how many are|are (overdue|open|closed|listed))\b/.test(q)){
+    ds=QA.lastCtx.ds;
+  }
   if(!ds){ qaLogUnanswered(rawq); return null; }
   if(ds==='deployment'&&!isAdmin) return 'Deployment data is available to admins only.';
   const df=qaDateFilter(q), op=qaOp(q);
-  if(ds==='rfi') return qaRFI(q,op,df);
-  if(ds==='ncr') return qaNCR(q,op,df);
-  if(ds==='sor') return qaSOR(q,op,df);
-  if(ds==='welders') return qaWelders(q,op);
-  if(ds==='daily') return qaDaily(q,op,df);
-  if(ds==='deployment') return qaDeployment();
-  qaLogUnanswered(rawq); return null;
+  let answer;
+  if(ds==='rfi') answer=qaRFI(q,op,df);
+  else if(ds==='ncr') answer=qaNCR(q,op,df);
+  else if(ds==='sor') answer=qaSOR(q,op,df);
+  else if(ds==='welders') answer=qaWelders(q,op);
+  else if(ds==='daily') answer=qaDaily(q,op,df);
+  else if(ds==='deployment') answer=qaDeployment();
+  else { qaLogUnanswered(rawq); return null; }
+  QA.lastCtx={ds};
+  return answer;
 }
 // LLM fallback — called only when the local parser returns null (a miss).
 // Hits the Supabase Edge Function (qa-assistant), which runs a tool-use loop
@@ -4621,19 +4677,14 @@ async function qaSend(){
   QA.history.push({role:'bot',text:answerText,source});
   QA.busy=false;
   if(btn) btn.disabled=false;
-  // Remove typing indicator, inject empty bot bubble, stream into it
-  const body=document.getElementById('qaBody');
-  if(body){
-    const typing=body.querySelector('.qa-typing');
-    if(typing) typing.remove();
-    const msgEl=document.createElement('div');
-    msgEl.className='qa-msg bot';
-    body.appendChild(msgEl);
-    body.scrollTop=body.scrollHeight;
-    await qaStream(answerText, msgEl, QA.history.length-1);
-    // Repaint from history so the source footnote (Local/LLM) is attached.
-    qaRender();
-  }
+  // Local answers are instant — add a think delay so typing dots stay visible
+  // long enough to feel like the engine is reasoning (scales with answer length).
+  const thinkMs=source==='Local'
+    ? Math.min(1400, 500 + Math.sqrt(answerText.length)*28 + qaExtractTables(answerText).length*350)
+    : 0;
+  await qaStream(answerText, QA.history.length-1, thinkMs);
+  // Repaint from history to ensure consistent state after streaming.
+  qaRender();
 }
 
 // ── Load all datasets from Supabase on page open ────
