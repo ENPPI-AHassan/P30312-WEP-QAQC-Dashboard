@@ -390,10 +390,10 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 }
 
 /* ── FREE CANVAS LAYOUT ── */
-#dashCanvas,#dpCanvas,#usersCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
+#dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
 .cp{position:absolute;box-sizing:border-box;padding:4px}
 .cp>.card{width:100%;height:100%;box-sizing:border-box;overflow:auto}
-#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode,#molCanvas.edit-mode,#stCanvas.edit-mode,#bcCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
 .cp.editable{cursor:default}.cp.editable:hover{z-index:100}
 .cp-drag{position:absolute;top:0;left:0;right:28px;height:24px;cursor:grab;z-index:20;
   border-radius:8px 8px 0 0;display:flex;align-items:center;padding-left:8px;opacity:0;transition:opacity .2s}
@@ -427,7 +427,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
   box-shadow:0 4px 24px rgba(0,0,0,.6)}
 .canvas-mode-bar.on{display:flex}
 /* Push canvas content below the edit bar when active */
-#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode{margin-top:36px}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode,#molCanvas.edit-mode,#stCanvas.edit-mode,#bcCanvas.edit-mode{margin-top:36px}
 .cp-span-tip{position:absolute;top:2px;right:30px;font-size:9px;color:var(--accent,#f59e0b);
   opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:none;
   background:rgba(0,0,0,.5);padding:1px 5px;border-radius:3px}
@@ -488,7 +488,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 ════════════════════════════════════════════════════════ */
 @media (min-width:641px) and (max-width:1024px){
   /* 2-column grid canvas */
-  #dashCanvas,#dpCanvas,#usersCanvas{
+  #dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas{
     display:grid!important;grid-template-columns:1fr 1fr!important;
     align-content:start!important;width:auto!important;height:auto!important;
     min-height:unset!important;padding:10px 10px 40px!important;gap:8px!important;
@@ -501,6 +501,8 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
   /* Full-width panels */
   .cp[data-id="rfiPeriod"]{grid-column:span 2}
   .cp[data-id="progress"]{grid-column:span 2}
+  .cp[data-id="molRfiPeriod"]{grid-column:span 2}
+  .cp[data-id="molProgress"]{grid-column:span 2}
 }
 
 /* ════════════════════════════════════════════════════════
@@ -517,7 +519,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
   .tb-logo{height:20px}
 
   /* Single-column stacked canvas */
-  #dashCanvas,#dpCanvas,#usersCanvas{
+  #dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas{
     display:flex!important;flex-direction:column!important;
     width:auto!important;height:auto!important;min-height:unset!important;
     padding:8px 8px 72px!important;gap:8px!important;
@@ -1039,6 +1041,15 @@ const ST = {
     ncr:        null,
     deployment: null,
   },
+  // MOL 3.3 dashboard — separate data namespace (same shape as `data`). Cleared
+  // by default; populated from the mol_* Supabase tables once Phase 2 wiring lands.
+  molData: {
+    rfi: null, daily1: null, daily2: null, daily3: null, welders: null, sor: null, ncr: null,
+  },
+  // Per-page file/upload state for the non-dashboard pages (mol/stations/bc) so
+  // the top-bar functions (slots, save, clear) are fully independent per page.
+  // The main dashboard keeps using the top-level data/files/errors/processing/unsaved.
+  pageState: {},
   files: {
     rfi:'', daily1:'', daily2:'', daily3:'', welders:'', sor:'', ncr:'', deployment:''
   },
@@ -1048,6 +1059,24 @@ const ST = {
 };
 
 const CHARTS = {};
+// Per-page state store. The main dashboard uses ST's top-level containers (so the
+// ~40 existing ST.data refs keep working); mol/stations/bc get their own isolated
+// store so the top-bar functions (upload slots, save, clear) never cross pages.
+function _activeStore(){
+  const v=APP_VIEW;
+  if(v!=='mol'&&v!=='stations'&&v!=='bc')
+    return {data:ST.data,files:ST.files,errors:ST.errors,processing:ST.processing,unsaved:ST.unsaved};
+  if(!ST.pageState[v]) ST.pageState[v]={
+    data: v==='mol' ? ST.molData : {rfi:null,daily1:null,daily2:null,daily3:null,welders:null,sor:null,ncr:null},
+    files:{}, errors:{}, processing:{}, unsaved:new Set()
+  };
+  return ST.pageState[v];
+}
+function activeData(){ return _activeStore().data; }
+function activeFiles(){ return _activeStore().files; }
+function activeErrors(){ return _activeStore().errors; }
+function activeProcessing(){ return _activeStore().processing; }
+function activeUnsaved(){ return _activeStore().unsaved; }
 const fn = v => (v == null || v === '') ? '—' : Number(v).toLocaleString();
 // HTML-escape any value sourced from an uploaded file or the DB before it goes
 // into innerHTML / a template literal. Prevents stored XSS from a booby-trapped
@@ -1405,13 +1434,14 @@ function aggRFI(records){
 }
 
 function getRFIData(){
-  if(!ST.data.rfi){
+  const rfi=activeData().rfi;
+  if(!rfi){
     return{period:null,cumulative:null,isDefault:true};
   }
-  const periodRecs = ST.data.rfi.filter(r=>inPeriod(r.date));
+  const periodRecs = rfi.filter(r=>inPeriod(r.date));
   return{
     period:    aggRFI(periodRecs),
-    cumulative:{...aggRFI(ST.data.rfi), supersededCount:ST.rfiSupersededCount||0},
+    cumulative:{...aggRFI(rfi), supersededCount:ST.rfiSupersededCount||0},
     isDefault: false
   };
 }
@@ -1551,7 +1581,8 @@ function bFJCTable(secRows, title, live){
 
 function bProgress(live){
   const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
-  const d1r = ST.data.daily1, d2r = ST.data.daily2, d3r = ST.data.daily3;
+  const _d = activeData();
+  const d1r = _d.daily1, d2r = _d.daily2, d3r = _d.daily3;
   // Follow the Reporting Duration / Cumulative toggle, same as the other panels:
   // period → delta within [ST.start, ST.end]; cumulative → snapshot at ST.end.
   const isPeriod = DASH_TAB==='period';
@@ -1716,15 +1747,16 @@ function bUploadBar(){
     </div>`:'';
   if(isViewer) return bTopBar(tabsHtml);
 
-  const loadedCount=Object.values(ST.data).filter(v=>v!==null).length;
-  const anyProcessing=Object.values(ST.processing).some(v=>v);
-  const hasRFI=!!ST.data.rfi;
+  const _d=activeData(), _f=activeFiles(), _e=activeErrors(), _p=activeProcessing(), _u=activeUnsaved();
+  const loadedCount=Object.values(_d).filter(v=>v!=null).length;
+  const anyProcessing=Object.values(_p).some(v=>v);
+  const hasRFI=!!_d.rfi;
   const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
   const isEditing=!!EDIT_MODE;
-  const anyUnsaved=ST.unsaved.size>0;
+  const anyUnsaved=_u.size>0;
 
   // Upload errors → one warning chip with a tooltip listing them
-  const errList=Object.entries(ST.errors).filter(([,v])=>v).map(([k,v])=>{
+  const errList=Object.entries(_e).filter(([,v])=>v).map(([k,v])=>{
     if(v.startsWith('WRONG_FILE|')){const p=v.split('|');return`${k}: wrong file — expected ${p[1]||''}, got ${(p[2]||'').split('/').pop()}`;}
     return`${k}: ${v}`;
   });
@@ -1732,9 +1764,9 @@ function bUploadBar(){
   // One status dot per dataset: green = loaded · amber = loaded but unsaved · grey = empty.
   // Click = upload/replace just that dataset (single-file picker via uploadSlot).
   const dots=SLOT_DEFS.map(s=>{
-    const loaded=ST.data[s.key]!==null;
-    const unsaved=loaded&&ST.unsaved.has(s.key);
-    const fname=ST.files[s.key]?ST.files[s.key].split('/').pop().split('\\').pop():'';
+    const loaded=_d[s.key]!=null;
+    const unsaved=loaded&&_u.has(s.key);
+    const fname=_f[s.key]?_f[s.key].split('/').pop().split('\\').pop():'';
     const tip=`${s.label} — ${loaded?(fname||'loaded')+(unsaved?' · UNSAVED':'')+' · click to replace':'not loaded · click to upload'}`;
     return`<span class="upl-dot ${unsaved?'unsaved':loaded?'ok':''}" data-tip="${esc(tip)}" onclick="uploadSlot('${s.key}')"></span>`;
   }).join('');
@@ -1956,7 +1988,7 @@ function bSidenavExtra(){
 // COMPUTE PANEL DATA
 // ═══════════════════════════════════════════════════
 function getNDTRows(cumulative){
-  const d1=ST.data.daily1, d2=ST.data.daily2, d3=ST.data.daily3;
+  const _d=activeData(), d1=_d.daily1, d2=_d.daily2, d3=_d.daily3;
   if(!d1&&!d2&&!d3) return null;
   const rows=[];
   const get=(label,rows)=>cumulative?mkNDTRow(label,rows,null,ST.end,true):mkNDTRow(label,rows,ST.start,ST.end,false);
@@ -1968,7 +2000,7 @@ function getNDTRows(cumulative){
 }
 
 function getFJCRows(cumulative){
-  const d1=ST.data.daily1, d2=ST.data.daily2, d3=ST.data.daily3;
+  const _d=activeData(), d1=_d.daily1, d2=_d.daily2, d3=_d.daily3;
   if(!d1&&!d2&&!d3) return null;
   const get=(label,rows)=>cumulative?mkFJCRow(label,rows,null,ST.end,true):mkFJCRow(label,rows,ST.start,ST.end,false);
   const rows=[];
@@ -2014,7 +2046,7 @@ function getNDTKPIs(){
   // NDT Backlog Goal = 2 × daily average welded joints (excl. Fridays)
   // Daily average = total cumulative welded across all 3 sections / working days
   let ndtBacklogGoal=null;
-  const d1=ST.data.daily1, d2=ST.data.daily2, d3=ST.data.daily3;
+  const _d=activeData(), d1=_d.daily1, d2=_d.daily2, d3=_d.daily3;
   if(d1||d2||d3){
     const totalWelded=cumNDT.reduce((s,r)=>s+r.welded,0);
     // Use the section with the most data rows for day count
@@ -2054,7 +2086,7 @@ function getPeriodKPIs(){
   let ndtBacklogGoal=null;
   if(cumNDT){
     const totalWelded=cumNDT.reduce((s,r)=>s+r.welded,0);
-    const refRows=ST.data.daily1||ST.data.daily2||ST.data.daily3;
+    const _d=activeData(), refRows=_d.daily1||_d.daily2||_d.daily3;
     if(refRows){
       const workDays=countWorkingDays(refRows);
       ndtBacklogGoal=Math.round(totalWelded/workDays*2);
@@ -2190,7 +2222,7 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWel
 
   // Weld repair %, NDT backlog, FJC repair % — monthly cumulative snapshots
   const sparkWeld=[],sparkNdtBl=[],sparkFjc=[];
-  const _d1=ST.data.daily1,_d2=ST.data.daily2,_d3=ST.data.daily3;
+  const _dd=activeData(),_d1=_dd.daily1,_d2=_dd.daily2,_d3=_dd.daily3;
   sparkMonths.forEach(mo=>{
     let rev=0,rep=0,welded=0,ndtRevM=0,fjcTot=0,fjcRep=0;
     [_d1,_d2,_d3].forEach(rows=>{
@@ -2317,6 +2349,49 @@ function updateMobTabBar(){
   });
 }
 
+// Build the keyed panel HTML for a pipeline-style dashboard (main OR MOL 3.3).
+// Reads the active dataset via the getters (which now use activeData()), so the
+// same code drives both pages. `prefix`='' → main panel ids; 'mol' → MOL ids.
+function buildDashPanels(prefix){
+  const k=n=> prefix ? prefix+n.charAt(0).toUpperCase()+n.slice(1) : n;
+  const rfiData=getRFIData();
+  const rfiLive=!rfiData.isDefault;
+  const ndtPeriod=getNDTRows(false), ndtCum=getNDTRows(true);
+  const fjcPeriod=getFJCRows(false), fjcCum=getFJCRows(true);
+  const _d=activeData();
+  const dailyLive=!!(_d.daily1||_d.daily2||_d.daily3);
+  const {weldRepair,fjcRepair,ndtBacklog,ndtBacklogGoal}=getNDTKPIs();
+  const {weldRepair:pWeldRepair,fjcRepair:pFjcRepair,ndtBacklog:pNdtBacklog}=getPeriodKPIs();
+  const welderData=_d.welders, sorRecs=_d.sor, ncrRecs=_d.ncr;
+  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
+  const isPeriodTab=DASH_TAB==='period';
+  const P={};
+  P[k('kpiStrip')] =bKPIStrip({sc,weldRepair,fjcRepair,ndtBacklog,ndtBacklogGoal,pWeldRepair,pFjcRepair,pNdtBacklog,sorRecs,ncrRecs});
+  P[k('rfiPeriod')]=isPeriodTab
+    ? bRFITable(rfiData.period?.rows||null, rfiData.period?.totals||null, 'Reporting Duration RFI Status', rfiLive)
+    : bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive, rfiData.cumulative?.supersededCount||0);
+  P[k('rfiDonut')] =bRFIDonut(rfiData.period?.totals||null, rfiData.cumulative?.totals||null, rfiLive);
+  P[k('ndtPeriod')]=isPeriodTab
+    ? bNDTTable(ndtPeriod, 'Reporting Duration NDT (EPCM)', dailyLive)
+    : bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive);
+  P[k('fjcPeriod')]=isPeriodTab
+    ? bFJCTable(fjcPeriod, 'Reporting Duration FJC Status', dailyLive)
+    : bFJCTable(fjcCum, 'Cumulative FJC Status', dailyLive);
+  P[k('welders')] =bWelderChart(welderData);
+  P[k('progress')]=bProgress(dailyLive);
+  P[k('ncrTable')]=isPeriodTab
+    ? bNCRTable(ncrRecs?ncrRecs.filter(r=>inPeriod(r.date)):null, !!ncrRecs, 'Reporting Duration NCR Status')
+    : bNCRTable(ncrRecs, !!ncrRecs, 'Cumulative NCR Status');
+  P[k('ncrBar')]  =bNCRBar(ncrRecs, !!ncrRecs);
+  P[k('sorTable')]=isPeriodTab
+    ? bSORTable(sorRecs?sorRecs.filter(r=>inPeriod(r.date)):null, !!sorRecs, 'Reporting Duration Site Observations')
+    : bSORTable(sorRecs, !!sorRecs, 'Cumulative Site Observations');
+  P[k('sorScatter')]=bSORScatter();
+  const sorFiltered=isPeriodTab?(sorRecs?sorRecs.filter(r=>inPeriod(r.date)):null):sorRecs;
+  const ncrFiltered=isPeriodTab?(ncrRecs?ncrRecs.filter(r=>inPeriod(r.date)):null):ncrRecs;
+  return {PANELS_HTML:P, rfiData, welderData, sorFiltered, ncrFiltered, rfiLive, dailyLive};
+}
+
 // ═══════════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════════
@@ -2330,56 +2405,8 @@ function render(){
   if(APP_VIEW==='bc')       { ACTIVE_CANVAS_ID='bcCanvas';    renderBC();         return; }
   ACTIVE_CANVAS_ID='dashCanvas';
 
-  const rfiData=getRFIData();
-  const rfiLive=!rfiData.isDefault;
-  const ndtPeriod=getNDTRows(false);
-  const ndtCum=getNDTRows(true);
-  const fjcPeriod=getFJCRows(false);
-  const fjcCum=getFJCRows(true);
-  const dailyLive=!!(ST.data.daily1||ST.data.daily2||ST.data.daily3);
-  const {weldRepair,fjcRepair,ndtBacklog,ndtBacklogGoal}=getNDTKPIs();
-  const {weldRepair:pWeldRepair,fjcRepair:pFjcRepair,ndtBacklog:pNdtBacklog,ndtBacklogGoal:pNdtBacklogGoal}=getPeriodKPIs();
-  const welderData=ST.data.welders;
-  const sorRecs=ST.data.sor;
-  const ncrRecs=ST.data.ncr;
-
-  // Welding progress totals for KPI strip
-  const d1r=ST.data.daily1, d2r=ST.data.daily2, d3r=ST.data.daily3;
-  let wTotal=null, fjcAccTotal=null;
-  if(d1r||d2r||d3r){
-    const s1=d1r?getDailySnapshot(d1r,ST.end):null;
-    const s2=d2r?getDailySnapshot(d2r,ST.end):null;
-    const s3=d3r?getDailySnapshot(d3r,ST.end):null;
-    wTotal=(s1?s1.welded:0)+(s2?s2.welded:0)+(s3?s3.welded:0);
-    fjcAccTotal=(s1?s1.fjcAccepted:0)+(s2?s2.fjcAccepted:0)+(s3?s3.fjcAccepted:0);
-  }
-  const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
-
-  // Build all panel HTML strings — period/cumul panels swap content based on DASH_TAB
-  const isPeriodTab = DASH_TAB === 'period';
-  const PANELS_HTML = {
-    kpiStrip:    bKPIStrip({sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWeldRepair, pFjcRepair, pNdtBacklog, sorRecs, ncrRecs}),
-    rfiPeriod:   isPeriodTab
-      ? bRFITable(rfiData.period?.rows||null, rfiData.period?.totals||null, 'Reporting Duration RFI Status', rfiLive)
-      : bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive, rfiData.cumulative?.supersededCount||0),
-    rfiDonut:    bRFIDonut(rfiData.period?.totals||null, rfiData.cumulative?.totals||null, rfiLive),
-    ndtPeriod:   isPeriodTab
-      ? bNDTTable(ndtPeriod, 'Reporting Duration NDT (EPCM)', dailyLive)
-      : bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive),
-    fjcPeriod:   isPeriodTab
-      ? bFJCTable(fjcPeriod, 'Reporting Duration FJC Status', dailyLive)
-      : bFJCTable(fjcCum, 'Cumulative FJC Status', dailyLive),
-    welders:     bWelderChart(welderData),
-    progress:    bProgress(dailyLive),
-    ncrTable:    isPeriodTab
-      ? bNCRTable(ncrRecs?ncrRecs.filter(r=>inPeriod(r.date)):null, !!ncrRecs, 'Reporting Duration NCR Status')
-      : bNCRTable(ncrRecs, !!ncrRecs, 'Cumulative NCR Status'),
-    ncrBar:      bNCRBar(ncrRecs, !!ncrRecs),
-    sorTable:    isPeriodTab
-      ? bSORTable(sorRecs?sorRecs.filter(r=>inPeriod(r.date)):null, !!sorRecs, 'Reporting Duration Site Observations')
-      : bSORTable(sorRecs, !!sorRecs, 'Cumulative Site Observations'),
-    sorScatter:  bSORScatter(),
-  };
+  const m=buildDashPanels('');
+  const _d=activeData();
 
   // Render top bar into app
   document.getElementById('app').innerHTML=`
@@ -2387,7 +2414,7 @@ function render(){
     <div id="uplBarSpacer"></div>
     <div id="dashCanvas"></div>
     <div class="footer" style="position:relative;z-index:1;padding:8px 20px;text-align:center;font-size:10px;color:#4a5068">
-      P30312 · RFI: ${rfiLive?fn(ST.data.rfi.length)+' live':'default'} · Daily: ${dailyLive?'live':'default'} · Welders: ${welderData?fn(welderData.length)+' live':'default'} · SOR: ${sorRecs?fn(sorRecs.length)+' live':'default'} · NCR: ${ncrRecs?fn(ncrRecs.length)+' live':'default'}
+      P30312 · RFI: ${m.rfiLive?fn(_d.rfi.length)+' live':'default'} · Daily: ${m.dailyLive?'live':'default'} · Welders: ${_d.welders?fn(_d.welders.length)+' live':'default'} · SOR: ${_d.sor?fn(_d.sor.length)+' live':'default'} · NCR: ${_d.ncr?fn(_d.ncr.length)+' live':'default'}
     </div>
   `;
 
@@ -2397,31 +2424,38 @@ function render(){
   fillSidenavDrops();
 
   // Render canvas panels
-  renderCanvas(PANELS_HTML);
-  const sorFiltered=isPeriodTab?sorRecs?.filter(r=>inPeriod(r.date))??null:sorRecs;
-  const ncrFiltered=isPeriodTab?ncrRecs?.filter(r=>inPeriod(r.date))??null:ncrRecs;
-  initCharts(rfiData, welderData, sorFiltered, ncrFiltered);
+  renderCanvas(m.PANELS_HTML);
+  initCharts(m.rfiData, m.welderData, m.sorFiltered, m.ncrFiltered);
   bindEvents();
   // Re-apply edit mode if active
   if(EDIT_MODE) activateEditMode();
 }
 
 // ═══════════════════════════════════════════════════
-// MOL 3.3 DASHBOARD PAGE (placeholder)
+// MOL 3.3 DASHBOARD PAGE
+// Exact clone of the main pipeline dashboard — same panels, cards, charts and
+// exports — but fed from the cleared MOL 3.3 data namespace (ST.molData).
+// Reuses every b*() builder (no duplicated logic). Data wiring = Phase 2.
 // ═══════════════════════════════════════════════════
 function renderMol(){
   ACTIVE_CANVAS_ID='molCanvas';
-  const PANELS_HTML={
-    molMain:`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px">
-      <span style="font-size:32px;font-weight:800;color:#a78bfa;opacity:.25;letter-spacing:.06em">MOL 3.3</span>
-      <span style="font-size:12px;color:#4a5068">Dashboard coming soon</span>
-    </div>`
-  };
-  document.getElementById('app').innerHTML=`${bUploadBar()}<div id="uplBarSpacer"></div><div id="molCanvas"></div>`;
+  const m=buildDashPanels('mol');   // reads ST.molData via activeData()
+  const _d=activeData();
+
+  document.getElementById('app').innerHTML=`
+    ${bUploadBar()}
+    <div id="uplBarSpacer"></div>
+    <div id="molCanvas"></div>
+    <div class="footer" style="position:relative;z-index:1;padding:8px 20px;text-align:center;font-size:10px;color:#4a5068">
+      MOL 3.3 · RFI: ${m.rfiLive?fn(_d.rfi.length)+' live':'—'} · Daily: ${m.dailyLive?'live':'—'} · Welders: ${_d.welders?fn(_d.welders.length)+' live':'—'} · SOR: ${_d.sor?fn(_d.sor.length)+' live':'—'} · NCR: ${_d.ncr?fn(_d.ncr.length)+' live':'—'}
+    </div>
+  `;
   const sne=document.getElementById('sidenavExtra');
   if(sne) sne.innerHTML=bSidenavExtra();
   fillSidenavDrops();
-  renderCanvas(PANELS_HTML);
+  renderCanvas(m.PANELS_HTML);
+  initCharts(m.rfiData, m.welderData, m.sorFiltered, m.ncrFiltered);
+  bindEvents();
   if(EDIT_MODE) activateEditMode();
 }
 
@@ -4028,13 +4062,17 @@ function initCharts(rfiData, welderData, sorRecs, ncrRecs){
 // ═══════════════════════════════════════════════════
 
 async function saveAllToDB(){
+  // Stations/BC have no DB tables yet. MOL → mol_* tables; dashboard → main tables.
+  if(APP_VIEW==='stations'||APP_VIEW==='bc'){ alert('Saving data for this page is coming soon.'); return; }
+  const pfx = APP_VIEW==='mol' ? 'mol_' : '';
+  const D=activeData(), F=activeFiles(), U=activeUnsaved();
   const btn=document.getElementById('btnSave');
   if(btn){ btn.disabled=true; btn.classList.add('saving'); } // pulsing glow while saving
   try{
-    const keys=Object.keys(ST.data).filter(k=>ST.data[k]!==null);
+    const keys=Object.keys(D).filter(k=>D[k]!=null);
     if(!keys.length){alert('No data loaded to save.');if(btn){btn.disabled=false;btn.classList.remove('saving');}return;}
-    await Promise.all(keys.map(k=>saveDataToDB(k,ST.data[k],ST.files[k]||k)));
-    ST.unsaved.clear();
+    await Promise.all(keys.map(k=>saveDataToDB(k,D[k],F[k]||k,pfx)));
+    U.clear();
     render(); // re-render rebuilds the bar — saving class gone with it
   }catch(e){
     alert('Save failed: '+e.message);
@@ -4043,6 +4081,30 @@ async function saveAllToDB(){
 }
 
 async function clearAllFiles(){
+  // MOL 3.3 — delete its own mol_* tables + meta, then reset its store. Isolated
+  // from the main pipeline data.
+  if(APP_VIEW==='mol'){
+    if(!confirm('Clear the MOL 3.3 dashboard? This removes all MOL data for all users.')) return;
+    const btn=document.getElementById('btnClearFiles');
+    if(btn) btn.disabled=true;
+    try{
+      const molTables=['mol_rfi_records','mol_daily_sec1','mol_daily_sec2','mol_daily_sec3','mol_welder_records','mol_sor_records','mol_ncr_records'];
+      await Promise.all(molTables.map(t=>sbDelete(t)));
+      await fetch(`${SB_URL}/rest/v1/dataset_meta?key=like.mol_*`,{method:'DELETE',headers:SB_HDR}).catch(()=>{});
+      const M=ST.molData; Object.keys(M).forEach(k=>M[k]=null);
+      ST.pageState.mol={data:ST.molData,files:{},errors:{},processing:{},unsaved:new Set()};
+      render();
+    }catch(e){ alert('Clear failed: '+e.message); if(btn) btn.disabled=false; }
+    return;
+  }
+  // Stations/BC — clear only this page's in-memory state (no DB tables yet).
+  if(APP_VIEW!=='dashboard'){
+    if(!confirm('Clear this page?')) return;
+    const s=_activeStore();
+    Object.keys(s.data).forEach(k=>s.data[k]=null);
+    s.files={}; s.errors={}; s.processing={}; s.unsaved.clear();
+    render(); return;
+  }
   if(!confirm('Clear the entire dashboard? This will remove all uploaded data for all users.')) return;
   const btn=document.getElementById('btnClearFiles');
   if(btn) btn.disabled=true;
@@ -4078,6 +4140,19 @@ function detectKey(wb){
   if(names.some(n=>n==='NCR'||n.includes('NCR'))) return 'ncr';
   if(names.some(n=>n==='DP_PLAN'||n.includes('DP_PLAN'))) return 'deployment';
   return null;
+}
+
+// Which dashboard a file belongs to, by the prefix convention. Checks the FILE
+// NAME first (e.g. "MOL_RFI_Register.xlsx"), then sheet-tab names as a fallback.
+// MOL_* → MOL 3.3 page; PPL_* or unprefixed → main pipeline.
+function detectDash(fileName, wb){
+  const base=String(fileName||'').split('/').pop().split('\\').pop().toUpperCase();
+  if(/^MOL[_-]/.test(base)) return 'mol';
+  if(/^PPL[_-]/.test(base)) return 'ppl';
+  const names=(wb&&wb.SheetNames||[]).map(n=>n.toUpperCase());
+  if(names.some(n=>n.startsWith('MOL_'))) return 'mol';
+  if(names.some(n=>n.startsWith('PPL_'))) return 'ppl';
+  return 'ppl'; // unprefixed → main pipeline
 }
 
 // ═══════════════════════════════════════════════════
@@ -4143,6 +4218,11 @@ function uiYield(){
 }
 
 async function handleFile(forcedKey, file){
+  // Stations/BC pages have no data wiring yet — block their uploads.
+  if(APP_VIEW==='stations'||APP_VIEW==='bc'){
+    alert('Data upload for this page is coming soon.');
+    return;
+  }
   const t0=performance.now();
   uplDbg('start:',file.name,Math.round(file.size/1024)+' KB','key='+(forcedKey||'auto'));
   // Pre-read workbook to detect key if not forced
@@ -4153,18 +4233,17 @@ async function handleFile(forcedKey, file){
   uplDbg('arrayBuffer:',Math.round(performance.now()-t0)+'ms');
 
   const tDet=performance.now();
+  const wb=XLSX.read(new Uint8Array(ab),{type:'array',bookSheets:true});
   if(!key){
-    const wb=XLSX.read(new Uint8Array(ab),{type:'array',bookSheets:true});
     key=detectKey(wb);
     if(!key){
       // Show unrecognised warning without disrupting other files
-      ST.errors['?'+(file.name)]='Unrecognised: '+file.name;
+      activeErrors()['?'+(file.name)]='Unrecognised: '+file.name;
       uplDbg('UNRECOGNISED:',file.name);
       render(); return;
     }
   } else {
     // Validate the uploaded file matches the intended slot
-    const wb=XLSX.read(new Uint8Array(ab),{type:'array',bookSheets:true});
     const detected=detectKey(wb);
     if(detected && detected!==forcedKey){
       const expNames={rfi:'RFI Register',daily1:'Daily Section-1',daily2:'Daily Section-2',
@@ -4172,7 +4251,7 @@ async function handleFile(forcedKey, file){
         deployment:'EPCM Deployment'};
       const expectedName=expNames[forcedKey]||forcedKey;
       const actualName=file.name.split('/').pop().split('\\').pop();
-      ST.errors[forcedKey]=`WRONG_FILE|${expectedName}|${actualName}`;
+      activeErrors()[forcedKey]=`WRONG_FILE|${expectedName}|${actualName}`;
       // Show modal
       const msg=document.getElementById('wrongFileMsg');
       if(msg) msg.innerHTML=`Please upload <span style="color:#3fb950;font-weight:600">"${esc(expectedName)}"</span><br>Instead, you tried to upload <span style="color:#f85149;font-weight:600">"${esc(actualName)}"</span>`;
@@ -4182,18 +4261,31 @@ async function handleFile(forcedKey, file){
       render(); return;
     }
   }
-  uplDbg('detect/validate:',Math.round(performance.now()-tDet)+'ms','→ key='+key);
+  // Prefix routing: MOL_ sheets belong to the MOL 3.3 page; PPL_/unprefixed → main.
+  const dash=detectDash(file.name, wb), pageDash=APP_VIEW==='mol'?'mol':'ppl';
+  if(dash!==pageDash){
+    const actualName=file.name.split('/').pop().split('\\').pop();
+    const msg=document.getElementById('wrongFileMsg');
+    if(msg) msg.innerHTML=`This file is tagged <span style="color:#f85149;font-weight:600">${dash.toUpperCase()}_</span> but you are on the <span style="color:#3fb950;font-weight:600">${pageDash==='mol'?'MOL 3.3':'main pipeline'}</span> dashboard.<br>Upload ${dash==='mol'?'MOL 3.3':'pipeline'} files from the matching page.`;
+    const modal=document.getElementById('wrongFileModal');
+    if(modal) modal.style.display='flex';
+    uplDbg('WRONG DASH:',actualName,'is',dash,'but page is',pageDash);
+    render(); return;
+  }
+  uplDbg('detect/validate:',Math.round(performance.now()-tDet)+'ms','→ key='+key+' dash='+dash);
 
-  ST.errors[key]='';
-  ST.processing[key]=true;
-  ST.files[key]=file.name;
+  // Route into the active page's store (main → ST.data; MOL → ST.molData).
+  const D=activeData(), F=activeFiles(), E=activeErrors(), P=activeProcessing(), U=activeUnsaved();
+  E[key]='';
+  P[key]=true;
+  F[key]=file.name;
   render();
   await uiYield(); // paint the spinner/dots before the blocking parse below
 
   try{
     const tParse=performance.now();
     let parsed;
-    if(key==='rfi')      { const r=parseRFI(ab); parsed=r.records; ST.rfiSupersededCount=r.supersededCount; localStorage.setItem('wep_rfi_superseded_count',r.supersededCount); }
+    if(key==='rfi')      { const r=parseRFI(ab); parsed=r.records; if(APP_VIEW==='dashboard'){ ST.rfiSupersededCount=r.supersededCount; localStorage.setItem('wep_rfi_superseded_count',r.supersededCount); } }
     else if(key==='daily1') parsed=parseDaily(ab);
     else if(key==='daily2') parsed=parseDaily(ab);
     else if(key==='daily3') parsed=parseDaily(ab);
@@ -4207,16 +4299,16 @@ async function handleFile(forcedKey, file){
     const isEmpty=!parsed||(key==='deployment'?!parsed.plan?.length:!parsed.length);
     if(isEmpty) throw new Error('No valid records found. Check file format.');
 
-    ST.data[key]=parsed;
-    ST.processing[key]=false;
-    ST.unsaved.add(key); // mark only this key as unsaved
+    D[key]=parsed;
+    P[key]=false;
+    U.add(key); // mark only this key as unsaved
     const tRender=performance.now();
     render();
     uplDbg('done:',file.name,'render '+Math.round(performance.now()-tRender)+'ms','· total '+Math.round(performance.now()-t0)+'ms');
   }catch(e){
-    ST.errors[key]=e.message;
-    ST.data[key]=null;
-    ST.processing[key]=false;
+    E[key]=e.message;
+    D[key]=null;
+    P[key]=false;
     uplDbg('ERROR['+key+']:',e.message);
     render();
   }
@@ -4652,10 +4744,12 @@ function qaDataset(q){
   return null;
 }
 function qaOp(q){
-  if(/break\s?down|by status|by section|per section|by discipline|by contractor|by ic\b/.test(q)) return 'breakdown';
   if(/average|avg|\bmean\b/.test(q)) return 'avg';
   if(/\btotal\b|\bsum\b/.test(q)) return 'sum';
-  if(/\blist\b|show |which |\bwho\b|name the|give me|\bput\b/.test(q)) return 'list';
+  // Explicit list verbs win over the "by X" breakdown heuristic so "list RFIs by IC"
+  // produces a grouped list, not a status breakdown.
+  if(/\blist\b|show |which |\bwho\b|name the|give me|\bput\b|tabulate/.test(q)) return 'list';
+  if(/break\s?down|group(ed)?\s+by|\bby status\b|\bby section\b|per section|\bby discipline\b|\bby contractor\b|\bby ic\b/.test(q)) return 'breakdown';
   if(/how many|number of|\bcount\b|how much/.test(q)) return 'count';
   return null;
 }
@@ -4668,7 +4762,7 @@ function qaGroupBy(q){
   return null;
 }
 // Renders multiple markdown tables — one per group — for "list … by X" compound questions.
-function qaGroupedList(rows, groupField, headers, rowFn, title){
+function qaGroupedList(rows, groupField, headers, rowFn, title, groupLabel){
   const groups={};
   rows.forEach(r=>{ const k=String(r[groupField]||'(none)'); if(!groups[k]) groups[k]=[]; groups[k].push(r); });
   const sorted=Object.entries(groups).sort((a,b)=>b[1].length-a[1].length);
@@ -4679,7 +4773,7 @@ function qaGroupedList(rows, groupField, headers, rowFn, title){
     const note=gr.length>200?`\n\n_Showing first 200 of ${gr.length}._`:'';
     return `**${k}** — ${gr.length} record${gr.length===1?'':'s'}\n\n${head}\n${sep}\n${body}${note}`;
   });
-  return `${title} — ${rows.length} total, grouped by ${groupField.toUpperCase()}\n\n${parts.join('\n\n')}`;
+  return `${title} — ${rows.length} total, grouped by ${(groupLabel||groupField).toUpperCase()}\n\n${parts.join('\n\n')}`;
 }
 function qaRfiStatus(q){
   if(/with com|as noted/.test(q)) return {code:'ACC W/COMM',label:'Accepted with comments'};
@@ -4688,6 +4782,137 @@ function qaRfiStatus(q){
   if(/\bopen\b/.test(q)) return {code:'OPEN',label:'Open'};
   if(/accept|approv/.test(q)) return {code:'ACC',label:'Accepted',strict:true};
   return null;
+}
+// ── CONTEXT CARRY-OVER (slot-based) ─────────────────────────────────────────
+// Every answer stores a set of "slots" (dataset, date, status, section, …) on
+// QA.lastCtx. A follow-up that omits the dataset inherits the previous slots and
+// overrides only what it names — so "what about May?" keeps the prior status,
+// section, IC, etc. and just swaps the date. Each handler is fed a CANONICAL
+// synthetic query rebuilt from the merged slots (one value per slot → no
+// double-date / double-section ambiguity); date + op flow through params.
+// Returns a dataset-appropriate canonical status phrase present in q, or null.
+function qaStatusPhrase(q, ds){
+  if(ds==='rfi'){ const s=qaRfiStatus(q); return s?({ACC:'accepted','ACC W/COMM':'accepted with comments',REJ:'rejected',CAN:'cancelled',OPEN:'open'})[s.code]||null:null; }
+  if(ds==='ncr'){ if(/overdue|past.{0,6}due|exceed.{0,10}target|target.{0,10}exceed/.test(q)) return 'overdue';
+    if(/\bopen\b/.test(q)) return 'open'; if(/clos/.test(q)) return 'closed'; return null; }
+  if(ds==='sor'){ if(/\bopen\b/.test(q)) return 'open'; if(/clos/.test(q)) return 'closed'; return null; }
+  return null;
+}
+// Returns a canonical daily-metric phrase explicitly named in q, or null (→ inherit).
+function qaDailyMetric(q){
+  if(/ndt.*repair|repair.*ndt/.test(q)) return 'ndt repair';
+  if(/\bndt\b/.test(q)) return 'ndt';
+  if(/fjc.*repair/.test(q)) return 'fjc repair';
+  if(/fjc.*balance|\bbalance\b/.test(q)) return 'fjc balance';
+  if(/\bfjc\b/.test(q)) return 'fjc';
+  if(/\brepair/.test(q)) return 'ndt repair';
+  if(/weld|joint/.test(q)) return 'joints welded';
+  return null;
+}
+// Returns the literal repair-rate threshold phrase from q (round-trips into qaWelders), or null.
+function qaWelderThresh(q){
+  const m=q.match(/(?:exceed\w*|above|over|greater|more|higher|>=?)[^\d]{0,6}\d+(?:\.\d+)?\s*%?/);
+  if(m) return m[0].trim();
+  const m2=q.match(/(?:below|under|less|lower|<=?)[^\d]{0,6}\d+(?:\.\d+)?\s*%?/);
+  return m2?m2[0].trim():null;
+}
+// Pull every filter slot the current question explicitly specifies.
+function qaExtractSlots(q, ds){
+  return {
+    status: qaStatusPhrase(q, ds),
+    sec:    qaSection(q),
+    disc:   qaDiscipline(q),
+    ic:     qaIC(q),
+    group:  qaGroupBy(q),
+    metric: ds==='daily'?qaDailyMetric(q):null,
+    welderThresh: ds==='welders'?qaWelderThresh(q):null,
+    weekly: ds==='welders'?/weekly|this week|\bwk\b/.test(q):false,
+    repeat: ds==='ncr'?/\brepeat(ed)?\b/.test(q):false,
+  };
+}
+// Rebuild a canonical, single-valued query string from merged slots for the handlers.
+// (Date + op are passed as params, never baked into the string.)
+function qaBuildQuery(slots){
+  const p=[];
+  if(slots.welderThresh) p.push(slots.welderThresh);
+  if(slots.weekly) p.push('weekly');
+  if(slots.repeat) p.push('repeat');
+  if(slots.metric) p.push(slots.metric);
+  if(slots.status) p.push(slots.status);
+  if(slots.sec) p.push('section '+slots.sec);
+  if(slots.disc) p.push(slots.disc);
+  if(slots.ic) p.push(slots.ic);
+  if(slots.group) p.push('by '+slots.group);
+  return p.join(' ');
+}
+// Explicit continuation cue: a leading conjunction, "what about…", or a pronoun.
+// Strong enough to mark a follow-up even when the question names the SAME dataset
+// (e.g. "what about NDT repairs?" — ndt is a daily keyword but it's still a follow-up).
+function qaFollowCue(raw){
+  const s=String(raw||'').trim();
+  return /^(and|also|but|then|so|now|ok|okay)\b/i.test(s)
+    || /\b(what about|how about|as well|too|of (which|them|those|these)|\bthem\b|\bthose\b|\bthese\b|\bit\b|\bthat\b)\b/i.test(s);
+}
+// True when a dataset-less question is a continuation of the previous turn.
+function qaIsFollowUp(q){
+  return /\b(of (which|them|those|these)|\bthem\b|\bthose\b|\bthese\b|\bit\b|\bthat\b|\bones?\b)\b/.test(q)
+    || /\b(what about|how about|and (in|for|the|how|what)|also|then|as well|too)\b/.test(q)
+    || /\b(overdue|accepted|rejected|cancell?ed|approved|with comments|as noted)\b/.test(q)
+    || /\b(open|closed)\b/.test(q)
+    || /\b(list|show|breakdown|break it down|break them down|group|grouped|tabulate|total|average|count|how many|how much)\b/.test(q)
+    || !!qaDateFilter(q)
+    || /(?:section|sec)[\s-]*[123]\b/.test(q)
+    || /(binasheer|cpecc|mpm|gulfrock)/.test(q.replace(/\s+/g,''))
+    || QA_DISC.some(d=>q.includes(d));
+}
+// Resolve dataset + merged slots + date + op from the current question and prior context.
+// Returns null on a genuine miss (no dataset and not a recognisable follow-up).
+function qaResolveContext(q, cue){
+  const ctx=QA.lastCtx;
+  let ds=qaDataset(q), isFollowUp=false;
+  if(ds){
+    // Named dataset is normally a fresh query — EXCEPT when an explicit continuation
+    // cue points back at the same dataset ("what about NDT repairs?"), which inherits
+    // the prior section/date/etc. and only overrides what it names.
+    if(ctx && cue && ctx.ds===ds) isFollowUp=true;
+  } else {
+    // No dataset named: inherit the prior dataset when this looks like a follow-up.
+    if(ctx && (cue || qaIsFollowUp(q))){ ds=ctx.ds; isFollowUp=true; }
+  }
+  if(!ds) return null;
+  const cur=qaExtractSlots(q, ds);
+  const curDate=qaDateFilter(q), curOp=qaOp(q);
+  // "reset" cues clear an inherited slot instead of carrying it.
+  const resetDate=/\b(to date|overall|cumulativ\w*|all[- ]?time|so far|whole project|in total|altogether)\b/.test(q);
+  const resetSec =/\b(all sections|across all sections|every section|any section|all of the sections)\b/.test(q);
+  const resetStat=/\b(regardless of status|all statuses|any status|all status|every status)\b/.test(q);
+  const inh=isFollowUp?(ctx||{}):{};
+  const slots={
+    status: cur.status || (resetStat?null:inh.status||null),
+    sec:    cur.sec    || (resetSec ?null:inh.sec   ||null),
+    disc:   cur.disc   || inh.disc  ||null,
+    ic:     cur.ic     || inh.ic    ||null,
+    group:  cur.group  || inh.group ||null,
+    metric: cur.metric || inh.metric||null,
+    welderThresh: cur.welderThresh || inh.welderThresh||null,
+    weekly: cur.weekly || (isFollowUp?!!inh.weekly:false),
+    repeat: cur.repeat || (isFollowUp?!!inh.repeat:false),
+  };
+  const df=curDate || (resetDate?null:(isFollowUp?inh.df:null)) || null;
+  const op=curOp || (isFollowUp?inh.op:null) || null;
+  return {ds, df, op, slots};
+}
+// Dimension-aware status/IC/section/discipline breakdown (falls back to status
+// when the chosen dimension's field is empty for this dataset).
+function qaBreakdownDim(rows, dim, label, sct){
+  const pick={ ic:r=>String(r.ic||'').toUpperCase(), section:r=>r.section?('SECTION '+r.section):'',
+    discipline:r=>String(r.discipline||'').toUpperCase(), status:r=>String(r.status||'').toUpperCase(),
+    against:r=>String(r.againstName||'').toUpperCase() };
+  let d=dim||'status';
+  if(d!=='status' && rows.length && rows.every(r=>!pick[d](r))) d='status';
+  const dl=d==='against'?'CONTRACTOR':d.toUpperCase();
+  const title=d==='status'?`${label} status breakdown${sct}`:`${label} breakdown by ${dl}${sct}`;
+  return qaBreakdown(rows, pick[d], title, dl);
 }
 function qaBreakdown(rows,keyFn,title,colLabel){
   if(!rows.length) return 'No matching records.';
@@ -4705,7 +4930,7 @@ function qaTable(headers,rows,title,total){
   return `${title} — ${total} total\n\n${head}\n${sep}\n${body}${note}`;
 }
 function qaRFI(q,op,df){
-  let rows=ST.data.rfi||[]; if(!rows.length) return 'No RFI data is loaded.';
+  let rows=activeData().rfi||[]; if(!rows.length) return 'No RFI data is loaded.';
   const sc=[]; const st=qaRfiStatus(q);
   if(st){ rows=rows.filter(r=>{const s=String(r.status||'').toUpperCase().trim(); return st.strict?s==='ACC':(st.code==='ACC W/COMM'?s==='ACC W/COMM':s.includes(st.code));}); sc.push(st.label); }
   const d=qaDiscipline(q); if(d){ rows=rows.filter(r=>String(r.discipline||'').toLowerCase().includes(d)); sc.push(qaCap(d)); }
@@ -4715,12 +4940,12 @@ function qaRFI(q,op,df){
   const sct=sc.length?` (${sc.join(', ')})`:'';
   const rfiGroupBy=qaGroupBy(q);
   if(rfiGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,rfiGroupBy,['RFI NO','DATE','DISCIPLINE','SECTION','IC','STATUS'],r=>[r.rfiNo||'—',qaFmtDate(r.date),r.discipline,r.section,r.ic,r.status],'RFIs'+sct);
-  if(op==='breakdown'||(!op&&!st&&/status/.test(q))) return qaBreakdown(rows,r=>String(r.status||'').toUpperCase(),'RFI status breakdown'+sct,'STATUS');
+  if(op==='breakdown'||(!op&&!st&&/status/.test(q))) return qaBreakdownDim(rows,rfiGroupBy,'RFI',sct);
   if(op==='list') return qaTable(['RFI NO','DATE','DISCIPLINE','SECTION','IC','STATUS'],rows.map(r=>[r.rfiNo||'—',qaFmtDate(r.date),r.discipline,r.section,r.ic,r.status]),'RFIs'+sct,rows.length);
   return `${rows.length} RFI${rows.length===1?'':'s'}${sct}.`;
 }
 function qaNCR(q,op,df){
-  let rows=ST.data.ncr||[]; if(!rows.length) return 'No NCR data is loaded.';
+  let rows=activeData().ncr||[]; if(!rows.length) return 'No NCR data is loaded.';
   const sc=[];
   if(/overdue|past.{0,6}due|exceed.{0,10}target|target.{0,10}exceed/.test(q)){
     const today=new Date().toISOString().slice(0,10);
@@ -4728,16 +4953,20 @@ function qaNCR(q,op,df){
     sc.push('Overdue');
   } else if(/\bopen\b/.test(q)){ rows=rows.filter(r=>!/clos/i.test(r.status||'')); sc.push('Open'); }
   else if(/clos/.test(q)){ rows=rows.filter(r=>/clos/i.test(r.status||'')); sc.push('Closed'); }
+  if(/\brepeat(ed)?\b/.test(q)){ rows=rows.filter(r=>/^(y|yes|true|1)/i.test(String(r.repeatedNcr||''))); sc.push('Repeat'); }
+  // NCR's contractor is the "against" party (againstName), not an `ic` field.
+  const ic=qaIC(q); if(ic){ rows=rows.filter(r=>String(r.againstName||'').toLowerCase().replace(/\s+/g,'').includes(ic)); sc.push(ic.toUpperCase()); }
   if(df){ rows=rows.filter(r=>qaInDate(r,df)); sc.push(df.label); }
   const sct=sc.length?` (${sc.join(', ')})`:'';
-  const ncrGroupBy=qaGroupBy(q);
-  if(ncrGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,ncrGroupBy,['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST'],r=>[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName],'NCRs'+sct);
-  if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdown(rows,r=>String(r.status||'').toUpperCase(),'NCR status breakdown'+sct,'STATUS');
+  // "by IC"/"by contractor" maps to againstName for NCRs.
+  const ncrGroupBy=qaGroupBy(q), ncrDim=ncrGroupBy==='ic'?'against':ncrGroupBy;
+  if(ncrGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,ncrDim==='against'?'againstName':ncrDim,['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST'],r=>[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName],'NCRs'+sct,ncrDim==='against'?'contractor':ncrDim);
+  if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdownDim(rows,ncrDim,'NCR',sct);
   if(op==='list') return qaTable(['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST'],rows.map(r=>[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName]),'NCRs'+sct,rows.length);
   return `${rows.length} NCR${rows.length===1?'':'s'}${sct}.`;
 }
 function qaSOR(q,op,df){
-  let rows=ST.data.sor||[]; if(!rows.length) return 'No SOR data is loaded.';
+  let rows=activeData().sor||[]; if(!rows.length) return 'No SOR data is loaded.';
   const sc=[];
   if(/\bopen\b/.test(q)){ rows=rows.filter(r=>!/clos/i.test(r.status||'')); sc.push('Open'); }
   else if(/clos/.test(q)){ rows=rows.filter(r=>/clos/i.test(r.status||'')); sc.push('Closed'); }
@@ -4746,23 +4975,25 @@ function qaSOR(q,op,df){
   const sct=sc.length?` (${sc.join(', ')})`:'';
   const sorGroupBy=qaGroupBy(q);
   if(sorGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,sorGroupBy,['SOR NO','DATE','STATUS','IC','KM'],r=>[r.sorNo,qaFmtDate(r.date),r.status,r.ic,r.km],'SORs'+sct);
-  if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdown(rows,r=>String(r.status||'').toUpperCase(),'SOR status breakdown'+sct,'STATUS');
+  if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdownDim(rows,sorGroupBy,'SOR',sct);
   if(op==='list') return qaTable(['SOR NO','DATE','STATUS','IC','KM'],rows.map(r=>[r.sorNo,qaFmtDate(r.date),r.status,r.ic,r.km]),'SORs'+sct,rows.length);
   return `${rows.length} SOR${rows.length===1?'':'s'}${sct}.`;
 }
 function qaWelders(q,op){
-  let rows=(ST.data.welders||[]).slice(); if(!rows.length) return 'No welder data is loaded.';
+  let rows=(activeData().welders||[]).slice(); if(!rows.length) return 'No welder data is loaded.';
   const weekly=/weekly|this week|\bwk\b/.test(q);
   const f=weekly?'wkPct':'cumPct', lbl=weekly?'weekly':'cumulative';
-  let sc='';
+  const parts=[];
+  const se=qaSection(q); if(se){ rows=rows.filter(r=>String(r.section||'').includes(se)); parts.push('Section '+se); }
   const m=q.match(/(?:exceed\w*|above|over|greater|more|higher|>=?)[^\d]{0,6}(\d+(?:\.\d+)?)/);
   const m2=q.match(/(?:below|under|less|lower|<=?)[^\d]{0,6}(\d+(?:\.\d+)?)/);
-  if(m){ const n=+m[1]; rows=rows.filter(r=>(+r[f]||0)>n); sc=` exceeding ${n}% ${lbl} repair rate`; }
-  else if(m2){ const n=+m2[1]; rows=rows.filter(r=>(+r[f]||0)<n); sc=` below ${n}% ${lbl} repair rate`; }
+  if(m){ const n=+m[1]; rows=rows.filter(r=>(+r[f]||0)>n); parts.push(`exceeding ${n}% ${lbl} repair rate`); }
+  else if(m2){ const n=+m2[1]; rows=rows.filter(r=>(+r[f]||0)<n); parts.push(`below ${n}% ${lbl} repair rate`); }
   rows.sort((a,b)=>(+b[f]||0)-(+a[f]||0));
-  if(op==='count') return `${rows.length} welder${rows.length===1?'':'s'}${sc}.`;
-  if(op==='avg'){ const a=rows.reduce((s,r)=>s+(+r[f]||0),0)/(rows.length||1); return `Average ${lbl} repair rate: ${a.toFixed(2)}% across ${rows.length} welders.`; }
-  return qaTable(['WELDER ID','NAME','SEC','REPAIR %'],rows.map(r=>[r.id,r.name,r.section,(+r[f]||0).toFixed(2)+'%']),'Welders'+sc,rows.length);
+  const sct=parts.length?` (${parts.join(', ')})`:'';
+  if(op==='count') return `${rows.length} welder${rows.length===1?'':'s'}${sct}.`;
+  if(op==='avg'){ const a=rows.reduce((s,r)=>s+(+r[f]||0),0)/(rows.length||1); return `Average ${lbl} repair rate: ${a.toFixed(2)}%${sct} across ${rows.length} welders.`; }
+  return qaTable(['WELDER ID','NAME','SEC','REPAIR %'],rows.map(r=>[r.id,r.name,r.section,(+r[f]||0).toFixed(2)+'%']),'Welders'+sct,rows.length);
 }
 function qaDailyDelta(arr,field,df){
   const s=(arr||[]).filter(r=>r.date).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
@@ -4785,10 +5016,10 @@ function qaDaily(q,op,df){
     {re:/weld|joint/,f:'welded',l:'joints welded'},
   ];
   const sel=map.find(x=>x.re.test(q))||map[map.length-1];
-  const se=qaSection(q)||(QA.lastCtx&&QA.lastCtx.ds==='daily'?QA.lastCtx.se:null);
+  const se=qaSection(q); // inherited section is already injected into q by qaResolveContext
   const keys=se?['daily'+se]:['daily1','daily2','daily3'];
   let total=0,any=false;
-  keys.forEach(k=>{ const a=ST.data[k]; if(a&&a.length){ any=true; total+=qaDailyDelta(a,sel.f,df); } });
+  keys.forEach(k=>{ const a=activeData()[k]; if(a&&a.length){ any=true; total+=qaDailyDelta(a,sel.f,df); } });
   if(!any) return 'No daily pipeline data is loaded'+(se?` for Section ${se}.`:'.');
   const where=se?`Section ${se}`:'all sections';
   const when=df?` in ${df.label}`:' (cumulative to date)';
@@ -4815,45 +5046,45 @@ function qaLogUnanswered(question){
 // or null when it cannot (a "miss") — null tells qaSend to fall back to the LLM.
 // Every miss is logged (fire-and-forget) so the parser can be hardened later.
 function qaAnswerLocal(rawq,isAdmin){
-  const rawq2=String(rawq||'').replace(/^\s*(and|also|what about|but)\s+/i,'').trim();
-  const q=rawq2.toLowerCase();
+  const raw=String(rawq||'').trim();
+  // Social phrases — respond gracefully without logging a miss or hitting the LLM.
+  if(/^(thanks?|thank you|ty|thx|cheers|appreciate it|much appreciated)[\s!.]*$/i.test(raw))
+    return "You're welcome! Ask me anything about the project data.";
+  if(/^(great|perfect|awesome|cool|nice|excellent|good job|well done|brilliant|noted|got it|understood|alright|ok|okay|sure|sounds good|no problem|np|👍)[\s!.]*$/i.test(raw))
+    return "Glad to help! Feel free to ask another question.";
+  if(/^(hi|hello|hey|good\s*(morning|afternoon|evening)|howdy|greetings)[\s!.,]*$/i.test(raw))
+    return "Hello! Ask me anything about the project data — RFIs, NCRs, SORs, welders, or daily progress.";
+  // Detect the continuation cue on the ORIGINAL text (before the leading words are stripped).
+  const cue=qaFollowCue(rawq);
+  // Strip leading conjunctions/fillers so "and how many in April?" parses as a follow-up.
+  const q=raw.replace(/^\s*(and|also|what about|but|ok|okay|so|now|hey|please)\s+/i,'').trim().toLowerCase();
   if(!q) return 'Please type a question.';
   // Meta-question: user asking how the engine calculated a previous answer.
-  if(/how did you (calculate|compute|get|work out)|how is (that|this|it) calculated|what.{0,10}formula/.test(q)){
+  if(/how did you (calculate|compute|get|work out)|how is (that|this|it) calculated|what.{0,10}formula|how was (it|that|this) (calculated|computed|derived)/.test(q)){
     return 'I count and filter the raw records loaded from your uploaded Excel files. For **counts** I filter by status/date/section and return the row count. For **period values** (joints welded, NDT, FJC) I take the last cumulative reading inside the period minus the last reading before it. No external calculation — the numbers come directly from your data.';
   }
-  let ds=qaDataset(q);
-  const ctx=QA.lastCtx;
-  // Follow-up resolution: detect whether this is a pronoun/status/date-only follow-up.
-  // For date-only follow-ups (e.g. "what about May 2026?") we also merge the previous
-  // question's keywords so ALL filters (status, op, section, discipline…) are re-derived
-  // naturally — not just the dataset.
-  let effectiveQ=q; // question used for filter extraction (may be augmented)
-  if(!ds && ctx){
-    const isDateOnly=!!(qaDateFilter(q) && !qaDataset(q));
-    const isPronoun=/\b(of (which|them|those|these)|\bthem\b|\bthose\b|\bthese\b|how many are|are (overdue|open|closed|listed)|overdue|in a list|how much)\b/.test(q);
-    if(isDateOnly || isPronoun){
-      ds=ctx.ds;
-      // For date-only follow-ups, prepend the previous question's keywords so filters survive.
-      if(isDateOnly && ctx.lastq) effectiveQ=ctx.lastq+' '+q;
-    }
+  // Meta-question: where the numbers come from.
+  if(/where (does|do).{0,25}(come from|sourced?|from)|what.{0,10}(the )?source|data source|how do you know/.test(q)){
+    return 'All answers come **directly from the Excel files uploaded to this dashboard** (RFI / NCR / SOR registers, daily inspection sheets, welder report) — held in memory after login. Nothing is fetched from outside; I just filter and count those records.';
   }
-  if(!ds){ qaLogUnanswered(rawq); return null; }
+  // Resolve dataset + inherited slots + date + operation from the question and prior context.
+  const r=qaResolveContext(q, cue);
+  if(!r){ qaLogUnanswered(rawq); return null; }
+  const {ds, df, op, slots}=r;
   if(ds==='deployment'&&!isAdmin) return 'Deployment data is available to admins only.';
-  // Date always comes from the current question (not the merged one) to avoid picking up
-  // the previous turn's date when doing a date-only follow-up ("what about May 2026?").
-  // All other filters (status, op, section…) come from effectiveQ (merged).
-  const df=qaDateFilter(q)||(ctx&&ctx.ds===ds?ctx.df:null);
-  const op=qaOp(effectiveQ);
+  // Feed handlers a canonical synthetic query rebuilt from the merged slots.
+  const synthQ=qaBuildQuery(slots);
   let answer;
-  if(ds==='rfi') answer=qaRFI(effectiveQ,op,df);
-  else if(ds==='ncr') answer=qaNCR(effectiveQ,op,df);
-  else if(ds==='sor') answer=qaSOR(effectiveQ,op,df);
-  else if(ds==='welders') answer=qaWelders(effectiveQ,op);
-  else if(ds==='daily') answer=qaDaily(effectiveQ,op,df);
+  if(ds==='rfi') answer=qaRFI(synthQ,op,df);
+  else if(ds==='ncr') answer=qaNCR(synthQ,op,df);
+  else if(ds==='sor') answer=qaSOR(synthQ,op,df);
+  else if(ds==='welders') answer=qaWelders(synthQ,op);
+  else if(ds==='daily') answer=qaDaily(synthQ,op,df);
   else if(ds==='deployment') answer=qaDeployment();
   else { qaLogUnanswered(rawq); return null; }
-  QA.lastCtx={ds, df, lastq:q, se:qaSection(effectiveQ)||(ctx&&ctx.ds===ds?ctx.se:null)};
+  // Persist the resolved context so the next follow-up can inherit it.
+  QA.lastCtx={ds, df, op, status:slots.status, sec:slots.sec, disc:slots.disc, ic:slots.ic,
+    group:slots.group, metric:slots.metric, welderThresh:slots.welderThresh, weekly:slots.weekly, repeat:slots.repeat};
   return answer;
 }
 // LLM fallback — called only when the local parser returns null (a miss).
@@ -4869,7 +5100,7 @@ async function qaLLM(question){
     r=await fetch(`${SB_URL}/functions/v1/qa-assistant`,{
       method:'POST',
       headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`},
-      body:JSON.stringify({question,role:u.role,history:hist})
+      body:JSON.stringify({question,role:u.role,history:hist,dash:APP_VIEW==='mol'?'mol':undefined})
     });
   }catch(e){ console.warn('[QA LLM] network',e); return {ok:false,answer:qaHelp()}; }
   let data={}; try{ data=await r.json(); }catch(e){/* non-JSON */}
@@ -4898,7 +5129,7 @@ async function qaSend(){
     const local=qaAnswerLocal(q,isAdmin);
     if(local!=null){ answerText=local; source='Local'; }
     else {
-      // Parser miss → LLM fallback.
+      // Parser miss → LLM fallback (Edge Function handles both pipeline and MOL via `dash` param).
       const r=await qaLLM(q);
       if(r.ok){ answerText=r.answer; source='LLM'; }
       else if(r.rateLimited){ answerText=`Oops! Limit reached.. try again in ${r.retry} seconds.`; }
@@ -4936,14 +5167,14 @@ async function loadAllFromDB(){
     ]);
 
     // Map DB column names back to the JS field names the parsers produce
-    if(rfi.length)  ST.data.rfi    = rfi.map(r=>({rfiNo:r.rfi_no||'',date:r.date,discipline:r.discipline,section:r.section,ic:r.ic,status:r.status}));
+    if(rfi.length)  ST.data.rfi    = rfi.map(dbRowToRfi);
     ST.rfiSupersededCount = +(localStorage.getItem('wep_rfi_superseded_count')||0);
     if(s1.length)   ST.data.daily1 = s1.map(dbRowToDaily);
     if(s2.length)   ST.data.daily2 = s2.map(dbRowToDaily);
     if(s3.length)   ST.data.daily3 = s3.map(dbRowToDaily);
-    if(wld.length)  ST.data.welders= wld.map(r=>({id:r.welder_id,name:r.name,section:r.section,cumAut:+r.cum_aut,cumRep:+r.cum_rep,cumPct:+r.cum_pct,wkAut:+r.wk_aut,wkRep:+r.wk_rep,wkPct:+r.wk_pct,remarks:r.remarks||''}));
-    if(sor.length)  ST.data.sor    = sor.map(r=>({sorNo:r.sor_no,short:r.short_name||r.sor_no,date:r.date,status:r.status,ic:r.ic,km:r.km,desc:r.description||''}));
-    if(ncr.length)  ST.data.ncr    = ncr.map(r=>({ncrNo:r.ncr_no,date:r.date,status:r.status,raisedBy:r.raised_by,againstName:r.against_name,targetClose:r.target_close,actualClose:r.actual_close,desc:r.description||''}));
+    if(wld.length)  ST.data.welders= wld.map(dbRowToWld);
+    if(sor.length)  ST.data.sor    = sor.map(dbRowToSor);
+    if(ncr.length)  ST.data.ncr    = ncr.map(dbRowToNcr);
     if(dep.length && dep[0].payload){
       try{
         const d=typeof dep[0].payload==='string'?JSON.parse(dep[0].payload):dep[0].payload;
@@ -4951,8 +5182,33 @@ async function loadAllFromDB(){
       }catch(e){}
     }
 
-    // Restore file names from meta
-    meta.forEach(m=>{ if(m.key!=='deployment') ST.files[m.key]=m.file_name||''; });
+    // Restore main file names from meta (skip deployment + the mol_* keys)
+    meta.forEach(m=>{ if(m.key!=='deployment' && m.key.indexOf('mol_')!==0) ST.files[m.key]=m.file_name||''; });
+
+    // ── MOL 3.3 datasets — own namespace, mol_* tables (best-effort) ──
+    try{
+      const [mrfi,ms1,ms2,ms3,mwld,msor,mncr]=await Promise.all([
+        sbSelectAll('mol_rfi_records','select=rfi_no,date,discipline,section,ic,status&order=date.asc').catch(()=>[]),
+        loadDaily('mol_daily_sec1').catch(()=>[]),
+        loadDaily('mol_daily_sec2').catch(()=>[]),
+        loadDaily('mol_daily_sec3').catch(()=>[]),
+        sbSelectAll('mol_welder_records','select=welder_id,name,section,cum_aut,cum_rep,cum_pct,wk_aut,wk_rep,wk_pct,remarks').catch(()=>[]),
+        sbSelectAll('mol_sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc').catch(()=>[]),
+        sbSelectAll('mol_ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description&order=date.asc').catch(()=>[]),
+      ]);
+      const M=ST.molData;
+      if(mrfi.length) M.rfi    = mrfi.map(dbRowToRfi);
+      if(ms1.length)  M.daily1 = ms1.map(dbRowToDaily);
+      if(ms2.length)  M.daily2 = ms2.map(dbRowToDaily);
+      if(ms3.length)  M.daily3 = ms3.map(dbRowToDaily);
+      if(mwld.length) M.welders= mwld.map(dbRowToWld);
+      if(msor.length) M.sor    = msor.map(dbRowToSor);
+      if(mncr.length) M.ncr    = mncr.map(dbRowToNcr);
+      // Pre-create the MOL page store with restored file names (meta keys 'mol_<key>').
+      const molFiles={};
+      meta.forEach(m=>{ if(m.key && m.key.indexOf('mol_')===0) molFiles[m.key.slice(4)]=m.file_name||''; });
+      ST.pageState.mol={data:ST.molData,files:molFiles,errors:{},processing:{},unsaved:new Set()};
+    }catch(e){ /* mol_ tables not provisioned yet — MOL page just shows empty */ }
 
   }catch(e){
     // DB unreachable or local file — dashboard shows defaults
@@ -4964,6 +5220,11 @@ function dbRowToDaily(r){
     ndtRescan:+r.ndt_rescan||0,ndtRepair:+r.ndt_repair||0,fjcReleased:+r.fjc_released||0,
     fjcTotal:+r.fjc_total||0,fjcAccepted:+r.fjc_accepted||0,fjcRepair:+r.fjc_repair||0,fjcBalance:+r.fjc_balance||0};
 }
+// DB-row → JS-object mappers, shared by the main and MOL 3.3 loaders (keep in sync).
+const dbRowToRfi=r=>({rfiNo:r.rfi_no||'',date:r.date,discipline:r.discipline,section:r.section,ic:r.ic,status:r.status});
+const dbRowToWld=r=>({id:r.welder_id,name:r.name,section:r.section,cumAut:+r.cum_aut,cumRep:+r.cum_rep,cumPct:+r.cum_pct,wkAut:+r.wk_aut,wkRep:+r.wk_rep,wkPct:+r.wk_pct,remarks:r.remarks||''});
+const dbRowToSor=r=>({sorNo:r.sor_no,short:r.short_name||r.sor_no,date:r.date,status:r.status,ic:r.ic,km:r.km,desc:r.description||''});
+const dbRowToNcr=r=>({ncrNo:r.ncr_no,date:r.date,status:r.status,raisedBy:r.raised_by,againstName:r.against_name,targetClose:r.target_close,actualClose:r.actual_close,desc:r.description||''});
 
 // ═══════════════════════════════════════════════════
 // AUTH SYSTEM — Supabase-backed
@@ -5738,8 +5999,8 @@ async function unblockUser(uname){
 // SUPABASE WRITE — called after parsing each file
 // Clears old data for that table then bulk-inserts new rows
 // ═══════════════════════════════════════════════════
-async function saveDataToDB(key, parsed, fileName){
-  // Deployment is stored as a single JSON blob in its own table
+async function saveDataToDB(key, parsed, fileName, pfx=''){
+  // Deployment is stored as a single JSON blob in its own table (main only)
   if(key==='deployment'){
     // Delete the existing row (if any) then insert fresh
     await fetch(`${SB_URL}/rest/v1/deployment_data?id=eq.1`,{method:'DELETE',headers:SB_HDR}).catch(()=>{});
@@ -5757,8 +6018,9 @@ async function saveDataToDB(key, parsed, fileName){
   }
 
   const tableMap={rfi:'rfi_records',daily1:'daily_sec1',daily2:'daily_sec2',daily3:'daily_sec3',welders:'welder_records',sor:'sor_records',ncr:'ncr_records'};
-  const table=tableMap[key];
-  if(!table) return;
+  const base=tableMap[key];
+  if(!base) return;
+  const table=pfx+base; // pfx='mol_' → MOL tables; '' → main pipeline tables
 
   // Clear existing rows for this table
   await sbDelete(table);
@@ -5782,9 +6044,9 @@ async function saveDataToDB(key, parsed, fileName){
 
   await sbInsertBatch(table, rows);
 
-  // Update metadata
+  // Update metadata (MOL rows use a 'mol_'-prefixed meta key so they don't clash)
   const dates=parsed.map(r=>r.date).filter(Boolean).sort();
-  await sbUpsert('dataset_meta',{key,file_name:fileName,row_count:parsed.length,
+  await sbUpsert('dataset_meta',{key:pfx+key,file_name:fileName,row_count:parsed.length,
     uploaded_by:AUTH.currentUser?.username||'admin',
     date_start:dates[0]||null, date_end:dates[dates.length-1]||null});
 }
@@ -6082,14 +6344,15 @@ function generateCustomExport(){
   const tlast=rows=>[rows.length-1];
 
   const origStart=ST.start, origEnd=ST.end;
+  const _d=activeData(); // export the dashboard you're on (main or MOL 3.3)
   try{
     // ── RFI (band 1): period | KPIs | cumulative ──
     let rfiP=null,rfiC=null,kpi=null;
-    if(ST.data.rfi){
-      const aP=aggRFI(ST.data.rfi.filter(r=>r.date>=from&&r.date<=to));
+    if(_d.rfi){
+      const aP=aggRFI(_d.rfi.filter(r=>r.date>=from&&r.date<=to));
       rfiP=aP.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
       rfiP.push(['TOTAL',aP.totals.acc,aP.totals.accW,aP.totals.can,aP.totals.open,aP.totals.rej,aP.totals.total]);
-      const aC=aggRFI(ST.data.rfi);
+      const aC=aggRFI(_d.rfi);
       rfiC=aC.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
       rfiC.push(['TOTAL',aC.totals.acc,aC.totals.accW,aC.totals.can,aC.totals.open,aC.totals.rej,aC.totals.total]);
       const T=aC.totals, tot=T.total||1;
@@ -6104,7 +6367,7 @@ function generateCustomExport(){
     if(r){const t=sumK(r,['welded','rev','appr','repair','bl']);ndtP=r.map(x=>[x.s,x.welded,x.rev,x.appr,x.repair,x.bl]);ndtP.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);}
     r=getFJCRows(false);
     if(r){const t=sumK(r,['released','total','accepted','repair','balance']);fjcP=r.map(x=>[x.s,x.released,x.total,x.accepted,x.repair,x.balance]);fjcP.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);}
-    ST.start=null; ST.end=maxDateAcross(ST.data.daily1,ST.data.daily2,ST.data.daily3)||origEnd;
+    ST.start=null; ST.end=maxDateAcross(_d.daily1,_d.daily2,_d.daily3)||origEnd;
     r=getNDTRows(true);
     if(r){ndtCr=r;const t=sumK(r,['welded','rev','appr','repair','bl']);ndtC=r.map(x=>[x.s,x.welded,x.rev,x.appr,x.repair,x.bl]);ndtC.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);}
     r=getFJCRows(true);
@@ -6124,8 +6387,8 @@ function generateCustomExport(){
 
     // ── Welders > 3% repair (band 4 right) ──
     let wel=null;
-    if(ST.data.welders&&ST.data.welders.length){
-      const over=ST.data.welders.filter(w=>w.cumPct>3&&w.cumAut>0).sort((a,b)=>b.cumPct-a.cumPct);
+    if(_d.welders&&_d.welders.length){
+      const over=_d.welders.filter(w=>w.cumPct>3&&w.cumAut>0).sort((a,b)=>b.cumPct-a.cumPct);
       if(over.length){
         wel=over.slice(0,3).map(w=>[w.name,w.id,w.section,w.cumPct/100]);
         const cnt={};over.forEach(w=>{cnt[w.section]=(cnt[w.section]||0)+1;});
@@ -6146,8 +6409,8 @@ function generateCustomExport(){
       rows.push(['TOTAL',t[1],t[2],t[3]]);
       return rows;
     };
-    const ncrS=(ST.data.ncr&&ST.data.ncr.length)?statusRows(ST.data.ncr,r=>r.againstName):null;
-    const sorS=(ST.data.sor&&ST.data.sor.length)?statusRows(ST.data.sor,r=>r.ic):null;
+    const ncrS=(_d.ncr&&_d.ncr.length)?statusRows(_d.ncr,r=>r.againstName):null;
+    const sorS=(_d.sor&&_d.sor.length)?statusRows(_d.sor,r=>r.ic):null;
 
     // ── place panels on the fixed grid (checkboxes toggle each panel) ──
     const RFI_H=['DISCIPLINE','ACC','ACC W/COMM','CAN','OPEN','REJ','TOTAL'];
@@ -6375,11 +6638,23 @@ const DEFAULT_USERS_LAYOUT=DEFAULT_USERS_LAYOUT_BASE.map(p=>({...p}));
 let USERS_CANVAS_LAYOUT=DEFAULT_USERS_LAYOUT.map(p=>({...p}));
 const USERS_LAYOUT_KEY=`wep_users_canvas_layout_g${GRID_SCALE}_v2`;
 
-// ── MOL 3.3 Dashboard canvas layout ──
-const DEFAULT_MOL_LAYOUT_BASE=[{id:'molMain',col:0,row:0,w:72,h:20}];
+// ── MOL 3.3 Dashboard canvas layout (mirrors the main pipeline dashboard) ──
+const DEFAULT_MOL_LAYOUT_BASE=[
+  {id:'molKpiStrip',   col:0,  row:0,  w:72, h:14},
+  {id:'molRfiPeriod',  col:0,  row:15, w:60, h:25},
+  {id:'molRfiDonut',   col:60, row:15, w:12, h:25},
+  {id:'molNdtPeriod',  col:0,  row:41, w:72, h:12},
+  {id:'molFjcPeriod',  col:0,  row:54, w:48, h:12},
+  {id:'molWelders',    col:48, row:54, w:24, h:23},
+  {id:'molProgress',   col:0,  row:66, w:48, h:11},
+  {id:'molNcrTable',   col:0,  row:78, w:18, h:14},
+  {id:'molNcrBar',     col:18, row:78, w:54, h:14},
+  {id:'molSorTable',   col:0,  row:93, w:18, h:14},
+  {id:'molSorScatter', col:18, row:93, w:54, h:14},
+];
 const DEFAULT_MOL_LAYOUT=DEFAULT_MOL_LAYOUT_BASE.map(p=>({...p}));
 let MOL_CANVAS_LAYOUT=DEFAULT_MOL_LAYOUT.map(p=>({...p}));
-const MOL_LAYOUT_KEY=`wep_mol_canvas_layout_g${GRID_SCALE}_v1`;
+const MOL_LAYOUT_KEY=`wep_mol_canvas_layout_g${GRID_SCALE}_v2`;
 
 // ── Stations Dashboard canvas layout ──
 const DEFAULT_ST_LAYOUT_BASE=[{id:'stMain',col:0,row:0,w:72,h:20}];
@@ -6445,7 +6720,13 @@ const PANEL_NAMES={
   dpHiring:'Hiring Status',
   dpLocRole:'Location & Role',dpPersonnel:'Personnel Table',
   usersLeft:'User List',usersRight:'User Editor',
-  molMain:'MOL 3.3 Dashboard',
+  molKpiStrip:'KPI Strip',
+  molRfiPeriod:'RFI Status',molRfiDonut:'RFI Donut',
+  molNdtPeriod:'NDT (EPCM)',
+  molFjcPeriod:'FJC Status',
+  molWelders:'Welder Activity',molProgress:'Progress',
+  molNcrTable:'NCR Table',molNcrBar:'NCR Bar',
+  molSorTable:'SOR Table',molSorScatter:'SOR Scatter',
   stMain:'Stations Dashboard',
   bcMain:'MOT BC Projects',
 };
