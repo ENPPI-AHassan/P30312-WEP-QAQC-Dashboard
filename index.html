@@ -101,6 +101,7 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .ks-sub{font-size:9px;color:#7a809a;margin-bottom:5px;position:relative;z-index:2}
 .ks-pill{display:inline-block;font-size:9px;font-weight:700;padding:2px 9px;border-radius:12px;border:1px solid;margin-bottom:8px}
 .ks-spark{position:absolute;left:0;right:0;top:0;bottom:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.ks-nodata{flex:1;display:flex;align-items:center;font-size:10px;font-style:italic;color:#4a5068;line-height:1.4;position:relative;z-index:2}
 /* Action strip (page-specific buttons) */
 .upl-strip{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
 .upl-strip-btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;border:none;cursor:pointer;transition:background .15s,opacity .15s;flex-shrink:0}
@@ -186,8 +187,8 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 @keyframes qaStatusBlink{0%,100%{opacity:1}50%{opacity:.35}}
 @keyframes qaGearSpin{to{transform:rotate(360deg)}}
 @keyframes qaGlowPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.55;transform:scale(1.14)}}
-@keyframes qaPanelIn{from{transform:scale(.85) translateY(12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-@keyframes qaPanelOut{from{transform:scale(1) translateY(0);opacity:1}to{transform:scale(.85) translateY(12px);opacity:0}}
+@keyframes qaPanelIn{from{transform:scale(.01);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes qaPanelOut{from{transform:scale(1);opacity:1}to{transform:scale(.01);opacity:0}}
 .qa-gear-spin{transform-box:fill-box;transform-origin:center;animation:qaGearSpin 4s linear infinite}
 #qaLauncher{position:fixed;right:26px;bottom:26px;width:62px;height:62px;border-radius:50%;border:none;cursor:pointer;z-index:1600;background:none;padding:0;display:flex;align-items:center;justify-content:center;transition:transform .2s}
 #qaLauncher:hover{transform:scale(1.08)}
@@ -198,7 +199,10 @@ td.tf{font-size:11px;padding:5px 8px;border-top:1px solid #2d3348;font-weight:60
 #qaLauncher svg{animation:qaHatBob 3s ease-in-out infinite}
 .qa-glint{animation:qaGlint 4s ease-in-out infinite}
 /* ── QA Panel ── */
-#qaPanel{position:fixed;right:26px;bottom:100px;width:430px;max-width:calc(100vw - 36px);height:580px;max-height:calc(100vh - 120px);z-index:1600;padding:2.5px;border-radius:18px;background:conic-gradient(from var(--qa-hue),#ff006e,#fb5607,#ffbe0b,#06d6a0,#118ab2,#8338ec,#ff006e);animation:qaColorFlow 5s linear infinite,qaPanelIn .38s cubic-bezier(.34,1.5,.64,1) both;display:flex;flex-direction:column;overflow:hidden}
+#qaPanel{position:fixed;right:26px;bottom:100px;width:430px;max-width:calc(100vw - 36px);height:580px;max-height:calc(100vh - 120px);z-index:1600;padding:2.5px;border-radius:18px;background:conic-gradient(from var(--qa-hue),#ff006e,#fb5607,#ffbe0b,#06d6a0,#118ab2,#8338ec,#ff006e);animation:qaColorFlow 5s linear infinite,qaPanelIn .28s cubic-bezier(.2,0,.2,1) both;display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right}
+#qaBackdrop{position:fixed;inset:0;z-index:1599;display:none}
+#qaResizeHandle{position:absolute;left:0;bottom:0;width:18px;height:18px;cursor:sw-resize;z-index:10;display:none;align-items:flex-end;justify-content:flex-start;padding:3px}
+#qaResizeHandle svg{opacity:.45}
 #qaPanel::after{content:'';position:absolute;inset:-6px;border-radius:24px;background:conic-gradient(from var(--qa-hue),#ff006e,#fb5607,#ffbe0b,#06d6a0,#118ab2,#8338ec,#ff006e);filter:blur(14px);opacity:.38;z-index:-1;animation:qaColorFlow 5s linear infinite}
 #qaInner{flex:1;min-height:0;background:#11141d;border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
 #qaHead{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid #1c2230;background:#0b1929;flex:none}
@@ -807,33 +811,19 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 
 <!-- CUSTOM EXPORT OPTIONS MODAL -->
 <div id="exportOptionsModal">
-  <div class="umg-card" style="width:560px">
+  <div class="umg-card" style="width:420px">
     <div class="umg-hdr">
-      <div><div class="umg-title">Custom Export</div><div class="umg-sub">Choose datasets and a date range, then generate an Excel workbook</div></div>
+      <div><div class="umg-title">Export to Excel</div><div class="umg-sub">Generates REP_DUR + CUM sheets matching the standard report template</div></div>
       <button class="btn-x" onclick="closeExportOptions()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke="#f43f5e" stroke-width="1.3" opacity=".3"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#f43f5e" stroke-width="1.7"/></svg></button>
     </div>
     <div class="umg-body">
       <div class="umg-section">
-        <div class="umg-slbl">Choose Data Sets</div>
-        <div class="exp-grp">
-          <label class="exp-chk"><input type="checkbox" id="expRfiPeriod" checked> Reporting Duration RFI Status</label>
-          <label class="exp-chk"><input type="checkbox" id="expRfiCumul" checked> Cumulative RFI Status</label>
-          <label class="exp-chk"><input type="checkbox" id="expNdtPeriod" checked> Reporting Duration NDT (EPCM)</label>
-          <label class="exp-chk"><input type="checkbox" id="expNdtCumul" checked> Cumulative NDT (EPCM)</label>
-          <label class="exp-chk"><input type="checkbox" id="expFjcPeriod" checked> Reporting Duration FJC Status</label>
-          <label class="exp-chk"><input type="checkbox" id="expFjcCumul" checked> Cumulative FJC Status</label>
-          <label class="exp-chk"><input type="checkbox" id="expWelders" checked> Welders</label>
-          <label class="exp-chk"><input type="checkbox" id="expSor" checked> Site Observations (SOR)</label>
-          <label class="exp-chk"><input type="checkbox" id="expNcr" checked> NCR Status</label>
-        </div>
-      </div>
-      <div class="umg-section">
-        <div class="umg-slbl">Date Range</div>
+        <div class="umg-slbl">Reporting Period</div>
         <div class="umg-form-grid">
           <div><div class="umg-slbl" style="margin-bottom:5px">From</div><input class="umg-inp" id="expFrom" type="date"></div>
           <div><div class="umg-slbl" style="margin-bottom:5px">To</div><input class="umg-inp" id="expTo" type="date"></div>
         </div>
-        <div class="exp-note">Applies to <b>Period</b> data sets only — each will only include records within this range. <b>Cumulative</b> data sets always export the full available history regardless of this range.</div>
+        <div class="exp-note">The <b>REP_DUR</b> sheet shows data for this period only. The <b>CUM</b> sheet always shows full cumulative history.</div>
         <div id="expGuestNote" style="display:none;margin-top:8px;font-size:11px;color:#f59e0b;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:5px;padding:6px 10px">🔒 Date range is locked for guest access.</div>
       </div>
       <button class="umg-add-btn" onclick="generateCustomExport()">📊 Generate Excel</button>
@@ -921,7 +911,11 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
     </svg>
   </div>
 </button>
+<div id="qaBackdrop" onclick="qaToggle()"></div>
 <div id="qaPanel" style="display:none">
+  <div id="qaResizeHandle" title="Resize panel">
+    <svg width="12" height="12" viewBox="0 0 12 12"><path d="M11 1L1 11M11 6L6 11M11 11" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
   <div id="qaInner">
     <div id="qaHead">
       <div id="qaHeadAvatar">
@@ -1040,6 +1034,7 @@ const ST = {
     sor:        null,
     ncr:        null,
     deployment: null,
+    constAct:   null, // Construction Activities snapshot (Welding/Trenching/Lowering/Cable Laying/Post Padding/Backfilling, KM)
   },
   // MOL 3.3 dashboard — separate data namespace (same shape as `data`). Cleared
   // by default; populated from the mol_* Supabase tables once Phase 2 wiring lands.
@@ -1051,7 +1046,7 @@ const ST = {
   // The main dashboard keeps using the top-level data/files/errors/processing/unsaved.
   pageState: {},
   files: {
-    rfi:'', daily1:'', daily2:'', daily3:'', welders:'', sor:'', ncr:'', deployment:''
+    rfi:'', daily1:'', daily2:'', daily3:'', welders:'', sor:'', ncr:'', deployment:'', constAct:''
   },
   dpMonths: null, // selected months on deployment page (array of YYYY-MM)
   errors: {},
@@ -1413,6 +1408,73 @@ function parseDeployment(ab){
   };
 }
 
+// Construction Activities — a single "as of DATE" snapshot table (no daily
+// history, unlike the Daily Section files), so this returns one aggregated
+// object rather than an array of rows. Reads the TOP table only (Welding/
+// Trenching/Lowering/Tie In/Cable laying/Post padding/Backfilling); Tie In is
+// intentionally not stored. Column order is discovered from the header row
+// rather than assumed, since the sheet may reorder columns between revisions.
+function parseConstActivities(ab){
+  const wb = XLSX.read(new Uint8Array(ab),{type:'array',cellDates:true});
+  const wsName = wb.SheetNames.find(n=>/CONST_ACT/i.test(n)) || wb.SheetNames[0];
+  const ws = wb.Sheets[wsName];
+  clampSheetRef(ws);
+  const raw = XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+  const norm=v=>(v==null?'':v.toString().trim());
+
+  // Locate the header row of the TOP table — the one whose row contains a
+  // "Welding" column (the second table further down uses "Total Welded
+  // Joints" instead, so this uniquely identifies the top table).
+  let hdrRow=-1;
+  for(let r=0;r<raw.length && hdrRow<0;r++){
+    const row=raw[r]; if(!row) continue;
+    for(let c=0;c<row.length;c++){ if(/^welding/i.test(norm(row[c]))){ hdrRow=r; break; } }
+  }
+  if(hdrRow<0) throw new Error('Could not find the Welding/Trenching/Lowering header row.');
+  const hdr=raw[hdrRow];
+
+  // The "As of DATE" cell shares the header row and marks the label column
+  // (section names below it, ending in a "Total" row).
+  let labelCol=-1, asOfText='';
+  for(let c=0;c<hdr.length;c++){
+    if(/^as of/i.test(norm(hdr[c]))){ labelCol=c; asOfText=norm(hdr[c]); break; }
+  }
+  if(labelCol<0) throw new Error('Could not find the "As of" label column.');
+  const dm=asOfText.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  const asOf=dm?`${dm[3].length===2?'20'+dm[3]:dm[3]}-${dm[2].padStart(2,'0')}-${dm[1].padStart(2,'0')}`:null;
+
+  const findCol=re=>{ for(let c=0;c<hdr.length;c++){ if(re.test(norm(hdr[c]))) return c; } return -1; };
+  const col={
+    welding:     findCol(/^welding/i),
+    trenching:   findCol(/^trenching/i),
+    lowering:    findCol(/^lowering/i),
+    cableLaying: findCol(/^cable/i),
+    postPadding: findCol(/^post/i),
+    backfilling: findCol(/^backfill/i),
+  };
+
+  // Walk down from the header to the "Total" row (stops at the first blank
+  // label cell so it never reads into an unrelated table below).
+  let totalRow=-1;
+  for(let r=hdrRow+1;r<raw.length;r++){
+    const row=raw[r]; if(!row||norm(row[labelCol])==='') break;
+    if(/^total$/i.test(norm(row[labelCol]))){ totalRow=r; break; }
+  }
+  if(totalRow<0) throw new Error('Could not find the Total row in the Construction Activities table.');
+
+  const num=v=>{ const n=parseFloat(v); return isNaN(n)?0:n; };
+  const row=raw[totalRow];
+  return{
+    asOf,
+    welding:     num(row[col.welding]),
+    trenching:   num(row[col.trenching]),
+    lowering:    num(row[col.lowering]),
+    cableLaying: num(row[col.cableLaying]),
+    postPadding: num(row[col.postPadding]),
+    backfilling: num(row[col.backfilling]),
+  };
+}
+
 // ═══════════════════════════════════════════════════
 // AGGREGATION HELPERS
 // ═══════════════════════════════════════════════════
@@ -1579,35 +1641,45 @@ function bFJCTable(secRows, title, live){
   </table></div></div>`;
 }
 
-function bProgress(live){
+// Construction Progress — measured in route KM against the fixed 500 km
+// pipeline length target (replaces the old joints-based Welding Progress
+// panel). Sourced from the Construction Activities snapshot (a single "as of
+// DATE" table, not a daily time series), so this does NOT follow the
+// Reporting Duration / Cumulative toggle — it always shows the latest upload.
+const CONST_TOTAL_KM = 500;
+function bProgress(){
   const sc=SCHEMES[CURRENT_SCHEME]||SCHEMES.slate;
-  const _d = activeData();
-  const d1r = _d.daily1, d2r = _d.daily2, d3r = _d.daily3;
-  // Follow the Reporting Duration / Cumulative toggle, same as the other panels:
-  // period → delta within [ST.start, ST.end]; cumulative → snapshot at ST.end.
-  const isPeriod = DASH_TAB==='period';
-  const pick = r => isPeriod ? getDailyPeriod(r, ST.start, ST.end) : getDailySnapshot(r, ST.end);
-  let totalJoints=TOTAL_JOINTS, wTotal=0, fjcTotal=0;
-  if(d1r&&d2r&&d3r){
-    const s1=pick(d1r),s2=pick(d2r),s3=pick(d3r);
-    wTotal=(s1?s1.welded:0)+(s2?s2.welded:0)+(s3?s3.welded:0);
-    fjcTotal=(s1?s1.fjcAccepted:0)+(s2?s2.fjcAccepted:0)+(s3?s3.fjcAccepted:0);
+  const c=activeData().constAct;
+  if(!c){
+    return`<div class="card" style="display:flex;flex-direction:column;height:100%">
+      <div class="slbl">Construction Progress</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:#484f58">Upload Construction Activities to populate</div>
+    </div>`;
   }
-  const wPct=Math.min(100,wTotal/totalJoints*100);
-  const fjcPct=Math.min(100,fjcTotal/totalJoints*100);
+  const asOfDisp=(()=>{ if(!c.asOf) return null; const[y,m,d]=c.asOf.split('-'); return `${d}/${m}/${y}`; })();
   const bars=[
-    {l:'Total Joints',v:totalJoints,pct:100,   c:sc.progTrack||sc.border},
-    {l:'Welded',      v:wTotal,    pct:wPct,   c:sc.cb},
-    {l:'FJC Accepted',v:fjcTotal,  pct:fjcPct, c:sc.cs2},
+    {l:'Welding',      v:c.welding,     c:sc.cb},
+    {l:'Trenching',    v:c.trenching,   c:sc.cs3},
+    {l:'Lowering',     v:c.lowering,    c:sc.cs2},
+    {l:'Cable Laying', v:c.cableLaying, c:sc.cp},
+    {l:'Post Padding', v:c.postPadding, c:sc.clb},
+    {l:'Backfilling',  v:c.backfilling, c:sc.cg},
   ];
-  return`<div class="card"><div class="slbl">${isPeriod?'Welding Progress — Reporting Duration':'Welding Progress'}</div>
-  ${bars.map(b=>`<div class="prog-row">
-    <div class="prog-meta">
-      <span class="cm" style="text-transform:uppercase;letter-spacing:.06em;font-size:9px">${b.l}</span>
-      <span><span class="sc-n" style="font-family:monospace;font-size:11px">${fn(b.v)}</span><span class="sc-n" style="color:${b.c};font-family:monospace;font-size:11px"> (${b.pct.toFixed(1)}%)</span></span>
+  return`<div class="card" style="display:flex;flex-direction:column;height:100%">
+    <div class="slbl">Construction Progress${asOfDisp?` <span style="font-size:9px;font-weight:400;text-transform:none;letter-spacing:0;color:#4a5068">— as of ${asOfDisp}</span>`:''}</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px">
+    ${bars.map(b=>{
+      const pct=Math.min(100,b.v/CONST_TOTAL_KM*100);
+      return`<div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+          <span class="cm" style="text-transform:uppercase;letter-spacing:.06em;font-size:9px">${b.l}</span>
+          <span><span class="sc-n" style="color:${sc.text};font-family:monospace;font-size:10px">${b.v.toFixed(1)}/${CONST_TOTAL_KM}</span><span style="color:${sc.muted};font-family:monospace;font-size:10px"> km</span><span class="sc-n" style="color:${b.c};font-family:monospace;font-size:10px"> (${pct.toFixed(1)}%)</span></span>
+        </div>
+        <div class="prog-track" style="height:10px"><div class="prog-fill" data-w="${pct}" style="width:0%;background:${b.c}"></div></div>
+      </div>`;
+    }).join('')}
     </div>
-    <div class="prog-track"><div class="prog-fill" data-w="${b.pct}" style="width:0%;background:${b.c}"></div></div>
-  </div>`).join('')}</div>`;
+  </div>`;
 }
 
 function bWelderChart(wData){
@@ -1714,6 +1786,7 @@ const SLOT_DEFS=[
   {key:'sor',    icon:'👁', label:'SOR Register',   hint:'SOR sheet'},
   {key:'ncr',        icon:'⚠', label:'NCR Register',      hint:'NCR sheet'},
   {key:'deployment', icon:'👥', label:'EPCM Deployment', hint:'DP_PLAN + DP_ACTUAL sheets'},
+  {key:'constAct',   icon:'🚧', label:'Const. Activities', hint:'CONST_ACT sheet — Welding/Trenching/Lowering/Cable Laying/Post Padding/Backfilling (KM)'},
 ];
 
 // SVG icons — neon futuristic style
@@ -2101,7 +2174,6 @@ function getPeriodKPIs(){
 // ═══════════════════════════════════════════════════
 let APP_VIEW = 'dashboard'; // 'dashboard' | 'deployment' | 'users'
 let DASH_TAB = 'period'; // 'period' | 'cumul'
-const TOTAL_JOINTS = 42000; // project total weld joints — denominator for welding-progress %
 
 const _SCHEX='0123456789ABCDEF';
 function _scEl(el,target,ms){
@@ -2180,6 +2252,7 @@ function switchDashTab(t){
 
 
 function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWeldRepair, pFjcRepair, pNdtBacklog, sorRecs, ncrRecs }){
+  const isPeriod=DASH_TAB==='period';
   const sorClosedCount=sorRecs?sorRecs.filter(r=>(r.status||'').includes('CLOSED')).length:null;
   const sorOpenCount=sorRecs?sorRecs.length-sorClosedCount:null;
   const today=new Date().toISOString().slice(0,10);
@@ -2187,22 +2260,35 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWel
   const ncrOverdueCount=ncrRecs?ncrRecs.filter(r=>!(r.status||'').includes('CLOSED')&&r.targetClose&&r.targetClose<today).length:null;
   const ncrOverduePct=ncrOverdueCount!=null&&ncrTotal?ncrOverdueCount/ncrTotal*100:null;
 
-  // Repeated NCR rate — % of NCRs raised in the reporting end-month that are REPEATED
-  const endMonth=ST.end?ST.end.slice(0,7):null;
-  const ncrThisMonth=ncrRecs&&endMonth?ncrRecs.filter(r=>r.date&&r.date.slice(0,7)===endMonth):null;
-  const ncrRepeatCount=ncrThisMonth?ncrThisMonth.filter(r=>r.repeatedNcr==='REPEATED').length:null;
-  const ncrRepeatTotal=ncrThisMonth?ncrThisMonth.length:null;
+  // Repeated NCR rate, cumulative — overall: total repeated / total raised (all-time, not month-scoped)
+  const ncrRepeatCount=ncrRecs?ncrRecs.filter(r=>r.repeatedNcr==='REPEATED').length:null;
   const ncrRepeatPct=ncrRepeatCount!=null&&ncrTotal>0?ncrRepeatCount/ncrTotal*100:null;
 
-  // Period (duration) values for secondary row
+  // Period (Reporting Duration) values — same metrics, scoped to [ST.start, ST.end]
   const periodNcrRecs=ncrRecs?ncrRecs.filter(r=>inPeriod(r.date)):null;
   const periodNcrTotal=periodNcrRecs?periodNcrRecs.length:null;
   const periodNcrOverdueCount=periodNcrRecs?periodNcrRecs.filter(r=>!(r.status||'').includes('CLOSED')&&r.targetClose&&r.targetClose<today).length:null;
   const periodNcrOverduePct=periodNcrOverdueCount!=null&&periodNcrTotal>0?periodNcrOverdueCount/periodNcrTotal*100:null;
+  // Repeated NCR rate, period — repeated raised in period / total raised in period
   const periodNcrRepeatCount=periodNcrRecs?periodNcrRecs.filter(r=>r.repeatedNcr==='REPEATED').length:null;
-  const periodNcrRepeatPct=periodNcrRepeatCount!=null&&ncrTotal>0?periodNcrRepeatCount/ncrTotal*100:null;
+  const periodNcrRepeatPct=periodNcrRepeatCount!=null&&periodNcrTotal>0?periodNcrRepeatCount/periodNcrTotal*100:null;
   const periodSorRecs=sorRecs?sorRecs.filter(r=>inPeriod(r.date)):null;
-  const periodSorOpen=periodSorRecs?periodSorRecs.filter(r=>!(r.status||'').includes('CLOSED')).length:null;
+  const periodSorClosedCount=periodSorRecs?periodSorRecs.filter(r=>(r.status||'').includes('CLOSED')).length:null;
+  const periodSorOpen=periodSorRecs?periodSorRecs.length-periodSorClosedCount:null;
+
+  // Active (mode-selected) values — the KPI cards follow the Reporting Duration / Cumulative toggle
+  const aWeldRepair=isPeriod?pWeldRepair:weldRepair;
+  const aFjcRepair=isPeriod?pFjcRepair:fjcRepair;
+  const aNdtBacklog=isPeriod?pNdtBacklog:ndtBacklog;
+  const aNcrOverduePct=isPeriod?periodNcrOverduePct:ncrOverduePct;
+  const aNcrOverdueCount=isPeriod?periodNcrOverdueCount:ncrOverdueCount;
+  const aNcrTotal=isPeriod?periodNcrTotal:ncrTotal;
+  const aNcrRepeatPct=isPeriod?periodNcrRepeatPct:ncrRepeatPct;
+  const aNcrRepeatCount=isPeriod?periodNcrRepeatCount:ncrRepeatCount;
+  const aSorOpen=isPeriod?periodSorOpen:sorOpenCount;
+  const aSorTotal=isPeriod?(periodSorRecs?periodSorRecs.length:null):(sorRecs?sorRecs.length:null);
+  // SOR Open % — calculated exactly like NCR Overdue %: open count / total * 100
+  const aSorOpenPct=aSorOpen!=null&&aSorTotal>0?aSorOpen/aSorTotal*100:null;
 
   const na='—';
 
@@ -2252,12 +2338,14 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWel
     sparkNcrRpt.push(tot>0?rpt/tot*100:0);
   });
 
-  // SOR open count — monthly
+  // SOR Open % — monthly (same method as the NCR Overdue % sparkline)
   const sparkSor=[];
   sparkMonths.forEach(mo=>{
     if(!sorRecs){sparkSor.push(0);return;}
     const upTo=sorRecs.filter(r=>r.date&&r.date<=mo);
-    sparkSor.push(upTo.filter(r=>!(r.status||'').includes('CLOSED')).length);
+    const tot=upTo.length;
+    const opn=upTo.filter(r=>!(r.status||'').includes('CLOSED')).length;
+    sparkSor.push(tot>0?opn/tot*100:0);
   });
 
   let _sparkIdx=0;
@@ -2287,7 +2375,13 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWel
     </svg>`;
   };
 
-  const mkCard=(label,val,sub,pill,color,sparkData=[])=>{
+  const mkCard=(label,val,sub,pill,color,sparkData=[],noDataMsg=null)=>{
+    if(val==null&&noDataMsg){
+      return`<div class="ks-card">
+        <div class="ks-lbl">${label}</div>
+        <div class="ks-nodata">${noDataMsg}</div>
+      </div>`;
+    }
     const v=val!=null?val:na;
     return`<div class="ks-card" style="--ks-c:${color}">
       ${mkSpark(sparkData,color)}
@@ -2298,39 +2392,66 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWel
     </div>`;
   };
   const pct=v=>v!=null?v.toFixed(1)+'%':null;
-  const weldColor=weldRepair!=null&&weldRepair>3?sc.bad:sc.good;
-  const fjcColor=fjcRepair!=null&&fjcRepair>1?sc.bad:sc.good;
-  const blColor=ndtBacklog!=null&&ndtBacklogGoal!=null&&ndtBacklog>ndtBacklogGoal?sc.bad:sc.good;
-  const ncrColor=ncrOverduePct!=null&&ncrOverduePct>5?sc.bad:sc.good;
-  const ncrRepeatColor=ncrRepeatPct!=null&&ncrRepeatPct>5?sc.bad:sc.good;
-  const sorColor=sc.good;
-  const weldPill=weldRepair!=null
-    ?(weldRepair<=3?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 3% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
+  const weldColor=aWeldRepair!=null&&aWeldRepair>3?sc.bad:sc.good;
+  const fjcColor=aFjcRepair!=null&&aFjcRepair>1?sc.bad:sc.good;
+  const blColor=aNdtBacklog!=null&&ndtBacklogGoal!=null&&aNdtBacklog>ndtBacklogGoal?sc.bad:sc.good;
+  const ncrColor=aNcrOverduePct!=null&&aNcrOverduePct>5?sc.bad:sc.good;
+  const ncrRepeatColor=aNcrRepeatPct!=null&&aNcrRepeatPct>5?sc.bad:sc.good;
+  const sorColor=aSorOpenPct!=null&&aSorOpenPct>5?sc.bad:sc.good;
+  const weldPill=aWeldRepair!=null
+    ?(aWeldRepair<=3?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 3% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
     :null;
-  const fjcPill=fjcRepair!=null
-    ?(fjcRepair<=1?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 1% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
+  const fjcPill=aFjcRepair!=null
+    ?(aFjcRepair<=1?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 1% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
     :null;
-  const blPill=ndtBacklog!=null&&ndtBacklogGoal!=null
-    ?(ndtBacklog<=ndtBacklogGoal?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:`GOAL ≤ ${fn(ndtBacklogGoal)} ✓`}:{bg:'rgba(249,115,22,.1)',bc:'rgba(249,115,22,.28)',c:'#f97316',txt:`GOAL ≤ ${fn(ndtBacklogGoal)}`})
+  const blPill=aNdtBacklog!=null&&ndtBacklogGoal!=null
+    ?(aNdtBacklog<=ndtBacklogGoal?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:`GOAL ≤ ${fn(ndtBacklogGoal)} ✓`}:{bg:'rgba(249,115,22,.1)',bc:'rgba(249,115,22,.28)',c:'#f97316',txt:`GOAL ≤ ${fn(ndtBacklogGoal)}`})
     :null;
-  const ncrPill=ncrOverduePct!=null
-    ?(ncrOverduePct<=5?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 5% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
+  const ncrPill=aNcrOverduePct!=null
+    ?(aNcrOverduePct<=5?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 5% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
     :null;
-  const ncrRepeatPill=ncrRepeatPct!=null
-    ?(ncrRepeatPct<=5?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 5% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
+  const ncrRepeatPill=aNcrRepeatPct!=null
+    ?(aNcrRepeatPct<=5?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 5% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
     :null;
-  const sorPill=sorOpenCount!=null
-    ?{bg:'rgba(20,184,166,.08)',bc:'rgba(20,184,166,.22)',c:'#14b8a6',txt:`${sorClosedCount} CLOSED`}
+  const sorPill=aSorOpenPct!=null
+    ?(aSorOpenPct<=5?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 5% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
     :null;
-  const monthLbl=endMonth?endMonth.replace(/^(\d{4})-(\d{2})$/,(_,y,m)=>{const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${mn[+m-1]} ${y}`;}):'';
+  const weldSub=isPeriod?'reporting duration NDT':'cumulative NDT';
+  const fjcSub=isPeriod?'reporting duration FJC':'cumulative FJC';
+  const blSub=isPeriod?'period welded, NDT not done':'welded, NDT not done';
+
+  // Grayed-out "no data" statements — shown instead of the value/pill when a KPI
+  // has nothing to report: either the source dataset isn't uploaded at all, or
+  // the dataset exists but nothing fell within the active period/cumulative scope.
+  const dailyLoaded=!!(_d1||_d2||_d3);
+  const ncrLoaded=!!ncrRecs;
+  const sorLoaded=!!sorRecs;
+  const weldNoData=aWeldRepair!=null?null
+    :!dailyLoaded?'Upload Daily Pipeline files to populate'
+    :isPeriod?'No NDT reviews raised within Reporting Duration':'No NDT reviews raised to date';
+  const blNoData=aNdtBacklog!=null?null
+    :!dailyLoaded?'Upload Daily Pipeline files to populate'
+    :isPeriod?'No welding activity within Reporting Duration':'No welding activity recorded';
+  const fjcNoData=aFjcRepair!=null?null
+    :!dailyLoaded?'Upload Daily Pipeline files to populate'
+    :isPeriod?'No FJC coating activity within Reporting Duration':'No FJC coating activity recorded';
+  const ncrOverdueNoData=aNcrOverduePct!=null?null
+    :!ncrLoaded?'Upload NCR Register to populate'
+    :isPeriod?'No NCRs raised within Reporting Duration':'No NCRs raised to date';
+  const ncrRepeatNoData=aNcrRepeatPct!=null?null
+    :!ncrLoaded?'Upload NCR Register to populate'
+    :isPeriod?'No NCRs raised within Reporting Duration':'No NCRs raised to date';
+  const sorNoData=aSorOpenPct!=null?null
+    :!sorLoaded?'Upload SOR Register to populate'
+    :isPeriod?'No SORs raised within Reporting Duration':'No SORs raised to date';
 
   return`<div id="kpiStrip">
-    ${mkCard('Weld Repair Rate', pct(weldRepair), 'cumulative NDT', weldPill, weldColor, sparkWeld)}
-    ${mkCard('NDT Backlog', ndtBacklog!=null?fn(ndtBacklog):null, 'welded, NDT not done', blPill, blColor, sparkNdtBl)}
-    ${mkCard('FJC Repair Rate', pct(fjcRepair), 'cumulative FJC', fjcPill, fjcColor, sparkFjc)}
-    ${mkCard('NCR Overdue', ncrOverduePct!=null?ncrOverduePct.toFixed(1)+'%':null, ncrTotal!=null?`${ncrOverdueCount} of ${fn(ncrTotal)} NCRs`:'No NCR data', ncrPill, ncrColor, sparkNcrOvd)}
-    ${mkCard('NCR Repeated', ncrRepeatPct!=null?ncrRepeatPct.toFixed(1)+'%':null, ncrRepeatCount!=null&&ncrTotal>0?`${ncrRepeatCount} in ${monthLbl} of ${fn(ncrTotal)} total`:'No NCR data', ncrRepeatPill, ncrRepeatColor, sparkNcrRpt)}
-    ${mkCard('Observations Open', sorOpenCount!=null?String(sorOpenCount):null, sorRecs?`of ${fn(sorRecs.length)} total SOR`:'No SOR data', sorPill, sorColor, sparkSor)}
+    ${mkCard('Weld Repair Rate', pct(aWeldRepair), weldSub, weldPill, weldColor, sparkWeld, weldNoData)}
+    ${mkCard('NDT Backlog', aNdtBacklog!=null?fn(aNdtBacklog):null, blSub, blPill, blColor, sparkNdtBl, blNoData)}
+    ${mkCard('FJC Repair Rate', pct(aFjcRepair), fjcSub, fjcPill, fjcColor, sparkFjc, fjcNoData)}
+    ${mkCard('NCR Overdue', aNcrOverduePct!=null?aNcrOverduePct.toFixed(1)+'%':null, `${aNcrOverdueCount} of ${fn(aNcrTotal)} NCRs`, ncrPill, ncrColor, sparkNcrOvd, ncrOverdueNoData)}
+    ${mkCard('NCR Repeated', aNcrRepeatPct!=null?aNcrRepeatPct.toFixed(1)+'%':null, `${aNcrRepeatCount} of ${fn(aNcrTotal)} total`, ncrRepeatPill, ncrRepeatColor, sparkNcrRpt, ncrRepeatNoData)}
+    ${mkCard('SOR Open', aSorOpenPct!=null?aSorOpenPct.toFixed(1)+'%':null, `${aSorOpen} of ${fn(aSorTotal)} SOR`, sorPill, sorColor, sparkSor, sorNoData)}
   </div>`;
 }
 
@@ -2378,7 +2499,7 @@ function buildDashPanels(prefix){
     ? bFJCTable(fjcPeriod, 'Reporting Duration FJC Status', dailyLive)
     : bFJCTable(fjcCum, 'Cumulative FJC Status', dailyLive);
   P[k('welders')] =bWelderChart(welderData);
-  P[k('progress')]=bProgress(dailyLive);
+  P[k('progress')]=bProgress();
   P[k('ncrTable')]=isPeriodTab
     ? bNCRTable(ncrRecs?ncrRecs.filter(r=>inPeriod(r.date)):null, !!ncrRecs, 'Reporting Duration NCR Status')
     : bNCRTable(ncrRecs, !!ncrRecs, 'Cumulative NCR Status');
@@ -2506,15 +2627,14 @@ function renderDeployment(){
   const isViewer=AUTH.currentUser&&(AUTH.currentUser.role==='viewer'||!!AUTH.currentUser.isGuest);
 
   // Initialise multi-month selection (ST.dpMonths replaces ST.dpMonth)
+  // Default page-load selection = "All" months when deployment data is loaded.
   if(!ST.dpMonths){
-    const n=new Date();
-    const curM=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
     const dep2=ST.data.deployment;
     if(dep2&&dep2.months.length){
-      // Default to current month if present, otherwise the last available month
-      const m=dep2.months.includes(curM)?curM:dep2.months[dep2.months.length-1];
-      ST.dpMonths=[m];
+      ST.dpMonths=[...dep2.months];
     } else {
+      const n=new Date();
+      const curM=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
       ST.dpMonths=[curM];
     }
   }
@@ -3017,10 +3137,10 @@ function bPersonnelTable(sc, dep){
 
   // Cell status colour pairs  [background, text]
   const STATUS_STYLE = {
-    met:     ['rgba(40,167,69,0.38)',  '#5ddd80'],
-    partial: ['rgba(255,193,7,0.50)',  '#ffe066'],
-    missed:  ['rgba(220,53,69,0.45)',  '#ff8a95'],
-    pending: ['rgba(100,149,237,0.28)','#a0b8f0'],
+    met:     ['rgba(40,167,69,0.38)',  sc.good],
+    partial: ['rgba(255,193,7,0.50)',  sc.warn],
+    missed:  ['rgba(220,53,69,0.45)',  sc.bad],
+    pending: ['rgba(100,149,237,0.28)',sc.accent],
     neutral: ['transparent',           sc.faint]
   };
 
@@ -3111,7 +3231,7 @@ function bPersonnelTable(sc, dep){
     return grp.rows.map((row,ri)=>{
       // Prominent separator line between location groups (skip very first group)
       const isSepRow = ri===0 && gi>0;
-      const SEP = 'border-top:2px solid rgba(255,255,255,0.13)';
+      const SEP = `border-top:2px solid ${sc.border}`;
       const locCell=ri===0
         ?`<td rowspan="${grp.rows.length}" style="text-align:center;vertical-align:middle;background:${sc.card};color:${sc.text};font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 8px;border:1px solid ${sc.border};${isSepRow?SEP:''};white-space:nowrap;min-width:60px;max-width:80px;word-break:break-word">${esc(lc)}</td>`
         :'';
@@ -3128,7 +3248,7 @@ function bPersonnelTable(sc, dep){
           :`border:1px solid ${sc.border};${isSepRow?SEP:''}`;
         return `<td style="text-align:center;font-size:11px;font-weight:600;padding:4px 2px;background:${av>0?bg:baseBg};${mBorderStyle};min-width:${mW}px;max-width:${mW}px;color:${av>0?tc:'transparent'}">${av>0?av:''}</td>`;
       }).join('');
-      const rowBg=ri%2?'rgba(255,255,255,0.04)':'rgba(255,255,255,0.000)';
+      const rowBg=ri%2?sc.border+'22':'transparent';
       return `<tr style="background:${rowBg};height:32px">
         ${locCell}
         <td style="font-size:10px;color:${sc.muted};padding:4px 7px;white-space:nowrap;border:1px solid ${sc.border};${isSepRow?SEP:''}">${esc(row.role)}</td>
@@ -4109,7 +4229,7 @@ async function clearAllFiles(){
   const btn=document.getElementById('btnClearFiles');
   if(btn) btn.disabled=true;
   try{
-    const tables=['rfi_records','daily_sec1','daily_sec2','daily_sec3','welder_records','sor_records','ncr_records','deployment_data'];
+    const tables=['rfi_records','daily_sec1','daily_sec2','daily_sec3','welder_records','sor_records','ncr_records','deployment_data','const_activities_data'];
     await Promise.all(tables.map(t=>sbDelete(t)));
     // Reset all state
     Object.keys(ST.data).forEach(k=>ST.data[k]=null);
@@ -4127,9 +4247,11 @@ async function clearAllFiles(){
   }
 }
 
-// Maps an Excel file to its dashboard key by inspecting sheet names
+// Maps an Excel file to its dashboard key by inspecting sheet names, falling
+// back to the file name for sheets that don't follow the tab-name convention
+// (e.g. Construction Activities workbooks currently ship as a generic "Sheet1").
 // ═══════════════════════════════════════════════════
-function detectKey(wb){
+function detectKey(wb, fileName){
   const names = wb.SheetNames.map(n=>n.toUpperCase());
   if(names.some(n=>n.includes('RFI_REG')||n==='RFI_REG')) return 'rfi';
   if(names.some(n=>n==='DAILY_SEC1'||n.includes('SEC1'))) return 'daily1';
@@ -4139,6 +4261,9 @@ function detectKey(wb){
   if(names.some(n=>n==='SOR'||n.includes('SOR'))) return 'sor';
   if(names.some(n=>n==='NCR'||n.includes('NCR'))) return 'ncr';
   if(names.some(n=>n==='DP_PLAN'||n.includes('DP_PLAN'))) return 'deployment';
+  if(names.some(n=>n.includes('CONST_ACT'))) return 'constAct';
+  const base=String(fileName||'').split('/').pop().split('\\').pop().toUpperCase();
+  if(/CONST[_-]?ACTIV/.test(base)) return 'constAct';
   return null;
 }
 
@@ -4235,7 +4360,7 @@ async function handleFile(forcedKey, file){
   const tDet=performance.now();
   const wb=XLSX.read(new Uint8Array(ab),{type:'array',bookSheets:true});
   if(!key){
-    key=detectKey(wb);
+    key=detectKey(wb, file.name);
     if(!key){
       // Show unrecognised warning without disrupting other files
       activeErrors()['?'+(file.name)]='Unrecognised: '+file.name;
@@ -4244,11 +4369,11 @@ async function handleFile(forcedKey, file){
     }
   } else {
     // Validate the uploaded file matches the intended slot
-    const detected=detectKey(wb);
+    const detected=detectKey(wb, file.name);
     if(detected && detected!==forcedKey){
       const expNames={rfi:'RFI Register',daily1:'Daily Section-1',daily2:'Daily Section-2',
         daily3:'Daily Section-3',welders:'Welders Performance',sor:'SOR Register',ncr:'NCR Register',
-        deployment:'EPCM Deployment'};
+        deployment:'EPCM Deployment',constAct:'Construction Activities'};
       const expectedName=expNames[forcedKey]||forcedKey;
       const actualName=file.name.split('/').pop().split('\\').pop();
       activeErrors()[forcedKey]=`WRONG_FILE|${expectedName}|${actualName}`;
@@ -4293,10 +4418,11 @@ async function handleFile(forcedKey, file){
     else if(key==='sor')        parsed=parseSOR(ab);
     else if(key==='ncr')        parsed=parseNCR(ab);
     else if(key==='deployment') parsed=parseDeployment(ab);
+    else if(key==='constAct')   parsed=parseConstActivities(ab);
     uplDbg('parse['+key+']:',Math.round(performance.now()-tParse)+'ms',
       Array.isArray(parsed)?parsed.length+' rows':'');
 
-    const isEmpty=!parsed||(key==='deployment'?!parsed.plan?.length:!parsed.length);
+    const isEmpty=!parsed||(key==='deployment'?!parsed.plan?.length:key==='constAct'?false:!parsed.length);
     if(isEmpty) throw new Error('No valid records found. Check file format.');
 
     D[key]=parsed;
@@ -4412,7 +4538,7 @@ async function sbRpc(fn, body){
 // ═══════════════════════════════════════════════════
 // Q&A ASSISTANT (chat widget)
 // ═══════════════════════════════════════════════════
-const QA = { history: [], busy: false, lastCtx: null };
+const QA = { history: [], busy: false, lastCtx: null, pendingExportReq: null };
 
 // Show the launcher for logged-in non-guest users; hide for guests / logged-out.
 function qaSyncVisibility(){
@@ -4428,20 +4554,64 @@ function qaSyncVisibility(){
 function qaToggle(){
   const launcher=document.getElementById('qaLauncher');
   const panel=document.getElementById('qaPanel');
+  const backdrop=document.getElementById('qaBackdrop');
   if(!launcher||!panel) return;
   const isOpen=panel.style.display==='flex';
   if(!isOpen){
     panel.style.removeProperty('animation');
     void panel.offsetWidth;
-    panel.style.animation='qaColorFlow 5s linear infinite,qaPanelIn .38s cubic-bezier(.34,1.5,.64,1) both';
+    panel.style.animation='qaColorFlow 5s linear infinite,qaPanelIn .28s cubic-bezier(.2,0,.2,1) both';
     panel.style.display='flex';
+    if(backdrop) backdrop.style.display='block';
+    qaRefreshResizeHandle();
     if(!QA.history.length) qaRender();
     setTimeout(()=>document.getElementById('qaInput')?.focus(),50);
   } else {
-    panel.style.animation='qaColorFlow 5s linear infinite,qaPanelOut .28s cubic-bezier(.4,0,.6,1) both';
-    setTimeout(()=>{ panel.style.display='none'; },260);
+    panel.style.animation='qaColorFlow 5s linear infinite,qaPanelOut .22s cubic-bezier(.4,0,1,1) both';
+    if(backdrop) backdrop.style.display='none';
+    setTimeout(()=>{ panel.style.display='none'; },210);
   }
 }
+
+function qaRefreshResizeHandle(){
+  const h=document.getElementById('qaResizeHandle');
+  if(!h) return;
+  h.style.display=EDIT_MODE?'flex':'none';
+}
+
+(function qaInitResize(){
+  // Restore saved size
+  try{
+    const s=JSON.parse(localStorage.getItem('wep_qa_panel_size')||'{}');
+    if(s.w||s.h){
+      const p=document.getElementById('qaPanel');
+      if(p){ if(s.w) p.style.width=s.w+'px'; if(s.h) p.style.height=s.h+'px'; }
+    }
+  }catch(e){}
+  // Resize drag from bottom-left handle (panel is fixed to bottom-right)
+  document.addEventListener('mousedown',e=>{
+    const h=document.getElementById('qaResizeHandle');
+    if(!h||e.target!==h&&!h.contains(e.target)) return;
+    e.preventDefault();
+    const panel=document.getElementById('qaPanel');
+    const startX=e.clientX, startY=e.clientY;
+    const startW=panel.offsetWidth, startH=panel.offsetHeight;
+    function onMove(ev){
+      // dragging left expands width; dragging up expands height
+      const dw=startX-ev.clientX, dh=startY-ev.clientY;
+      panel.style.width =Math.max(320,startW+dw)+'px';
+      panel.style.height=Math.max(400,startH+dh)+'px';
+      panel.style.maxWidth='none'; panel.style.maxHeight='none';
+    }
+    function onUp(){
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+      try{ localStorage.setItem('wep_qa_panel_size',JSON.stringify({w:panel.offsetWidth,h:panel.offsetHeight})); }catch(e){}
+    }
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+  });
+})();
 
 function qaClear(){ QA.history=[]; qaRender(); }
 
@@ -4477,7 +4647,9 @@ function qaRender(){
     if(m.role==='user') return `<div class="qa-msg user">${esc(m.text)}</div>`;
     if(m.role==='error') return `<div class="qa-msg err">${esc(m.text)}</div>`;
     const hasTable=qaExtractTables(m.text).length>0;
-    const exp=hasTable?`<button class="qa-xls" onclick="qaExportExcel(${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M9 11l6 6M15 11l-6 6"/></svg> Export to Excel</button>`:'';
+    const xlsIcon=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M9 11l6 6M15 11l-6 6"/></svg>`;
+    const exp=hasTable?`<button class="qa-xls" onclick="qaExportExcel(${i})">${xlsIcon} Export to Excel</button>`
+      :(m.exportReq?`<button class="qa-xls" onclick="qaRunExport(${i})">${xlsIcon} Export to Excel</button>`:'');
     const src=m.source?`<div class="qa-src">${esc(m.source)}</div>`:'';
     return `<div class="qa-msg bot">${qaFmt(m.text)}${exp}${src}</div>`;
   }).join('') + (QA.busy?`<div class="qa-typing"><span></span><span></span><span></span></div>`:'');
@@ -4551,6 +4723,22 @@ function qaLoadExcelJS(){
   });
 }
 
+// "Export to Excel" button for a QA "export …" command answer — this is the
+// ONLY point that actually runs generateCustomExport (and triggers the browser
+// download); the chat command itself only validates + stages the request
+// (see qaHandleExport/qaSend) so typing "export…" never auto-downloads.
+function qaRunExport(idx){
+  const msg=QA.history[idx];
+  if(!msg||!msg.exportReq) return;
+  const {from,to,dash}=msg.exportReq;
+  const res=generateCustomExport(from,to,dash);
+  // Failures render as a normal chat message (not a native alert()) so the
+  // assistant panel is the single source of truth for export status.
+  if(!res||!res.ok){
+    QA.history.push({role:'bot',text:`Export failed: ${(res&&res.error)||'unknown error'}.`,source:'Local'});
+    qaRender();
+  }
+}
 // Export the table(s) in a bot answer to a marked-up .xlsx (borders + header fill).
 async function qaExportExcel(idx){
   const msg=QA.history[idx];
@@ -4809,6 +4997,11 @@ function qaDailyMetric(q){
   if(/weld|joint/.test(q)) return 'joints welded';
   return null;
 }
+// Detects a request to express a joint-count metric as pipe LENGTH instead of a raw count.
+function qaAsLength(q){ return /\bkms?\b|kilomet|pipe\s*length|\blength\b/i.test(q); }
+// Average spacing between consecutive weld joints, per user-supplied field figure:
+// ~11.5-12m per joint (midpoint ~11.75m) => ~83-84 joints per km (midpoint used below).
+const JOINTS_PER_KM=83.5;
 // Returns the literal repair-rate threshold phrase from q (round-trips into qaWelders), or null.
 function qaWelderThresh(q){
   const m=q.match(/(?:exceed\w*|above|over|greater|more|higher|>=?)[^\d]{0,6}\d+(?:\.\d+)?\s*%?/);
@@ -4828,6 +5021,7 @@ function qaExtractSlots(q, ds){
     welderThresh: ds==='welders'?qaWelderThresh(q):null,
     weekly: ds==='welders'?/weekly|this week|\bwk\b/.test(q):false,
     repeat: ds==='ncr'?/\brepeat(ed)?\b/.test(q):false,
+    asLength: ds==='daily'?qaAsLength(q):false,
   };
 }
 // Rebuild a canonical, single-valued query string from merged slots for the handlers.
@@ -4837,6 +5031,7 @@ function qaBuildQuery(slots){
   if(slots.welderThresh) p.push(slots.welderThresh);
   if(slots.weekly) p.push('weekly');
   if(slots.repeat) p.push('repeat');
+  if(slots.asLength) p.push('km');
   if(slots.metric) p.push(slots.metric);
   if(slots.status) p.push(slots.status);
   if(slots.sec) p.push('section '+slots.sec);
@@ -4897,6 +5092,7 @@ function qaResolveContext(q, cue){
     welderThresh: cur.welderThresh || inh.welderThresh||null,
     weekly: cur.weekly || (isFollowUp?!!inh.weekly:false),
     repeat: cur.repeat || (isFollowUp?!!inh.repeat:false),
+    asLength: cur.asLength || (isFollowUp?!!inh.asLength:false),
   };
   const df=curDate || (resetDate?null:(isFollowUp?inh.df:null)) || null;
   const op=curOp || (isFollowUp?inh.op:null) || null;
@@ -5023,6 +5219,12 @@ function qaDaily(q,op,df){
   if(!any) return 'No daily pipeline data is loaded'+(se?` for Section ${se}.`:'.');
   const where=se?`Section ${se}`:'all sections';
   const when=df?` in ${df.label}`:' (cumulative to date)';
+  // "km"/"kilometers"/"length" converts the joint count to pipe length using the
+  // field-measured spacing between consecutive weld joints (see JOINTS_PER_KM).
+  if(qaAsLength(q)){
+    const km=total/JOINTS_PER_KM;
+    return `${km.toFixed(2)} km of pipe ${sel.l} — ${where}${when} (${total.toLocaleString()} joints ÷ ~${JOINTS_PER_KM} joints/km).`;
+  }
   return `${total.toLocaleString()} ${sel.l} — ${where}${when}.`;
 }
 function qaDeployment(){
@@ -5031,7 +5233,81 @@ function qaDeployment(){
   return `${n} personnel in the actual mobilization record. Open the Manpower page for the full plan-vs-actual breakdown by location, role, and month.`;
 }
 function qaHelp(){
-  return `I can answer questions about RFIs, NCRs, SORs, welders, and pipeline progress. Try:\n\n- How many rejected RFIs in March 2026?\n- RFI status breakdown for Section 1\n- List welders exceeding 7% repair rate\n- How many open NCRs?\n- Total joints welded in Section 2 in January 2026`;
+  return `I can answer questions about RFIs, NCRs, SORs, welders, and pipeline progress. Try:\n\n- How many rejected RFIs in March 2026?\n- RFI status breakdown for Section 1\n- List welders exceeding 7% repair rate\n- How many open NCRs?\n- Total joints welded in Section 2 in January 2026\n- Export pipeline data\n- Export MOL data from 01/03/2026 to 31/03/2026`;
+}
+// ── EXPORT COMMANDS ("export pipeline data", "export MOL data from D/M/Y to D/M/Y") ──
+// Which dashboard's data to export. Explicit "mol"/"pipeline" wins; with neither
+// mentioned, falls back to whichever page the user is currently on.
+function qaExportDash(q){
+  if(/\bmol\b/.test(q)) return 'mol';
+  if(/\bpipeline\b|\bmain\b|\bppl\b|\bwep\b|\bdashboard\b/.test(q)) return 'dashboard';
+  return APP_VIEW==='mol'?'mol':'dashboard';
+}
+// Shared "is there anything to export" check, used both to short-circuit the
+// QA "export…" command (so it never shows a false success + button) and by
+// generateCustomExport's own guard — one definition, so the two can't disagree.
+function qaHasExportData(dash,from,to){
+  const _d=dash==='mol'?ST.molData:ST.data;
+  if(!_d) return false;
+  const hasDaily=!!(_d.daily1||_d.daily2||_d.daily3);
+  const hasRfi=!!(_d.rfi&&_d.rfi.length);
+  const hasNcr=(_d.ncr||[]).some(r=>r.date>=from&&r.date<=to);
+  const hasSor=(_d.sor||[]).some(r=>r.date>=from&&r.date<=to);
+  return hasDaily||hasRfi||hasNcr||hasSor;
+}
+// Turns a qaDateFilter-style prefix ('2026-03' or '2026') into a {from,to} ISO range.
+function qaPrefixToRange(prefix){
+  let m=prefix.match(/^(\d{4})-(\d{2})$/);
+  if(m){ const y=+m[1],mo=+m[2]; return {from:`${prefix}-01`,to:`${prefix}-${String(new Date(y,mo,0).getDate()).padStart(2,'0')}`}; }
+  m=prefix.match(/^(\d{4})$/);
+  if(m) return {from:`${prefix}-01-01`,to:`${prefix}-12-31`};
+  return null;
+}
+// Explicit "from DD/MM/YYYY to DD/MM/YYYY" range, or a month/year mention
+// ("March 2026", "2026"), or null (caller falls back to the dashboard's current
+// reporting duration — the "default reporting duration" behavior).
+function qaExportDateRange(q){
+  const m=q.match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})\s*(?:to|-|until|through|–|—)\s*(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/i);
+  if(m){
+    const from=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    const to=`${m[6]}-${m[5].padStart(2,'0')}-${m[4].padStart(2,'0')}`;
+    return {from,to};
+  }
+  const df=qaDateFilter(q);
+  if(df){
+    if(df.multi){
+      const ranges=df.parts.map(p=>qaPrefixToRange(p.prefix)).filter(Boolean);
+      if(!ranges.length) return null;
+      return {from:ranges.reduce((a,r)=>r.from<a?r.from:a,ranges[0].from),
+              to:  ranges.reduce((a,r)=>r.to>a?r.to:a,ranges[0].to)};
+    }
+    return qaPrefixToRange(df.prefix);
+  }
+  return null;
+}
+// Does NOT generate/download the file — only validates the request and stages
+// it. The actual XLSX.writeFile (and browser download prompt) fires only when
+// the user clicks the "Export to Excel" button (qaRunExport), never as a
+// side effect of typing the command.
+function qaHandleExport(rawq){
+  if(typeof XLSX==='undefined'||!XLSX) return 'The Excel export library is not loaded yet — please try again in a moment.';
+  const q=rawq.toLowerCase();
+  const dash=qaExportDash(q);
+  const range=qaExportDateRange(q);
+  const from=range?range.from:ST.start;
+  const to=range?range.to:ST.end;
+  if(!from||!to) return 'No reporting duration is set. Pick dates on the dashboard first, or say "export pipeline data from DD/MM/YYYY to DD/MM/YYYY".';
+  if(from>to) return '"From" date must be on or before "To" date.';
+  const dashLabel=dash==='mol'?'MOL 3.3':'Pipeline';
+  // Catch the "nothing to export" case here, before ever showing a success
+  // message — a false "Compiled Successfully" + button that fails on click
+  // is worse than just saying so up front.
+  if(!qaHasExportData(dash,from,to)) return `No ${dashLabel} data is loaded for that range. Upload the ${dashLabel} files first, then try again.`;
+  // Side channel: qaSend attaches this to the pushed history entry so the
+  // rendered message gets a persistent "Export to Excel" button — clicking it
+  // is what actually runs generateCustomExport (see qaRunExport).
+  QA.pendingExportReq={from,to,dash};
+  return `✅ ${dashLabel} Report Compiled Successfully`;
 }
 // Log a question the engine couldn't map to any dataset, so it can be reviewed
 // later to improve the parser. Fire-and-forget — never blocks or breaks the UI.
@@ -5059,6 +5335,9 @@ function qaAnswerLocal(rawq,isAdmin){
   // Strip leading conjunctions/fillers so "and how many in April?" parses as a follow-up.
   const q=raw.replace(/^\s*(and|also|what about|but|ok|okay|so|now|hey|please)\s+/i,'').trim().toLowerCase();
   if(!q) return 'Please type a question.';
+  // Export command: "export pipeline data", "export MOL data from D/M/Y to D/M/Y", …
+  // Handled before dataset resolution — export is an action, not a data query.
+  if(/\bexport\b/.test(q)) return qaHandleExport(q);
   // Meta-question: user asking how the engine calculated a previous answer.
   if(/how did you (calculate|compute|get|work out)|how is (that|this|it) calculated|what.{0,10}formula|how was (it|that|this) (calculated|computed|derived)/.test(q)){
     return 'I count and filter the raw records loaded from your uploaded Excel files. For **counts** I filter by status/date/section and return the row count. For **period values** (joints welded, NDT, FJC) I take the last cumulative reading inside the period minus the last reading before it. No external calculation — the numbers come directly from your data.';
@@ -5084,7 +5363,7 @@ function qaAnswerLocal(rawq,isAdmin){
   else { qaLogUnanswered(rawq); return null; }
   // Persist the resolved context so the next follow-up can inherit it.
   QA.lastCtx={ds, df, op, status:slots.status, sec:slots.sec, disc:slots.disc, ic:slots.ic,
-    group:slots.group, metric:slots.metric, welderThresh:slots.welderThresh, weekly:slots.weekly, repeat:slots.repeat};
+    group:slots.group, metric:slots.metric, welderThresh:slots.welderThresh, weekly:slots.weekly, repeat:slots.repeat, asLength:slots.asLength};
   return answer;
 }
 // LLM fallback — called only when the local parser returns null (a miss).
@@ -5136,7 +5415,8 @@ async function qaSend(){
       else { answerText=r.answer||'Sorry — the assistant is unavailable right now.'; }
     }
   }catch(e){ console.error('[QA]',e); answerText='Sorry — something went wrong reading the data.'; }
-  QA.history.push({role:'bot',text:answerText,source});
+  QA.history.push({role:'bot',text:answerText,source,exportReq:QA.pendingExportReq||null});
+  QA.pendingExportReq=null;
   QA.busy=false;
   if(btn) btn.disabled=false;
   // Local answers are instant — add a think delay so typing dots stay visible
@@ -5154,7 +5434,7 @@ async function loadAllFromDB(){
   const DAILY_COLS='date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance';
   const loadDaily=t=>sbSelectAll(t,`select=${DAILY_COLS}&order=date.asc`);
   try{
-    const [rfi,s1,s2,s3,wld,sor,ncr,dep,meta]=await Promise.all([
+    const [rfi,s1,s2,s3,wld,sor,ncr,dep,constAct,meta]=await Promise.all([
       sbSelectAll('rfi_records','select=rfi_no,date,discipline,section,ic,status&order=date.asc'),
       loadDaily('daily_sec1'),
       loadDaily('daily_sec2'),
@@ -5163,6 +5443,7 @@ async function loadAllFromDB(){
       sbSelectAll('sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc'),
       sbSelectAll('ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description&order=date.asc'),
       sbSelectAll('deployment_data','select=payload,file_name').catch(()=>[]),
+      sbSelectAll('const_activities_data','select=payload,file_name').catch(()=>[]),
       sbSelect('dataset_meta','select=key,file_name,row_count,uploaded_by,uploaded_at,date_start,date_end'),
     ]);
 
@@ -5179,6 +5460,12 @@ async function loadAllFromDB(){
       try{
         const d=typeof dep[0].payload==='string'?JSON.parse(dep[0].payload):dep[0].payload;
         if(d.plan&&d.actual){ ST.data.deployment=d; ST.files.deployment=dep[0].file_name||''; }
+      }catch(e){}
+    }
+    if(constAct.length && constAct[0].payload){
+      try{
+        const c=typeof constAct[0].payload==='string'?JSON.parse(constAct[0].payload):constAct[0].payload;
+        if(c.welding!=null){ ST.data.constAct=c; ST.files.constAct=constAct[0].file_name||''; }
       }catch(e){}
     }
 
@@ -6017,6 +6304,22 @@ async function saveDataToDB(key, parsed, fileName, pfx=''){
     return;
   }
 
+  // Construction Activities is a single "as of DATE" snapshot — same singleton
+  // pattern as deployment, its own table (main pipeline only).
+  if(key==='constAct'){
+    await fetch(`${SB_URL}/rest/v1/const_activities_data?id=eq.1`,{method:'DELETE',headers:SB_HDR}).catch(()=>{});
+    const r=await fetch(`${SB_URL}/rest/v1/const_activities_data`,{
+      method:'POST',
+      headers:{...SB_HDR,'Prefer':'return=minimal'},
+      body:JSON.stringify({id:1, payload:parsed, file_name:fileName,
+        uploaded_by:AUTH.currentUser?.username||'admin', uploaded_at:new Date().toISOString()})
+    });
+    if(!r.ok){const t=await r.text();throw new Error(`DB insert failed (const_activities_data): ${r.status} ${t}`);}
+    await sbUpsert('dataset_meta',{key:'constAct',file_name:fileName,row_count:1,
+      uploaded_by:AUTH.currentUser?.username||'admin', date_start:parsed.asOf||null, date_end:parsed.asOf||null});
+    return;
+  }
+
   const tableMap={rfi:'rfi_records',daily1:'daily_sec1',daily2:'daily_sec2',daily3:'daily_sec3',welders:'welder_records',sor:'sor_records',ncr:'ncr_records'};
   const base=tableMap[key];
   if(!base) return;
@@ -6267,195 +6570,353 @@ function maxDateAcross(...datasets){
   return max;
 }
 
-function generateCustomExport(){
+// fromOverride/toOverride/dashOverride let callers other than the modal (e.g. the
+// QA assistant's "export …" command) drive this headlessly. `dashOverride` is
+// 'dashboard'|'mol'; when omitted it follows the current page (activeData()),
+// matching the modal's original behavior. Returns {ok,file,from,to,dash} or
+// {ok:false,error}.
+function generateCustomExport(fromOverride,toOverride,dashOverride){
   const msg=document.getElementById('expMsg');
-  const showMsg=(txt,ok)=>{ if(msg){ msg.textContent=txt; msg.className='umg-msg '+(ok?'ok':'err'); } };
-  if(!XLSX){ showMsg('XLSX library not loaded.',false); return; }
+  const showMsg=(txt,ok)=>{if(msg){msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');}};
+  if(!XLSX){showMsg('XLSX library not loaded.',false);return{ok:false,error:'XLSX library not loaded.'};}
 
-  const from=document.getElementById('expFrom').value;
-  const to=document.getElementById('expTo').value;
-  if(!from||!to){ showMsg('Please choose both From and To dates.',false); return; }
-  if(from>to){ showMsg('"From" date must be on or before "To" date.',false); return; }
+  const from=fromOverride!=null?fromOverride:document.getElementById('expFrom').value;
+  const to=toOverride!=null?toOverride:document.getElementById('expTo').value;
+  if(!from||!to){showMsg('Please choose both From and To dates.',false);return{ok:false,error:'Both From and To dates are required.'};}
+  if(from>to){showMsg('"From" date must be on or before "To" date.',false);return{ok:false,error:'"From" date must be on or before "To" date.'};}
+  const isMolExport=dashOverride?dashOverride==='mol':APP_VIEW==='mol';
 
-  const sel={
-    rfiPeriod: document.getElementById('expRfiPeriod').checked,
-    rfiCumul:  document.getElementById('expRfiCumul').checked,
-    ndtPeriod: document.getElementById('expNdtPeriod').checked,
-    ndtCumul:  document.getElementById('expNdtCumul').checked,
-    fjcPeriod: document.getElementById('expFjcPeriod').checked,
-    fjcCumul:  document.getElementById('expFjcCumul').checked,
-    welders:   document.getElementById('expWelders').checked,
-    sor:       document.getElementById('expSor').checked,
-    ncr:       document.getElementById('expNcr').checked,
-  };
-  if(!Object.values(sel).some(Boolean)){ showMsg('Select at least one data set to export.',false); return; }
+  // ── Color palette — all 6-char RGB as required by xlsx-js-style ──────────
+  // NOTE: Excel's fill/font "theme" index 0 = lt1 (white), not dk1. Tinting
+  // white by -0.05 yields the template's normal-cell gray (F2F2F2) — there is
+  // no black fill anywhere in the source template.
+  const C_GRY ='F2F2F2'; // normal/default cell fill (theme0, tint -0.05)
+  const C_BLUE='4F81BD'; // section title bars, KPI label/target rows, OPEN mini-KPI
+  const C_LBLU='DBE5F1'; // light blue (column header rows)
+  const C_GRN ='4F6128'; // ACC mini-KPI label (dark green, theme6 tint -0.50)
+  const C_ORG ='E36C09'; // ACC W/C mini-KPI label (dark orange, theme9 tint -0.25)
+  const C_MGRY='808080'; // CAN mini-KPI label (mid gray, theme0 tint -0.50)
+  const C_RED ='C00000'; // REJ mini-KPI label (dark red, explicit RGB)
+  const C_W   ='FFFFFF'; // white font
 
-  const wb=XLSX.utils.book_new();
-  const ws={};
-
-  // ── styling primitives (xlsx-js-style) ────────────────────────────────
-  // Border color: 6-char RGB (no alpha prefix) as required by xlsx-js-style.
-  // Four independent side objects — sharing one object across top/bottom/left/right
-  // causes xlsx-js-style to mangle the border XML during XF deduplication.
-  const mkBorder=()=>({
+  // Each border has four independent side objects — shared refs cause XF bleed in xlsx-js-style
+  const bdr=()=>({
     top:   {style:'thin',color:{rgb:'000000'}},
     bottom:{style:'thin',color:{rgb:'000000'}},
     left:  {style:'thin',color:{rgb:'000000'}},
     right: {style:'thin',color:{rgb:'000000'}},
   });
-  // Style templates (border injected fresh per cell via mkBorder()).
-  const S_TITLE=()=>({font:{bold:true,sz:11},alignment:{horizontal:'center',vertical:'center'},border:mkBorder()});
-  const S_HEAD =()=>({font:{bold:true,sz:10},alignment:{horizontal:'center'},border:mkBorder()});
-  const S_LBL  =()=>({border:mkBorder()});
-  const S_NUM  =()=>({border:mkBorder(),alignment:{horizontal:'right'}});
-  const S_TLBL =()=>({font:{bold:true},border:mkBorder()});
-  const S_TNUM =()=>({font:{bold:true},border:mkBorder(),alignment:{horizontal:'right'}});
+  const fill=(rgb)=>({patternType:'solid',fgColor:{rgb}});
+  const font=(bold,sz,rgb)=>{const f={bold,sz};if(rgb)f.color={rgb};return f;};
+  const al=(h,v)=>{const a={};if(h)a.horizontal=h;if(v)a.vertical=v;return a;};
 
-  let MAXR=0,MAXC=0,placed=false;
-  const merges=[];
-  const put=(r,c,v,styleFn,fmt)=>{
-    const addr=XLSX.utils.encode_cell({r,c});
-    const num=(typeof v==='number'&&isFinite(v));
-    const cell={t:num?'n':'s',v:(v==null?'':v)};
-    // Fresh style object per cell — no shared references, no XF bleed.
-    const s=styleFn();
-    if(num&&fmt) s.numFmt=fmt;
-    cell.s=s;
-    ws[addr]=cell;
-    if(r>MAXR)MAXR=r; if(c>MAXC)MAXC=c;
-  };
-  // place a titled, bordered panel: title bar → header row → data rows
-  const panel=(r0,c0,title,headers,rows,o)=>{
-    o=o||{}; placed=true;
-    const span=headers.length;
-    put(r0,c0,title,S_TITLE);
-    for(let cc=1;cc<span;cc++) put(r0,c0+cc,'',S_TITLE); // border across merged title
-    merges.push({s:{r:r0,c:c0},e:{r:r0,c:c0+span-1}});
-    headers.forEach((h,j)=>put(r0+1,c0+j,h,S_HEAD));
-    rows.forEach((row,i)=>{
-      const isTot=o.totalRows&&o.totalRows.includes(i);
-      row.forEach((val,j)=>{
-        const pct=o.pctCols&&o.pctCols.includes(j);
-        const style=(j===0)?(isTot?S_TLBL:S_LBL):(isTot?S_TNUM:S_NUM);
-        put(r0+2+i,c0+j,val,style,pct?'0.00%':undefined);
-      });
-    });
-  };
-  const tlast=rows=>[rows.length-1];
+  // Style factories — called fresh per cell, zero shared object references.
+  // Font color omitted (undefined) wherever the template leaves it automatic/black.
+  const S_PHDR=()=>({fill:fill(C_GRY),font:font(true,13),alignment:al('center','center'),border:bdr()});
+  const S_DHDR=()=>({fill:fill(C_GRY),font:font(true,11),alignment:al('center','center'),border:bdr()});
+  const S_KLBL=()=>({fill:fill(C_BLUE),font:font(true,11,C_W),alignment:al('center','center'),border:bdr()});
+  const S_KVAL=()=>({fill:fill(C_GRY),font:font(true,24),alignment:al('center','center'),border:bdr()});
+  const S_KTGT=()=>({fill:fill(C_BLUE),font:font(true,11,C_W),alignment:al('center','center'),border:bdr()});
+  const S_STTL=()=>({fill:fill(C_BLUE),font:font(true,11,C_W),alignment:al('center','center'),border:bdr()});
+  const S_CHDR=()=>({fill:fill(C_LBLU),font:font(true,10),alignment:al('center'),border:bdr()});
+  const S_DLBL=()=>({fill:fill(C_GRY),font:font(false,11),alignment:al('left'),border:bdr()});
+  const S_DNUM=()=>({fill:fill(C_GRY),font:font(false,11),alignment:al('right'),border:bdr()});
+  const S_TLBL=()=>({fill:fill(C_GRY),font:font(true,11),alignment:al('center'),border:bdr()});
+  const S_TNUM=()=>({fill:fill(C_GRY),font:font(true,11),alignment:al('right'),border:bdr()});
+  // Mini-KPI panel styles — accent-colored labels, white font (explicit in template)
+  const S_MORG=()=>({fill:fill(C_ORG), font:font(true,11,C_W),alignment:al('center','center'),border:bdr()});
+  const S_MBLU=()=>({fill:fill(C_BLUE),font:font(true,11,C_W),alignment:al('center','center'),border:bdr()});
+  const S_MGRN=()=>({fill:fill(C_GRN), font:font(true,12,C_W),alignment:al('center','center'),border:bdr()});
+  const S_MDRK=()=>({fill:fill(C_MGRY),font:font(true,11,C_W),alignment:al('center','center'),border:bdr()});
+  const S_MRED=()=>({fill:fill(C_RED), font:font(true,11,C_W),alignment:al('center','center'),border:bdr()});
+  // Mini-KPI value cells — gray fill, automatic/black font (template leaves these unset)
+  const S_MV24=()=>({fill:fill(C_GRY),font:font(true,24),alignment:al('center','center'),border:bdr()});
+  const S_MV20=()=>({fill:fill(C_GRY),font:font(true,20),alignment:al('center','center'),border:bdr()});
 
-  const origStart=ST.start, origEnd=ST.end;
-  const _d=activeData(); // export the dashboard you're on (main or MOL 3.3)
-  try{
-    // ── RFI (band 1): period | KPIs | cumulative ──
-    let rfiP=null,rfiC=null,kpi=null;
-    if(_d.rfi){
-      const aP=aggRFI(_d.rfi.filter(r=>r.date>=from&&r.date<=to));
-      rfiP=aP.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
-      rfiP.push(['TOTAL',aP.totals.acc,aP.totals.accW,aP.totals.can,aP.totals.open,aP.totals.rej,aP.totals.total]);
-      const aC=aggRFI(_d.rfi);
-      rfiC=aC.rows.map(r=>[r.d,r.acc,r.accW,r.can,r.open,r.rej,r.total]);
-      rfiC.push(['TOTAL',aC.totals.acc,aC.totals.accW,aC.totals.can,aC.totals.open,aC.totals.rej,aC.totals.total]);
-      const T=aC.totals, tot=T.total||1;
-      kpi=[['ACC %',T.acc/tot],['ACC W/C %',T.accW/tot],['REJ %',T.rej/tot],
-           ['CAN %',T.can/tot],['OPEN %',T.open/tot],['REJ KPI',(T.rej/tot<0.05?'< 5% ✓':'≥ 5% ✗')]];
-    }
+  // ── Worksheet factory ────────────────────────────────────────────────────
+  const makeWS=()=>{
+    const ws={};
+    const merges=[];
+    let MR=0,MC=0;
 
-    // ── NDT + FJC: period (chosen range) and cumulative (full history) ──
-    let ndtP=null,fjcP=null,ndtC=null,fjcC=null,ndtCr=[],fjcCr=[];
-    ST.start=from; ST.end=to;
-    let r=getNDTRows(false);
-    if(r){const t=sumK(r,['welded','rev','appr','repair','bl']);ndtP=r.map(x=>[x.s,x.welded,x.rev,x.appr,x.repair,x.bl]);ndtP.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);}
-    r=getFJCRows(false);
-    if(r){const t=sumK(r,['released','total','accepted','repair','balance']);fjcP=r.map(x=>[x.s,x.released,x.total,x.accepted,x.repair,x.balance]);fjcP.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);}
-    ST.start=null; ST.end=maxDateAcross(_d.daily1,_d.daily2,_d.daily3)||origEnd;
-    r=getNDTRows(true);
-    if(r){ndtCr=r;const t=sumK(r,['welded','rev','appr','repair','bl']);ndtC=r.map(x=>[x.s,x.welded,x.rev,x.appr,x.repair,x.bl]);ndtC.push(['TOTAL',t.welded,t.rev,t.appr,t.repair,t.bl]);}
-    r=getFJCRows(true);
-    if(r){fjcCr=r;const t=sumK(r,['released','total','accepted','repair','balance']);fjcC=r.map(x=>[x.s,x.released,x.total,x.accepted,x.repair,x.balance]);fjcC.push(['TOTAL',t.released,t.total,t.accepted,t.repair,t.balance]);}
-    ST.start=origStart; ST.end=origEnd;
-
-    // ── Pipeline welding progress (band 4 left), real data only ──
-    // No per-section target exists in the data, so the 4th column shows FJC
-    // Accepted; % complete is welded against the 42,000-joint project scope
-    // (same denominator the on-screen progress bar uses).
-    let prog=null;
-    if(ndtCr.length){
-      prog=ndtCr.map(x=>{const f=fjcCr.find(y=>y.s===x.s);return [x.s,x.welded,f?f.accepted:0,x.welded/TOTAL_JOINTS];});
-      const wTot=ndtCr.reduce((a,x)=>a+x.welded,0), fTot=fjcCr.reduce((a,x)=>a+x.accepted,0);
-      prog.push(['OVERALL',wTot,fTot,wTot/TOTAL_JOINTS]);
-    }
-
-    // ── Welders > 3% repair (band 4 right) ──
-    let wel=null;
-    if(_d.welders&&_d.welders.length){
-      const over=_d.welders.filter(w=>w.cumPct>3&&w.cumAut>0).sort((a,b)=>b.cumPct-a.cumPct);
-      if(over.length){
-        wel=over.slice(0,3).map(w=>[w.name,w.id,w.section,w.cumPct/100]);
-        const cnt={};over.forEach(w=>{cnt[w.section]=(cnt[w.section]||0)+1;});
-        const summary=Object.entries(cnt).map(([s,n])=>`${s}:${n}`).join('  ')||'—';
-        wel.push(['Welders >3%',summary,'TOT',String(over.length)]);
-      }
-    }
-
-    // ── NCR / SOR by-status (band 5), filtered to the chosen range ──
-    const statusRows=(recs,keyFn)=>{
-      const m={};
-      recs.filter(r=>r.date>=from&&r.date<=to).forEach(r=>{
-        const k=keyFn(r); if(!m[k])m[k]={k,open:0,closed:0,total:0};
-        if(String(r.status).includes('CLOSED'))m[k].closed++; else m[k].open++; m[k].total++;
-      });
-      const rows=Object.values(m).sort((a,b)=>b.total-a.total).map(x=>[x.k,x.open,x.closed,x.total]);
-      const t=rows.reduce((a,x)=>[null,a[1]+x[1],a[2]+x[2],a[3]+x[3]],[null,0,0,0]);
-      rows.push(['TOTAL',t[1],t[2],t[3]]);
-      return rows;
+    const put=(r,c,v,sFn,fmt)=>{
+      const addr=XLSX.utils.encode_cell({r,c});
+      const isN=(typeof v==='number'&&isFinite(v));
+      const cell={t:isN?'n':'s',v:(v==null?'':v)};
+      const s=sFn();
+      if(isN&&fmt)s.numFmt=fmt;
+      cell.s=s;
+      ws[addr]=cell;
+      if(r>MR)MR=r; if(c>MC)MC=c;
     };
-    const ncrS=(_d.ncr&&_d.ncr.length)?statusRows(_d.ncr,r=>r.againstName):null;
-    const sorS=(_d.sor&&_d.sor.length)?statusRows(_d.sor,r=>r.ic):null;
 
-    // ── place panels on the fixed grid (checkboxes toggle each panel) ──
-    const RFI_H=['DISCIPLINE','ACC','ACC W/COMM','CAN','OPEN','REJ','TOTAL'];
-    const NDT_H=['SECTION','WELDED','EPCM REV','EPCM APPR','REPAIR','BACKLOG'];
-    const FJC_H=['SECTION','RELEASED','COATED','ACCEPTED','REPAIR','BALANCE'];
-    const ST_H =['IC','OPEN','CLOSED','TOTAL'];
+    // Fill a merged block — top-left gets value, rest get empty with same style
+    const mput=(r0,c0,r1,c1,v,sFn,fmt)=>{
+      for(let r=r0;r<=r1;r++)
+        for(let c=c0;c<=c1;c++)
+          put(r,c,(r===r0&&c===c0)?v:'',sFn,fmt);
+      if(r0!==r1||c0!==c1) merges.push({s:{r:r0,c:c0},e:{r:r1,c:c1}});
+    };
 
-    // ── header: project title + reporting duration spanning all 16 columns ──
-    const isoToDMY=d=>{if(!d||d==='—')return d||'—';const[y,m,dy]=d.split('-');return`${dy}/${m}/${y}`;};
-    const hdr1='WEST TO EAST PIPELINE "WEP" PROJECT  ·  P30312  ·  CONSTRUCTION QA/QC DASHBOARD';
-    const hdr2=`REPORTING PERIOD: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`;
-    const S_HDR1=()=>({font:{bold:true,sz:13},alignment:{horizontal:'center',vertical:'center'},border:mkBorder()});
-    const S_HDR2=()=>({font:{bold:true,sz:11},alignment:{horizontal:'center',vertical:'center'},border:mkBorder()});
-    put(0,0,hdr1,S_HDR1); for(let c=1;c<16;c++) put(0,c,'',S_HDR1);
-    put(1,0,hdr2,S_HDR2); for(let c=1;c<16;c++) put(1,c,'',S_HDR2);
-    merges.push({s:{r:0,c:0},e:{r:0,c:15}},{s:{r:1,c:0},e:{r:1,c:15}});
+    const seal=()=>{
+      ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:MR,c:MC}});
+      ws['!merges']=merges;
+      // Matches template: only column A has an explicit width (8.83); every
+      // other column is left at Excel's default (~8.43, "8" units).
+      ws['!cols']=[{wch:8.83}];
+      return ws;
+    };
 
-    // panels shifted down 3 rows (2 header rows + 1 blank gap)
-    if(sel.rfiPeriod&&rfiP) panel(3,0,'RFI — REPORTING PERIOD',RFI_H,rfiP,{totalRows:tlast(rfiP)});
-    if(sel.rfiCumul&&rfiC){
-      panel(3,9,'RFI — CUMULATIVE',RFI_H,rfiC,{totalRows:tlast(rfiC)});
-      if(kpi) panel(3,7,'RFI KPIs',['METRIC','VALUE'],kpi,{pctCols:[1]});
-    }
-    if(sel.ndtPeriod&&ndtP) panel(19,0,'WELDING / NDT — REPORTING PERIOD',NDT_H,ndtP,{totalRows:tlast(ndtP)});
-    if(sel.ndtCumul&&ndtC) panel(19,9,'WELDING / NDT — CUMULATIVE',NDT_H,ndtC,{totalRows:tlast(ndtC)});
-    if(sel.fjcPeriod&&fjcP) panel(27,0,'FJC — REPORTING PERIOD',FJC_H,fjcP,{totalRows:tlast(fjcP)});
-    if(sel.fjcCumul&&fjcC) panel(27,9,'FJC — CUMULATIVE',FJC_H,fjcC,{totalRows:tlast(fjcC)});
-    if(prog) panel(35,0,'PIPELINE WELDING PROGRESS',['SECTION','WELDED','FJC ACC','% COMPLETE'],prog,{totalRows:tlast(prog),pctCols:[3]});
-    if(sel.welders&&wel) panel(35,9,'WELDERS — HIGHEST REPAIR RATE',['NAME','W.ID','SEC','REP %'],wel,{pctCols:[3]});
-    if(sel.ncr&&ncrS) panel(43,0,'NCR — BY STATUS',ST_H,ncrS,{totalRows:tlast(ncrS)});
-    if(sel.sor&&sorS) panel(43,9,'SOR — BY STATUS',ST_H,sorS,{totalRows:tlast(sorS)});
-  }catch(e){
-    ST.start=origStart; ST.end=origEnd;
-    showMsg('Export failed: '+e.message,false);
-    return;
+    return {put,mput,seal};
+  };
+
+  // ── Data helpers ─────────────────────────────────────────────────────────
+  const isoToDMY=d=>{if(!d)return'—';const[y,m,dy]=d.split('-');return`${dy}/${m}/${y}`;};
+  const today=new Date().toISOString().slice(0,10);
+  const sv=(v,fb=0)=>(v==null?fb:v);
+
+  const mkStatusRows=(recs,keyFn)=>{
+    const m={};
+    recs.forEach(r=>{
+      const k=keyFn(r)||'OTHER';
+      if(!m[k])m[k]={k,open:0,closed:0,total:0};
+      if(String(r.status||'').includes('CLOSED'))m[k].closed++;else m[k].open++;
+      m[k].total++;
+    });
+    const rows=Object.values(m).sort((a,b)=>b.total-a.total);
+    const tot=rows.reduce((a,x)=>({k:'TOTAL',open:a.open+x.open,closed:a.closed+x.closed,total:a.total+x.total}),{k:'TOTAL',open:0,closed:0,total:0});
+    rows.push(tot);
+    return rows;
+  };
+
+  // ── Collect data ─────────────────────────────────────────────────────────
+  // getNDTRows/getFJCRows read activeData() internally (not a param), so a
+  // cross-page export request (dashOverride differs from the current page)
+  // must flip APP_VIEW for the duration — restored in the finally below.
+  const origStart=ST.start, origEnd=ST.end, origView=APP_VIEW;
+  if(dashOverride) APP_VIEW=(dashOverride==='mol'?'mol':'dashboard');
+  const _d=activeData();
+
+  let ndtP,fjcP,rfiPData,ndtC,fjcC,rfiCData;
+  let ncrPRecs=[],sorPRecs=[],ncrCRecs=[],sorCRecs=[];
+
+  try{
+    ST.start=from; ST.end=to;
+    ndtP=getNDTRows(false);
+    fjcP=getFJCRows(false);
+    rfiPData=_d.rfi?aggRFI(_d.rfi.filter(r=>r.date>=from&&r.date<=to)):null;
+    ncrPRecs=(_d.ncr||[]).filter(r=>r.date>=from&&r.date<=to);
+    sorPRecs=(_d.sor||[]).filter(r=>r.date>=from&&r.date<=to);
+
+    ST.start=null; ST.end=maxDateAcross(_d.daily1,_d.daily2,_d.daily3)||origEnd;
+    ndtC=getNDTRows(true);
+    fjcC=getFJCRows(true);
+    rfiCData=_d.rfi?aggRFI(_d.rfi):null;
+    ncrCRecs=_d.ncr||[];
+    sorCRecs=_d.sor||[];
+  }finally{
+    ST.start=origStart; ST.end=origEnd; APP_VIEW=origView;
   }
-  ST.start=origStart; ST.end=origEnd;
 
-  if(!placed){ showMsg('No data available for the selected data sets / range.',false); return; }
-  ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(MAXR,46),c:Math.max(MAXC,15)}});
-  ws['!merges']=merges;
-  ws['!cols']=[14.3,10,12,11,9,9,9,12,9,14.3,9,18,10,12,11,9].map(w=>({wch:w}));
-  XLSX.utils.book_append_sheet(wb,ws,'Dashboard');
-  XLSX.writeFile(wb,`P30312_Dashboard_${from}_to_${to}.xlsx`);
-  showMsg('Export generated — check your downloads folder.',true);
+  if(!qaHasExportData(isMolExport?'mol':'dashboard',from,to)){
+    showMsg('No data found for the selected date range.',false); return{ok:false,error:'No data found for the selected date range.'};
+  }
+
+  // Period KPIs
+  const ndtPT=ndtP?sumK(ndtP,['welded','rev','appr','repair','bl']):{welded:0,rev:0,appr:0,repair:0,bl:0};
+  const fjcPT=fjcP?sumK(fjcP,['released','total','accepted','repair','balance']):{released:0,total:0,accepted:0,repair:0,balance:0};
+  const pWeldRep=ndtPT.rev>0?ndtPT.repair/ndtPT.rev:null;
+  const pNdtBl=ndtPT.bl;
+  const pFjcRep=fjcPT.total>0?fjcPT.repair/fjcPT.total:null;
+  const pNcrTot=ncrPRecs.length;
+  const pNcrOvd=pNcrTot>0?ncrPRecs.filter(r=>!(r.status||'').includes('CLOSED')&&r.targetClose&&r.targetClose<today).length/pNcrTot:null;
+  const pNcrRpt=pNcrTot>0?ncrPRecs.filter(r=>r.repeatedNcr==='REPEATED').length/pNcrTot:null;
+
+  // Cumulative KPIs
+  const ndtCT=ndtC?sumK(ndtC,['welded','rev','appr','repair','bl']):{welded:0,rev:0,appr:0,repair:0,bl:0};
+  const fjcCT=fjcC?sumK(fjcC,['released','total','accepted','repair','balance']):{released:0,total:0,accepted:0,repair:0,balance:0};
+  const cWeldRep=ndtCT.rev>0?ndtCT.repair/ndtCT.rev:null;
+  const cNdtBl=ndtCT.bl;
+  const cFjcRep=fjcCT.total>0?fjcCT.repair/fjcCT.total:null;
+  const cNcrTot=ncrCRecs.length;
+  const cNcrOvd=cNcrTot>0?ncrCRecs.filter(r=>!(r.status||'').includes('CLOSED')&&r.targetClose&&r.targetClose<today).length/cNcrTot:null;
+  const cNcrRpt=cNcrTot>0?ncrCRecs.filter(r=>r.repeatedNcr==='REPEATED').length/cNcrTot:null;
+
+  // Status breakdowns
+  const ncrPSt=ncrPRecs.length?mkStatusRows(ncrPRecs,r=>r.againstName):null;
+  const sorPSt=sorPRecs.length?mkStatusRows(sorPRecs,r=>r.ic):null;
+  const ncrCSt=ncrCRecs.length?mkStatusRows(ncrCRecs,r=>r.againstName):null;
+  const sorCSt=sorCRecs.length?mkStatusRows(sorCRecs,r=>r.ic):null;
+
+  // ── Build one sheet (period or cumulative) ────────────────────────────────
+  const buildSheet=(isPeriod)=>{
+    const {put,mput,seal}=makeWS();
+
+    const ndtRows=isPeriod?ndtP:ndtC;
+    const fjcRows=isPeriod?fjcP:fjcC;
+    const rfiData=isPeriod?rfiPData:rfiCData;
+    const ncrSt  =isPeriod?ncrPSt:ncrCSt;
+    const sorSt  =isPeriod?sorPSt:sorCSt;
+    const weldRep=isPeriod?pWeldRep:cWeldRep;
+    const ndtBl  =isPeriod?pNdtBl:cNdtBl;
+    const fjcRep =isPeriod?pFjcRep:cFjcRep;
+    const ncrOvd =isPeriod?pNcrOvd:cNcrOvd;
+    const ncrRpt =isPeriod?pNcrRpt:cNcrRpt;
+    const rfiTot =rfiData?rfiData.totals:{acc:0,accW:0,can:0,open:0,rej:0,total:1};
+
+    // ── Rows 1-2: project + period header (B:O = cols 1-14) ──────────────
+    const PH=isMolExport
+      ?'MOL 3.3  ·  P30312  ·  CONSTRUCTION QA/QC DASHBOARD'
+      :'WEST TO EAST PIPELINE "WEP" PROJECT  ·  P30312  ·  CONSTRUCTION QA/QC DASHBOARD';
+    mput(1,1,1,14,PH,S_PHDR);
+    const DH=isPeriod
+      ?`REPORTING DURATION: FROM ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
+      :'CUMULATIVE DATA';
+    mput(2,1,2,14,DH,S_DHDR);
+
+    // Row 3 and the gap columns (D,G,J,M) between KPI cards are left
+    // completely unstyled — no fill, no border — matching the template.
+
+    // ── Rows 4-9: KPI cards ────────────────────────────────────────────────
+    const kpiCards=[
+      {c0:1, c1:2,  lbl:'Welding Repair %',  val:weldRep, fmt:'0.00%', tgt:'Target < 3%'},
+      {c0:4, c1:5,  lbl:'NDT Backlog',        val:ndtBl,   fmt:'#,##0', tgt:'Target: Minimize', cnt:true},
+      {c0:7, c1:8,  lbl:'FJC Repair %',       val:fjcRep,  fmt:'0.00%', tgt:'Target < 1%'},
+      {c0:10,c1:11, lbl:'NCRs Overdue %',     val:ncrOvd,  fmt:'0.00%', tgt:'Target < 5%'},
+      {c0:13,c1:14, lbl:'NCRs Repeated %',    val:ncrRpt,  fmt:'0.00%', tgt:'Target < 5%'},
+    ];
+    kpiCards.forEach(({c0,c1,lbl,val,fmt,tgt,cnt})=>{
+      mput(4,c0,5,c1,lbl,S_KLBL);
+      const dispVal=val!=null?val:'—';
+      mput(6,c0,8,c1,dispVal,S_KVAL,(!cnt&&val!=null)?fmt:undefined);
+      mput(9,c0,9,c1,tgt,S_KTGT);
+    });
+
+    // Rows 10-11 are left completely unstyled — no fill, no border.
+
+    // ── RFI SECTION (row 12) ───────────────────────────────────────────────
+    const rfiTitle=isPeriod
+      ?`RFI STATUS — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
+      :'RFI — CUMULATIVE';
+    mput(12,1,12,9,rfiTitle,S_STTL);
+    // Column headers (row 13): label spans B:D (cols 1-3), then E-J (cols 4-9)
+    mput(13,1,13,3,'DISCIPLINE',S_CHDR);
+    ['ACC','ACC W/C','CAN','OPEN','REJ','TOTAL'].forEach((h,i)=>put(13,4+i,h,S_CHDR));
+
+    // Data rows (rows 14+)
+    const rfiRows=rfiData?rfiData.rows:[];
+    let rRow=14;
+    rfiRows.forEach(row=>{
+      mput(rRow,1,rRow,3,row.d,S_DLBL);
+      [row.acc,row.accW,row.can,row.open,row.rej,row.total].forEach((v,i)=>put(rRow,4+i,v,S_DNUM));
+      rRow++;
+    });
+    // TOTAL row
+    mput(rRow,1,rRow,3,'TOTAL',S_TLBL);
+    [sv(rfiTot.acc),sv(rfiTot.accW),sv(rfiTot.can),sv(rfiTot.open),sv(rfiTot.rej),sv(rfiTot.total)]
+      .forEach((v,i)=>put(rRow,4+i,v,S_TNUM));
+    rRow++;
+
+    // ── Mini-KPI side panel (cols 11-13, rows 14-22) ─────────────────────
+    // Positioned at same rows as RFI data, right side — cols don't overlap
+    if(rfiData&&sv(rfiTot.total)>0){
+      const t=sv(rfiTot.total)||1;
+      put(14,11,'ACC W/C',S_MORG); put(14,13,'OPEN',S_MBLU);
+      mput(15,11,16,11,sv(rfiTot.accW)/t,S_MV20,'0%');
+      mput(15,13,16,13,sv(rfiTot.open)/t,S_MV20,'0%');
+      put(17,12,'ACC',S_MGRN);
+      mput(18,12,19,12,sv(rfiTot.acc)/t,S_MV24,'0%');
+      put(20,11,'CAN',S_MDRK); put(20,13,'REJ',S_MRED);
+      mput(21,11,22,11,sv(rfiTot.can)/t,S_MV20,'0%');
+      mput(21,13,22,13,sv(rfiTot.rej)/t,S_MV20,'0%');
+    }
+
+    // ── WELDING / NDT SECTION ─────────────────────────────────────────────
+    const NDT_R=Math.max(28,rRow+2);
+    const ndtTitle=isPeriod
+      ?`WELDING / NDT — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
+      :'WELDING / NDT — CUMULATIVE';
+    mput(NDT_R,1,NDT_R,8,ndtTitle,S_STTL);
+    mput(NDT_R+1,1,NDT_R+1,3,'SECTION',S_CHDR);
+    ['WELDED','EPCM REV','EPCM APPR','REPAIR','BACKLOG'].forEach((h,i)=>put(NDT_R+1,4+i,h,S_CHDR));
+    let nRow=NDT_R+2;
+    (ndtRows||[]).forEach(row=>{
+      mput(nRow,1,nRow,3,row.s,S_DLBL);
+      [row.welded,row.rev,row.appr,row.repair,row.bl].forEach((v,i)=>put(nRow,4+i,v,S_DNUM));
+      nRow++;
+    });
+    const ndtT=ndtRows?sumK(ndtRows,['welded','rev','appr','repair','bl']):{welded:0,rev:0,appr:0,repair:0,bl:0};
+    mput(nRow,1,nRow,3,'TOTAL',S_TLBL);
+    [ndtT.welded,ndtT.rev,ndtT.appr,ndtT.repair,ndtT.bl].forEach((v,i)=>put(nRow,4+i,v,S_TNUM));
+    nRow++;
+
+    // ── FJC SECTION ──────────────────────────────────────────────────────
+    const FJC_R=Math.max(36,nRow+2);
+    const fjcTitle=isPeriod
+      ?`FJC — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
+      :'FJC — CUMULATIVE';
+    mput(FJC_R,1,FJC_R,8,fjcTitle,S_STTL);
+    mput(FJC_R+1,1,FJC_R+1,3,'SECTION',S_CHDR);
+    ['RELEASED','COATED','ACCEPTED','REPAIR','BALANCE'].forEach((h,i)=>put(FJC_R+1,4+i,h,S_CHDR));
+    let fRow=FJC_R+2;
+    (fjcRows||[]).forEach(row=>{
+      mput(fRow,1,fRow,3,row.s,S_DLBL);
+      [row.released,row.total,row.accepted,row.repair,row.balance].forEach((v,i)=>put(fRow,4+i,v,S_DNUM));
+      fRow++;
+    });
+    const fjcT=fjcRows?sumK(fjcRows,['released','total','accepted','repair','balance']):{released:0,total:0,accepted:0,repair:0,balance:0};
+    mput(fRow,1,fRow,3,'TOTAL',S_TLBL);
+    [fjcT.released,fjcT.total,fjcT.accepted,fjcT.repair,fjcT.balance].forEach((v,i)=>put(fRow,4+i,v,S_TNUM));
+    fRow++;
+
+    // ── NCR SECTION ──────────────────────────────────────────────────────
+    const NCR_R=Math.max(44,fRow+2);
+    const ncrTitle=isPeriod
+      ?`NCR — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
+      :'NCR — BY STATUS';
+    mput(NCR_R,1,NCR_R,6,ncrTitle,S_STTL);
+    mput(NCR_R+1,1,NCR_R+1,3,'IC',S_CHDR);
+    ['OPEN','CLOSED','TOTAL'].forEach((h,i)=>put(NCR_R+1,4+i,h,S_CHDR));
+    let ncRow=NCR_R+2;
+    (ncrSt||[]).forEach(row=>{
+      const isTot=row.k==='TOTAL';
+      mput(ncRow,1,ncRow,3,row.k,isTot?S_TLBL:S_DLBL);
+      [row.open,row.closed,row.total].forEach((v,i)=>put(ncRow,4+i,v,isTot?S_TNUM:S_DNUM));
+      ncRow++;
+    });
+
+    // ── SOR SECTION ──────────────────────────────────────────────────────
+    const SOR_R=Math.max(NCR_R+6,ncRow+2);
+    const sorTitle=isPeriod
+      ?`SOR — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
+      :'SOR — BY STATUS';
+    mput(SOR_R,1,SOR_R,6,sorTitle,S_STTL);
+    mput(SOR_R+1,1,SOR_R+1,3,'IC',S_CHDR);
+    ['OPEN','CLOSED','TOTAL'].forEach((h,i)=>put(SOR_R+1,4+i,h,S_CHDR));
+    let srRow=SOR_R+2;
+    (sorSt||[]).forEach(row=>{
+      const isTot=row.k==='TOTAL';
+      mput(srRow,1,srRow,3,row.k,isTot?S_TLBL:S_DLBL);
+      [row.open,row.closed,row.total].forEach((v,i)=>put(srRow,4+i,v,isTot?S_TNUM:S_DNUM));
+      srRow++;
+    });
+
+    return seal();
+  };
+
+  try{
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,buildSheet(true), 'REP_DUR');
+    XLSX.utils.book_append_sheet(wb,buildSheet(false),'CUM');
+    const file=`P30312_${isMolExport?'MOL33':'QAQC'}_${from}_to_${to}.xlsx`;
+    XLSX.writeFile(wb,file);
+    showMsg('Export generated — check your downloads folder.',true);
+    return{ok:true,file,from,to,dash:isMolExport?'mol':'dashboard'};
+  }catch(e){
+    showMsg('Export failed: '+e.message,false);
+    console.error('generateCustomExport:',e);
+    return{ok:false,error:e.message};
+  }
 }
 
 async function exportDashboardImage(){
@@ -6905,6 +7366,7 @@ function toggleEditMode(){
       :'';
   }
   if(EDIT_MODE){ activateEditMode(); refreshHiddenMenu(); } else deactivateEditMode();
+  qaRefreshResizeHandle();
 }
 
 function activateEditMode(){
