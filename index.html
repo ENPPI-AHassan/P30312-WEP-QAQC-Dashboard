@@ -94,8 +94,9 @@ body{background:#1e2130;color:#f1f0e8;font-family:system-ui,-apple-system,sans-s
 .dtb-tab.active{background:#1e2235;color:#e2e8f4;box-shadow:0 1px 4px rgba(0,0,0,.35)}
 /* ── KPI Strip (canvas panel) ───────────────────────────────── */
 #kpiStrip{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px;height:100%}
-.ks-card{background:var(--card,#0e1520);border:1px solid var(--border,#2d3348);border-radius:10px;padding:10px 12px;transition:border-color .2s,box-shadow .2s;display:flex;flex-direction:column;position:relative;overflow:hidden}
-.ks-card:hover{border-color:var(--ks-c,#7a809a);box-shadow:0 0 18px color-mix(in srgb,var(--ks-c,#7a809a) 15%,transparent)}
+.ks-card{background:var(--card,#0e1520);border:1px solid var(--border,#2d3348);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;position:relative;overflow:visible}
+.ks-card::after{content:'';position:absolute;bottom:-3px;left:4%;right:4%;height:6px;border-radius:0 0 10px 10px;background:var(--ks-c,#7a809a);filter:blur(7px);pointer-events:none;animation:ksGlow 1s ease-in-out infinite alternate;animation-delay:var(--ks-delay,0s)}
+@keyframes ksGlow{from{opacity:.1}to{opacity:.45}}
 .ks-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#7a809a;margin-bottom:4px;position:relative;z-index:2}
 .ks-val{font-size:22px;font-weight:800;font-family:monospace;line-height:1;margin-bottom:2px;position:relative;z-index:2}
 .ks-sub{font-size:9px;color:#7a809a;margin-bottom:5px;position:relative;z-index:2}
@@ -2375,15 +2376,17 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWel
     </svg>`;
   };
 
+  let _ci=0;
   const mkCard=(label,val,sub,pill,color,sparkData=[],noDataMsg=null)=>{
+    const delay=(_ci++*0.18).toFixed(2);
     if(val==null&&noDataMsg){
-      return`<div class="ks-card">
+      return`<div class="ks-card" style="--ks-c:${color};--ks-delay:${delay}s">
         <div class="ks-lbl">${label}</div>
         <div class="ks-nodata">${noDataMsg}</div>
       </div>`;
     }
     const v=val!=null?val:na;
-    return`<div class="ks-card" style="--ks-c:${color}">
+    return`<div class="ks-card" style="--ks-c:${color};--ks-delay:${delay}s">
       ${mkSpark(sparkData,color)}
       <div class="ks-lbl">${label}</div>
       <div class="ks-val" style="color:${val!=null?color:'#4a5068'}">${v}</div>
@@ -2405,7 +2408,7 @@ function bKPIStrip({ sc, weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWel
     ?(aFjcRepair<=1?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 1% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
     :null;
   const blPill=aNdtBacklog!=null&&ndtBacklogGoal!=null
-    ?(aNdtBacklog<=ndtBacklogGoal?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:`GOAL ≤ ${fn(ndtBacklogGoal)} ✓`}:{bg:'rgba(249,115,22,.1)',bc:'rgba(249,115,22,.28)',c:'#f97316',txt:`GOAL ≤ ${fn(ndtBacklogGoal)}`})
+    ?(aNdtBacklog<=ndtBacklogGoal?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:`GOAL ≤ ${fn(ndtBacklogGoal)} ✓`}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:`GOAL ≤ ${fn(ndtBacklogGoal)}`})
     :null;
   const ncrPill=aNcrOverduePct!=null
     ?(aNcrOverduePct<=5?{bg:'rgba(20,184,166,.1)',bc:'rgba(20,184,166,.28)',c:'#14b8a6',txt:'TARGET < 5% ✓'}:{bg:'rgba(244,63,94,.1)',bc:'rgba(244,63,94,.28)',c:'#f43f5e',txt:'▲ ABOVE TARGET'})
@@ -4538,7 +4541,7 @@ async function sbRpc(fn, body){
 // ═══════════════════════════════════════════════════
 // Q&A ASSISTANT (chat widget)
 // ═══════════════════════════════════════════════════
-const QA = { history: [], busy: false, lastCtx: null, pendingExportReq: null };
+const QA = { history: [], busy: false, lastCtx: null, pendingExportReq: null, pendingFullTables: null };
 
 // Show the launcher for logged-in non-guest users; hide for guests / logged-out.
 function qaSyncVisibility(){
@@ -4743,7 +4746,10 @@ function qaRunExport(idx){
 async function qaExportExcel(idx){
   const msg=QA.history[idx];
   if(!msg) return;
-  const tables=qaExtractTables(msg.text);
+  // Prefer the full (untruncated) row set stashed by qaTable/qaGroupedList —
+  // the rendered chat text caps at 200 rows/group for readability, but the
+  // export must include everything that matched, however many rows that is.
+  const tables=(msg.fullTables&&msg.fullTables.length)?msg.fullTables:qaExtractTables(msg.text);
   if(!tables.length) return;
   let ExcelJS;
   try{ ExcelJS=await qaLoadExcelJS(); }
@@ -4900,6 +4906,7 @@ const QA_IC=['binasheer','cpecc','mpm','gulfrock'];
 function qaCap(s){ return s?s[0].toUpperCase()+s.slice(1):s; }
 function qaCell(v){ return (v==null||v==='')?'—':String(v).replace(/\|/g,'/').replace(/\s*\n\s*/g,' ').trim(); }
 function qaFmtDate(s){ if(!s||s==='—') return '—'; const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/); return m?`${m[3]}/${m[2]}/${m[1]}`:s; }
+function qaTruncate(s,n){ s=String(s||''); return s.length>n?s.slice(0,n).trim()+'…':s; }
 function qaSection(q){ const m=q.match(/(?:section|sec)[\s-]*([123])\b/); return m?m[1]:null; }
 function qaDiscipline(q){ return QA_DISC.find(d=>q.includes(d))||null; }
 function qaIC(q){ const nq=q.replace(/\s+/g,''); return QA_IC.find(c=>nq.includes(c))||null; }
@@ -4935,8 +4942,9 @@ function qaOp(q){
   if(/average|avg|\bmean\b/.test(q)) return 'avg';
   if(/\btotal\b|\bsum\b/.test(q)) return 'sum';
   // Explicit list verbs win over the "by X" breakdown heuristic so "list RFIs by IC"
-  // produces a grouped list, not a status breakdown.
-  if(/\blist\b|show |which |\bwho\b|name the|give me|\bput\b|tabulate/.test(q)) return 'list';
+  // produces a grouped list, not a status breakdown. Dataset-name + "no./number" is
+  // also a list request ("NCR no", "SOR number") — the user wants the identifiers.
+  if(/\blist\b|show |which |\bwho\b|name the|give me|\bput\b|tabulate|\b(ncr|rfi|sor)s?\s*(no\.?|number|#)\b/.test(q)) return 'list';
   if(/break\s?down|group(ed)?\s+by|\bby status\b|\bby section\b|per section|\bby discipline\b|\bby contractor\b|\bby ic\b/.test(q)) return 'breakdown';
   if(/how many|number of|\bcount\b|how much/.test(q)) return 'count';
   return null;
@@ -4956,11 +4964,15 @@ function qaGroupedList(rows, groupField, headers, rowFn, title, groupLabel){
   const sorted=Object.entries(groups).sort((a,b)=>b[1].length-a[1].length);
   const head=`| ${headers.join(' | ')} |`;
   const sep=`| ${headers.map(()=>'---').join(' | ')} |`;
+  // One full (untruncated) table per group — see qaTable for why.
+  const fullTables=[];
   const parts=sorted.map(([k,gr])=>{
+    fullTables.push({headers,rows:gr.map(r=>rowFn(r).map(qaCell))});
     const body=gr.slice(0,200).map(r=>`| ${rowFn(r).map(qaCell).join(' | ')} |`).join('\n');
     const note=gr.length>200?`\n\n_Showing first 200 of ${gr.length}._`:'';
     return `**${k}** — ${gr.length} record${gr.length===1?'':'s'}\n\n${head}\n${sep}\n${body}${note}`;
   });
+  QA.pendingFullTables=fullTables;
   return `${title} — ${rows.length} total, grouped by ${(groupLabel||groupField).toUpperCase()}\n\n${parts.join('\n\n')}`;
 }
 function qaRfiStatus(q){
@@ -5009,6 +5021,54 @@ function qaWelderThresh(q){
   const m2=q.match(/(?:below|under|less|lower|<=?)[^\d]{0,6}\d+(?:\.\d+)?\s*%?/);
   return m2?m2[0].trim():null;
 }
+// Structural/filler words stripped when looking for a leftover free-text
+// "topic" phrase to search NCR/SOR descriptions with (qaTopic below).
+const QA_TOPIC_STOP=new Set(['a','an','the','is','are','was','were','what','which','who','that','this',
+  'for','of','to','by','in','on','with','from','and','or','no','number','numbers',
+  'raised','against','regarding','about','related','concerning','concern',
+  'please','can','you','tell','me','give','show','list','find','know','want',
+  'ncr','ncrs','sor','sors','observation','observations','non','conformance','conformity',
+  'company','contractor','ic',
+  'open','closed','close','overdue','repeat','repeated','status',
+  'section','sec','discipline',
+  'total','sum','average','avg','mean','count','how','many','much','breakdown','group','grouped','per','classified',
+  'binasheer','cpecc','mpm','gulfrock',
+  // Meta-vocabulary about the query itself — must never be mistaken for a real
+  // topic, otherwise a reset cue like "regardless of topic" would extract
+  // "regardless topic" as if IT were the search term (self-defeating).
+  'regardless','topic','topics','reason','reasons','description',
+  // Pronouns/quantifiers/leading conjunctions — the exact same vocabulary
+  // qaFollowCue/qaIsFollowUp treat as a follow-up CUE, not real content
+  // (e.g. "list all of them" must not extract "all them" as a search term).
+  'them','those','these','it','ones','one','all','any','some','each','every','both',
+  'and','also','but','then','now','ok','okay']);
+// Returns the leftover free-text "topic"/reason phrase in q (after stripping
+// dates, punctuation, and known structural/filler words), or null if nothing
+// meaningful survives. Used for NCR/SOR description search — see qaNCR/qaSOR.
+// Must be idempotent: qaBuildQuery re-embeds the extracted phrase verbatim,
+// and the handler re-derives it by calling qaTopic() again on that phrase.
+function qaTopic(q){
+  let s=String(q||'').toLowerCase()
+    .replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{4}\b/g,' ')
+    .replace(/\b\d{4}-\d{2}(-\d{2})?\b/g,' ')
+    .replace(/\b20\d{2}\b/g,' ')
+    .replace(/[?.,!#]/g,' ');
+  const words=s.split(/\s+/).filter(w=>w&&w.length>2&&!QA_TOPIC_STOP.has(w));
+  if(!words.length) return null;
+  return words.join(' ');
+}
+// Filters rows to those whose `desc` field contains every topic token —
+// tolerant of a trailing 's' so "delay"/"delays" both match. Shared by qaNCR/qaSOR.
+function qaTopicFilter(rows,topic){
+  const toks=topic.split(' ');
+  return rows.filter(r=>{
+    const d=String(r.desc||'').toLowerCase();
+    return toks.every(t=>{
+      const key=(t.length>3&&t.endsWith('s'))?t.slice(0,-1):t;
+      return d.includes(key);
+    });
+  });
+}
 // Pull every filter slot the current question explicitly specifies.
 function qaExtractSlots(q, ds){
   return {
@@ -5022,6 +5082,7 @@ function qaExtractSlots(q, ds){
     weekly: ds==='welders'?/weekly|this week|\bwk\b/.test(q):false,
     repeat: ds==='ncr'?/\brepeat(ed)?\b/.test(q):false,
     asLength: ds==='daily'?qaAsLength(q):false,
+    topic:  (ds==='ncr'||ds==='sor')?qaTopic(q):null,
   };
 }
 // Rebuild a canonical, single-valued query string from merged slots for the handlers.
@@ -5038,6 +5099,7 @@ function qaBuildQuery(slots){
   if(slots.disc) p.push(slots.disc);
   if(slots.ic) p.push(slots.ic);
   if(slots.group) p.push('by '+slots.group);
+  if(slots.topic) p.push(slots.topic);
   return p.join(' ');
 }
 // Explicit continuation cue: a leading conjunction, "what about…", or a pronoun.
@@ -5081,6 +5143,7 @@ function qaResolveContext(q, cue){
   const resetDate=/\b(to date|overall|cumulativ\w*|all[- ]?time|so far|whole project|in total|altogether)\b/.test(q);
   const resetSec =/\b(all sections|across all sections|every section|any section|all of the sections)\b/.test(q);
   const resetStat=/\b(regardless of status|all statuses|any status|all status|every status)\b/.test(q);
+  const resetTopic=/\b(any topic|all topics|regardless of (topic|reason|description)|any reason)\b/.test(q);
   const inh=isFollowUp?(ctx||{}):{};
   const slots={
     status: cur.status || (resetStat?null:inh.status||null),
@@ -5093,6 +5156,7 @@ function qaResolveContext(q, cue){
     weekly: cur.weekly || (isFollowUp?!!inh.weekly:false),
     repeat: cur.repeat || (isFollowUp?!!inh.repeat:false),
     asLength: cur.asLength || (isFollowUp?!!inh.asLength:false),
+    topic:  cur.topic  || (resetTopic?null:(isFollowUp?inh.topic||null:null)),
   };
   const df=curDate || (resetDate?null:(isFollowUp?inh.df:null)) || null;
   const op=curOp || (isFollowUp?inh.op:null) || null;
@@ -5123,6 +5187,9 @@ function qaTable(headers,rows,title,total){
   const shown=rows.slice(0,200);
   const body=shown.map(r=>`| ${r.map(qaCell).join(' | ')} |`).join('\n');
   const note=total>shown.length?`\n\n_Showing first ${shown.length} of ${total}._`:'';
+  // Stash the FULL row set (not just the 200 shown in chat) so the "Export to
+  // Excel" button on this answer exports everything, not just what's rendered.
+  QA.pendingFullTables=[{headers,rows:rows.map(r=>r.map(qaCell))}];
   return `${title} — ${total} total\n\n${head}\n${sep}\n${body}${note}`;
 }
 function qaRFI(q,op,df){
@@ -5153,12 +5220,17 @@ function qaNCR(q,op,df){
   // NCR's contractor is the "against" party (againstName), not an `ic` field.
   const ic=qaIC(q); if(ic){ rows=rows.filter(r=>String(r.againstName||'').toLowerCase().replace(/\s+/g,'').includes(ic)); sc.push(ic.toUpperCase()); }
   if(df){ rows=rows.filter(r=>qaInDate(r,df)); sc.push(df.label); }
+  // Free-text search on the description ("preservation", "post padding delays", …).
+  // A topic search almost always wants to know WHICH records matched, not just a count.
+  const topic=qaTopic(q); if(topic){ rows=qaTopicFilter(rows,topic); sc.push(`"${topic}"`); if(!op) op='list'; }
   const sct=sc.length?` (${sc.join(', ')})`:'';
+  const ncrHeaders=topic?['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST','DESCRIPTION']:['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST'];
+  const ncrRow=r=>topic?[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName,qaTruncate(r.desc,80)]:[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName];
   // "by IC"/"by contractor" maps to againstName for NCRs.
   const ncrGroupBy=qaGroupBy(q), ncrDim=ncrGroupBy==='ic'?'against':ncrGroupBy;
-  if(ncrGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,ncrDim==='against'?'againstName':ncrDim,['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST'],r=>[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName],'NCRs'+sct,ncrDim==='against'?'contractor':ncrDim);
+  if(ncrGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,ncrDim==='against'?'againstName':ncrDim,ncrHeaders,ncrRow,'NCRs'+sct,ncrDim==='against'?'contractor':ncrDim);
   if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdownDim(rows,ncrDim,'NCR',sct);
-  if(op==='list') return qaTable(['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST'],rows.map(r=>[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName]),'NCRs'+sct,rows.length);
+  if(op==='list') return qaTable(ncrHeaders,rows.map(ncrRow),'NCRs'+sct,rows.length);
   return `${rows.length} NCR${rows.length===1?'':'s'}${sct}.`;
 }
 function qaSOR(q,op,df){
@@ -5168,11 +5240,15 @@ function qaSOR(q,op,df){
   else if(/clos/.test(q)){ rows=rows.filter(r=>/clos/i.test(r.status||'')); sc.push('Closed'); }
   const ic=qaIC(q); if(ic){ rows=rows.filter(r=>String(r.ic||'').toLowerCase().replace(/\s+/g,'').includes(ic)); sc.push(ic.toUpperCase()); }
   if(df){ rows=rows.filter(r=>qaInDate(r,df)); sc.push(df.label); }
+  // Free-text search on the description — same convention as qaNCR.
+  const topic=qaTopic(q); if(topic){ rows=qaTopicFilter(rows,topic); sc.push(`"${topic}"`); if(!op) op='list'; }
   const sct=sc.length?` (${sc.join(', ')})`:'';
+  const sorHeaders=topic?['SOR NO','DATE','STATUS','IC','KM','DESCRIPTION']:['SOR NO','DATE','STATUS','IC','KM'];
+  const sorRow=r=>topic?[r.sorNo,qaFmtDate(r.date),r.status,r.ic,r.km,qaTruncate(r.desc,80)]:[r.sorNo,qaFmtDate(r.date),r.status,r.ic,r.km];
   const sorGroupBy=qaGroupBy(q);
-  if(sorGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,sorGroupBy,['SOR NO','DATE','STATUS','IC','KM'],r=>[r.sorNo,qaFmtDate(r.date),r.status,r.ic,r.km],'SORs'+sct);
+  if(sorGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,sorGroupBy,sorHeaders,sorRow,'SORs'+sct);
   if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdownDim(rows,sorGroupBy,'SOR',sct);
-  if(op==='list') return qaTable(['SOR NO','DATE','STATUS','IC','KM'],rows.map(r=>[r.sorNo,qaFmtDate(r.date),r.status,r.ic,r.km]),'SORs'+sct,rows.length);
+  if(op==='list') return qaTable(sorHeaders,rows.map(sorRow),'SORs'+sct,rows.length);
   return `${rows.length} SOR${rows.length===1?'':'s'}${sct}.`;
 }
 function qaWelders(q,op){
@@ -5346,6 +5422,10 @@ function qaAnswerLocal(rawq,isAdmin){
   if(/where (does|do).{0,25}(come from|sourced?|from)|what.{0,10}(the )?source|data source|how do you know/.test(q)){
     return 'All answers come **directly from the Excel files uploaded to this dashboard** (RFI / NCR / SOR registers, daily inspection sheets, welder report) — held in memory after login. Nothing is fetched from outside; I just filter and count those records.';
   }
+  // Meta-question: user asking what the assistant is capable of.
+  if(/what can you do|what do you do|what are you able to (do|answer)|help me|^help$|what (kind of |sort of )?questions can (i|you)/.test(q)){
+    return qaHelp();
+  }
   // Resolve dataset + inherited slots + date + operation from the question and prior context.
   const r=qaResolveContext(q, cue);
   if(!r){ qaLogUnanswered(rawq); return null; }
@@ -5363,7 +5443,7 @@ function qaAnswerLocal(rawq,isAdmin){
   else { qaLogUnanswered(rawq); return null; }
   // Persist the resolved context so the next follow-up can inherit it.
   QA.lastCtx={ds, df, op, status:slots.status, sec:slots.sec, disc:slots.disc, ic:slots.ic,
-    group:slots.group, metric:slots.metric, welderThresh:slots.welderThresh, weekly:slots.weekly, repeat:slots.repeat, asLength:slots.asLength};
+    group:slots.group, metric:slots.metric, welderThresh:slots.welderThresh, weekly:slots.weekly, repeat:slots.repeat, asLength:slots.asLength, topic:slots.topic};
   return answer;
 }
 // LLM fallback — called only when the local parser returns null (a miss).
@@ -5415,8 +5495,9 @@ async function qaSend(){
       else { answerText=r.answer||'Sorry — the assistant is unavailable right now.'; }
     }
   }catch(e){ console.error('[QA]',e); answerText='Sorry — something went wrong reading the data.'; }
-  QA.history.push({role:'bot',text:answerText,source,exportReq:QA.pendingExportReq||null});
+  QA.history.push({role:'bot',text:answerText,source,exportReq:QA.pendingExportReq||null,fullTables:QA.pendingFullTables||null});
   QA.pendingExportReq=null;
+  QA.pendingFullTables=null;
   QA.busy=false;
   if(btn) btn.disabled=false;
   // Local answers are instant — add a think delay so typing dots stay visible
@@ -5441,7 +5522,7 @@ async function loadAllFromDB(){
       loadDaily('daily_sec3'),
       sbSelectAll('welder_records','select=welder_id,name,section,cum_aut,cum_rep,cum_pct,wk_aut,wk_rep,wk_pct,remarks'),
       sbSelectAll('sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc'),
-      sbSelectAll('ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description&order=date.asc'),
+      sbSelectAll('ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description,repeated_ncr&order=date.asc'),
       sbSelectAll('deployment_data','select=payload,file_name').catch(()=>[]),
       sbSelectAll('const_activities_data','select=payload,file_name').catch(()=>[]),
       sbSelect('dataset_meta','select=key,file_name,row_count,uploaded_by,uploaded_at,date_start,date_end'),
@@ -5481,7 +5562,7 @@ async function loadAllFromDB(){
         loadDaily('mol_daily_sec3').catch(()=>[]),
         sbSelectAll('mol_welder_records','select=welder_id,name,section,cum_aut,cum_rep,cum_pct,wk_aut,wk_rep,wk_pct,remarks').catch(()=>[]),
         sbSelectAll('mol_sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc').catch(()=>[]),
-        sbSelectAll('mol_ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description&order=date.asc').catch(()=>[]),
+        sbSelectAll('mol_ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description,repeated_ncr&order=date.asc').catch(()=>[]),
       ]);
       const M=ST.molData;
       if(mrfi.length) M.rfi    = mrfi.map(dbRowToRfi);
@@ -5511,7 +5592,7 @@ function dbRowToDaily(r){
 const dbRowToRfi=r=>({rfiNo:r.rfi_no||'',date:r.date,discipline:r.discipline,section:r.section,ic:r.ic,status:r.status});
 const dbRowToWld=r=>({id:r.welder_id,name:r.name,section:r.section,cumAut:+r.cum_aut,cumRep:+r.cum_rep,cumPct:+r.cum_pct,wkAut:+r.wk_aut,wkRep:+r.wk_rep,wkPct:+r.wk_pct,remarks:r.remarks||''});
 const dbRowToSor=r=>({sorNo:r.sor_no,short:r.short_name||r.sor_no,date:r.date,status:r.status,ic:r.ic,km:r.km,desc:r.description||''});
-const dbRowToNcr=r=>({ncrNo:r.ncr_no,date:r.date,status:r.status,raisedBy:r.raised_by,againstName:r.against_name,targetClose:r.target_close,actualClose:r.actual_close,desc:r.description||''});
+const dbRowToNcr=r=>({ncrNo:r.ncr_no,date:r.date,status:r.status,raisedBy:r.raised_by,againstName:r.against_name,targetClose:r.target_close,actualClose:r.actual_close,desc:r.description||'',repeatedNcr:r.repeated_ncr||''});
 
 // ═══════════════════════════════════════════════════
 // AUTH SYSTEM — Supabase-backed
@@ -6342,7 +6423,7 @@ async function saveDataToDB(key, parsed, fileName, pfx=''){
     rows=parsed.map(r=>({sor_no:r.sorNo,short_name:r.short||r.sorNo,date:r.date,status:r.status,ic:r.ic,km:r.km,description:r.desc||''}));
   } else if(key==='ncr'){
     rows=parsed.map(r=>({ncr_no:r.ncrNo,date:r.date,status:r.status,raised_by:r.raisedBy,against_name:r.againstName,
-      target_close:r.targetClose||null,actual_close:r.actualClose||null,description:r.desc||''}));
+      target_close:r.targetClose||null,actual_close:r.actualClose||null,description:r.desc||'',repeated_ncr:r.repeatedNcr||null}));
   }
 
   await sbInsertBatch(table, rows);
