@@ -209,7 +209,7 @@ td.tf.tl{letter-spacing:.1em;color:var(--muted)}
 .tbl-lg td.td,.tbl-lg td.tf{font-size:11px}
 .tr-alt{background:rgba(255,255,255,.02)}
 .tr-tot{background:rgba(255,255,255,0)}
-.tl{text-align:left!important}.tr{text-align:right!important}
+.tl{text-align:left!important}
 .ox{overflow-x:auto}
 .cb{color:var(--c1)}.clb{color:var(--violet)}.cg{color:var(--good)}
 .cr{color:var(--bad)}.ca{color:var(--amber)}.cm{color:var(--muted)}
@@ -221,7 +221,6 @@ td.tf.tl{letter-spacing:.1em;color:var(--muted)}
 .bdg-cnt{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);text-align:left}
 .prog-track{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.05);border-radius:5px;height:9px;overflow:hidden}
 .prog-fill{height:100%;border-radius:5px;transition:width .7s cubic-bezier(.4,0,.2,1)}
-.ch-wrap{position:relative;width:100%}
 /* Neon chart primitives (SVG donut / div bars / scatter dots) */
 .ndot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);opacity:.85;transition:transform .15s,opacity .15s}
 .ndot:hover{transform:translate(-50%,-50%) scale(1.7);opacity:1;z-index:5}
@@ -275,7 +274,7 @@ td.tf.tl{letter-spacing:.1em;color:var(--muted)}
 #qaResizeHandle{position:absolute;left:0;bottom:0;width:18px;height:18px;cursor:sw-resize;z-index:10;display:none;align-items:flex-end;justify-content:flex-start;padding:3px}
 #qaResizeHandle svg{opacity:.45}
 #qaPanel::after{content:'';position:absolute;inset:-6px;border-radius:24px;padding:10px;background:conic-gradient(from var(--qa-hue),#ff006e,#fb5607,#ffbe0b,#06d6a0,#118ab2,#8338ec,#ff006e);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;filter:blur(14px);opacity:.38;z-index:-1;pointer-events:none;animation:qaColorFlow 5s linear infinite}
-#qaInner{flex:1;min-height:0;background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.02) 40%,rgba(255,255,255,.01) 60%,rgba(255,255,255,.05)),rgba(8,12,28,.55);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);border:1px solid var(--card-border);border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
+#qaInner{flex:1;min-height:0;background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.02) 40%,rgba(255,255,255,.01) 60%,rgba(255,255,255,.05)),rgba(8,12,28,.7);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);border:1px solid var(--card-border);border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
 #qaHead{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--card-border);background:rgba(255,255,255,.03);flex:none}
 #qaHeadAvatar{width:34px;height:34px;border-radius:50%;background:#e8f0fb;overflow:hidden;flex-shrink:0;border:1.5px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center}
 #qaTitle{flex:1}
@@ -461,7 +460,6 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
   #uplBarSpacer,#dpBarSpacer{display:none!important}
   #loginOverlay,#wrongFileModal,#idleWarningModal,#changePwModal{display:none!important}
   body{min-width:unset!important}
-  .row{break-inside:avoid}
   .card{break-inside:avoid}
 }
 
@@ -1747,11 +1745,15 @@ function bRFIDonut(periodTotals, cumTotals, live){
   </div>`;
 }
 
-function bNDTTable(secRows, title, live){
+function bNDTTable(secRows, title, live, backlogGoal){
   const hideBacklog=!!(AUTH.currentUser&&AUTH.currentUser.isGuest);
   const totals = secRows ? sumK(secRows,['welded','rev','appr','rescan','repair','bl']) : null;
   const sc=['cs1','cs2','cs3'];
   const colCount=hideBacklog?5:6;
+  // Backlog color thresholds follow the same dynamic goal as the KPI card
+  // (2 × daily avg welded) — total vs the whole goal, rows vs an equal share.
+  const totThresh=backlogGoal!=null?backlogGoal:200;
+  const rowThresh=backlogGoal!=null&&secRows?backlogGoal/secRows.length:100;
   const trs = secRows ? secRows.map((r,i)=>{
     const tip=tipHtml(esc(r.s)+' · NDT',[
       'repair rate '+(r.rev>0?(r.repair/r.rev*100).toFixed(2):'0.00')+'% ('+fn(r.repair)+' ÷ '+fn(r.rev)+' reviewed)',
@@ -1762,7 +1764,7 @@ function bNDTTable(secRows, title, live){
     <td class="td tl ${sc[i]||''}" style="font-weight:700">${r.s}</td>
     <td class="td">${fn(r.welded)}</td><td class="td">${fn(r.rev)}</td>
     <td class="td cg">${fn(r.appr)}</td><td class="td cr">${fn(r.repair)}</td>
-    ${hideBacklog?'':`<td class="td ${r.bl>100?'cr':'ca'}">${fn(r.bl)}</td>`}
+    ${hideBacklog?'':`<td class="td ${r.bl>rowThresh?'cr':'ca'}">${fn(r.bl)}</td>`}
   </tr>`;}).join('') : `<tr><td colspan="${colCount}" class="td tl cm" style="padding:16px">Upload Daily Pipeline files</td></tr>`;
   const totTip=totals?tipHtml('All Sections · NDT',[
     'weld repair rate '+(totals.rev>0?(totals.repair/totals.rev*100).toFixed(1):'0.0')+'% — target 3% max',
@@ -1776,7 +1778,7 @@ function bNDTTable(secRows, title, live){
   ${totals?`<tfoot><tr class="tr-tot" data-ntip="${esc(totTip)}"><td class="tf tl cm">Total</td>
     <td class="tf">${fn(totals.welded)}</td><td class="tf">${fn(totals.rev)}</td>
     <td class="tf cg">${fn(totals.appr)}</td><td class="tf cr">${fn(totals.repair)}</td>
-    ${hideBacklog?'':`<td class="tf ${totals.bl>200?'cr':'ca'}">${fn(totals.bl)}</td>`}
+    ${hideBacklog?'':`<td class="tf ${totals.bl>totThresh?'cr':'ca'}">${fn(totals.bl)}</td>`}
   </tr></tfoot>`:''}
   </table></div></div>`;
 }
@@ -2526,24 +2528,51 @@ function _scEl(el,target,ms){
   },iv);
 }
 
+// rAF raced with a timeout — rAF never fires in hidden/background tabs (same
+// hazard uiYield guards against), and anything animation-critical must not
+// depend on it alone or the page can stall with 0-width bars / no cascade.
+function _frame(cb){
+  let done=false; const fin=()=>{ if(!done){done=true;cb();} };
+  requestAnimationFrame(fin);
+  setTimeout(fin,80);
+}
+// Progress bars are emitted at width:0 with the real width in data-w.
+// animate=true runs the .7s transition (cascade path); animate=false snaps to
+// the final width instantly (plain re-renders, image capture).
+function applyProgFills(canvas,animate){
+  canvas.querySelectorAll('.prog-fill[data-w]').forEach(fill=>{
+    const finalW=fill.dataset.w+'%';
+    if(animate){
+      _frame(()=>{
+        fill.style.transition='width .7s cubic-bezier(.4,0,.2,1)';
+        fill.style.width=finalW;
+      });
+    } else {
+      fill.style.transition='none';
+      fill.style.width=finalW;
+    }
+  });
+}
+// Set by _animRender so renderCanvas leaves the progress bars at 0 for the
+// cascade to animate; plain render() paths fill them instantly instead.
+let _cascadePending=false;
+// Image export sets this so captured pages render final values immediately
+// (no hidden/mid-scramble numbers, no 0-width bars in the PNGs).
+let CASCADE_OFF=false;
+
 // Hex-scramble band cascade (design spec): numeric elements grouped into 55px
 // horizontal bands, resolving top→bottom — 60ms initial delay, 70ms stagger,
 // 6 steps over 220ms each. Progress bars animate width 0→final in parallel.
 function triggerCascade(){
+  _cascadePending=false;
   const canvas=document.getElementById(ACTIVE_CANVAS_ID);
   if(!canvas) return;
+  if(CASCADE_OFF){ applyProgFills(canvas,false); return; }
   const BASE=60;
   const isNum=t=>/^[\d,.\-%+()/: ]+$/.test(t.trim())&&t.trim().length>0&&t.trim()!=='—';
 
   // Animate progress bars: stored final width in data-w, currently at 0%
-  canvas.querySelectorAll('.prog-fill[data-w]').forEach(fill=>{
-    const finalW=fill.dataset.w+'%';
-    // Already at 0 from template; just trigger transition after a frame
-    requestAnimationFrame(()=>{
-      fill.style.transition='width .7s cubic-bezier(.4,0,.2,1)';
-      fill.style.width=finalW;
-    });
-  });
+  applyProgFills(canvas,true);
 
   // Collect all numeric text elements
   const els=[...new Set(canvas.querySelectorAll('.ks-val,.td,.tf,.bdg-pct,.bdg-cnt,.sc-n,[data-sc],[data-scv]'))].filter(el=>{
@@ -2650,8 +2679,9 @@ function bindNeonFX(){
 
 function _animRender(){
   if(typeof Chart!=='undefined'&&Chart.defaults) Chart.defaults.animation={duration:650,easing:'easeInOutQuart'};
+  _cascadePending=true; // renderCanvas leaves prog bars at 0 — cascade animates them
   render();
-  requestAnimationFrame(()=>{
+  _frame(()=>{ // raced with a timeout — a hidden tab must still run the cascade
     if(typeof Chart!=='undefined'&&Chart.defaults) Chart.defaults.animation=false;
     triggerCascade();
   });
@@ -2944,8 +2974,8 @@ function buildDashPanels(prefix){
     : bRFITable(rfiData.cumulative?.rows||null, rfiData.cumulative?.totals||null, 'Cumulative RFI Status', rfiLive, rfiData.cumulative?.supersededCount||0);
   P[k('rfiDonut')] =bRFIDonut(rfiData.period?.totals||null, rfiData.cumulative?.totals||null, rfiLive);
   P[k('ndtPeriod')]=isPeriodTab
-    ? bNDTTable(ndtPeriod, 'Reporting Duration NDT (EPCM)', dailyLive)
-    : bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive);
+    ? bNDTTable(ndtPeriod, 'Reporting Duration NDT (EPCM)', dailyLive, ndtBacklogGoal)
+    : bNDTTable(ndtCum, 'Cumulative NDT (EPCM)', dailyLive, ndtBacklogGoal);
   P[k('fjcPeriod')]=isPeriodTab
     ? bFJCTable(fjcPeriod, 'Reporting Duration FJC Status', dailyLive)
     : bFJCTable(fjcCum, 'Cumulative FJC Status', dailyLive);
@@ -3113,7 +3143,7 @@ function renderDeployment(){
   fillSidenavDrops();
 
   const DP_PANELS = {
-    dpUpload:    bDPUploadPanel(sc, dep, isViewer),
+    dpUpload:    bDPUploadPanel(sc, dep),
     dpCtrl:      bDPCtrlPanel(sc, dep),
     dpCats:      bDPCatsPanel(sc, dep),
     dpRoles:     bDPRolesPanel(sc, dep),
@@ -3314,12 +3344,9 @@ function clearDeployment(){
   render();
 }
 
-function bDPUploadPanel(sc, dep, isViewer){
-  if(isViewer) return `<div class="card" style="display:flex;align-items:center;padding:14px 18px">
-    <span style="font-size:11px;color:${sc.faint}">
-      ${dep?`✅ ${esc(ST.files.deployment||'Loaded')} · ${dep.plan.length} plan rows · ${dep.actual.length} actual rows`:'No deployment file loaded'}
-    </span></div>`;
-  // File input + upload button now live in bDeployBar; this panel just shows status
+function bDPUploadPanel(sc, dep){
+  // File input + upload button now live in bDeployBar; this panel just shows
+  // status. (Viewers never reach this — renderDeployment early-returns first.)
   return `<div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px">
     <span style="font-size:12px;color:${sc.muted};font-weight:600">EPCM Deployment File</span>
     ${dep
@@ -4257,7 +4284,7 @@ function bUpTabProfile(u,r,isSA_user,isMe,canEdit){
 function bUpTabPages(perm,ceil){
   const pages=perm.pages||{};
   const panels=perm.panels||{};
-  const mkRow=(key,lbl,val,ceilVal,changeExpr)=>{
+  const mkRow=(lbl,val,ceilVal,changeExpr)=>{
     const locked=!ceilVal;
     return`<div class="up-toggle-row">
       <div style="flex:1"><div class="up-toggle-lbl">${lbl}</div></div>
@@ -4270,33 +4297,33 @@ function bUpTabPages(perm,ceil){
   };
   return`<div class="up-section">
     <div class="up-section-title">Pages</div>
-    ${mkRow('page_dashboard','Pipeline Dashboard',pages.dashboard!==false,true,"umgTogglePanel('page_dashboard',this.checked)")}
-    ${mkRow('page_deployment','Manpower Deployment',pages.deployment!==false,true,"umgTogglePanel('page_deployment',this.checked)")}
+    ${mkRow('Pipeline Dashboard',pages.dashboard!==false,true,"umgTogglePanel('page_dashboard',this.checked)")}
+    ${mkRow('Manpower Deployment',pages.deployment!==false,true,"umgTogglePanel('page_deployment',this.checked)")}
   </div>
   <div class="up-section">
     <div class="up-section-title">Dashboard Panels</div>
-    ${mkRow('kpiStrip','KPI Strip',panels.kpiStrip!==false,true,"umgTogglePanel('panel_kpiStrip',this.checked)")}
-    ${mkRow('rfiPeriod','RFI Status Table',panels.rfiPeriod!==false,true,"umgTogglePanel('panel_rfiPeriod',this.checked)")}
-    ${mkRow('rfiDonut','RFI Donut Chart',panels.rfiDonut!==false,true,"umgTogglePanel('panel_rfiDonut',this.checked)")}
-    ${mkRow('ndtPeriod','NDT (EPCM) Table',panels.ndtPeriod!==false,true,"umgTogglePanel('panel_ndtPeriod',this.checked)")}
-    ${mkRow('fjcPeriod','FJC Status Table',panels.fjcPeriod!==false,true,"umgTogglePanel('panel_fjcPeriod',this.checked)")}
-    ${mkRow('welders','Welder Activity Chart',panels.welders!==false,true,"umgTogglePanel('panel_welders',this.checked)")}
-    ${mkRow('progress','Welding Progress Bars',panels.progress!==false,true,"umgTogglePanel('panel_progress',this.checked)")}
-    ${mkRow('ncrTable','NCR Table',panels.ncrTable!==false,true,"umgTogglePanel('panel_ncrTable',this.checked)")}
-    ${mkRow('ncrBar','NCR Bar Chart',panels.ncrBar!==false,true,"umgTogglePanel('panel_ncrBar',this.checked)")}
-    ${mkRow('sorTable','SOR Table',panels.sorTable!==false,true,"umgTogglePanel('panel_sorTable',this.checked)")}
-    ${mkRow('sorScatter','SOR Scatter Plot',panels.sorScatter!==false,true,"umgTogglePanel('panel_sorScatter',this.checked)")}
+    ${mkRow('KPI Strip',panels.kpiStrip!==false,true,"umgTogglePanel('panel_kpiStrip',this.checked)")}
+    ${mkRow('RFI Status Table',panels.rfiPeriod!==false,true,"umgTogglePanel('panel_rfiPeriod',this.checked)")}
+    ${mkRow('RFI Donut Chart',panels.rfiDonut!==false,true,"umgTogglePanel('panel_rfiDonut',this.checked)")}
+    ${mkRow('NDT (EPCM) Table',panels.ndtPeriod!==false,true,"umgTogglePanel('panel_ndtPeriod',this.checked)")}
+    ${mkRow('FJC Status Table',panels.fjcPeriod!==false,true,"umgTogglePanel('panel_fjcPeriod',this.checked)")}
+    ${mkRow('Welder Activity Chart',panels.welders!==false,true,"umgTogglePanel('panel_welders',this.checked)")}
+    ${mkRow('Welding Progress Bars',panels.progress!==false,true,"umgTogglePanel('panel_progress',this.checked)")}
+    ${mkRow('NCR Table',panels.ncrTable!==false,true,"umgTogglePanel('panel_ncrTable',this.checked)")}
+    ${mkRow('NCR Bar Chart',panels.ncrBar!==false,true,"umgTogglePanel('panel_ncrBar',this.checked)")}
+    ${mkRow('SOR Table',panels.sorTable!==false,true,"umgTogglePanel('panel_sorTable',this.checked)")}
+    ${mkRow('SOR Scatter Plot',panels.sorScatter!==false,true,"umgTogglePanel('panel_sorScatter',this.checked)")}
   </div>
   <div class="up-section">
     <div class="up-section-title">Deployment Panels</div>
-    ${mkRow('dpUpload','File Upload Panel',panels.dpUpload!==false,ceil.dpUpload,"umgTogglePanel('panel_dpUpload',this.checked)")}
-    ${mkRow('dpCtrl','Month Selector',panels.dpCtrl!==false,true,"umgTogglePanel('panel_dpCtrl',this.checked)")}
-    ${mkRow('dpCats','By Category Chart',panels.dpCats!==false,true,"umgTogglePanel('panel_dpCats',this.checked)")}
-    ${mkRow('dpRoles','By Role Chart',panels.dpRoles!==false,true,"umgTogglePanel('panel_dpRoles',this.checked)")}
-    ${mkRow('dpChart6m','6-Month Trend Chart',panels.dpChart6m!==false,true,"umgTogglePanel('panel_dpChart6m',this.checked)")}
-    ${mkRow('dpHiring','Hiring Status Chart',panels.dpHiring!==false,true,"umgTogglePanel('panel_dpHiring',this.checked)")}
-    ${mkRow('dpLocRole','Location & Role Matrix',panels.dpLocRole!==false,true,"umgTogglePanel('panel_dpLocRole',this.checked)")}
-    ${mkRow('dpPersonnel','Personnel Table',panels.dpPersonnel!==false,true,"umgTogglePanel('panel_dpPersonnel',this.checked)")}
+    ${mkRow('File Upload Panel',panels.dpUpload!==false,ceil.dpUpload,"umgTogglePanel('panel_dpUpload',this.checked)")}
+    ${mkRow('Month Selector',panels.dpCtrl!==false,true,"umgTogglePanel('panel_dpCtrl',this.checked)")}
+    ${mkRow('By Category Chart',panels.dpCats!==false,true,"umgTogglePanel('panel_dpCats',this.checked)")}
+    ${mkRow('By Role Chart',panels.dpRoles!==false,true,"umgTogglePanel('panel_dpRoles',this.checked)")}
+    ${mkRow('6-Month Trend Chart',panels.dpChart6m!==false,true,"umgTogglePanel('panel_dpChart6m',this.checked)")}
+    ${mkRow('Hiring Status Chart',panels.dpHiring!==false,true,"umgTogglePanel('panel_dpHiring',this.checked)")}
+    ${mkRow('Location & Role Matrix',panels.dpLocRole!==false,true,"umgTogglePanel('panel_dpLocRole',this.checked)")}
+    ${mkRow('Personnel Table',panels.dpPersonnel!==false,true,"umgTogglePanel('panel_dpPersonnel',this.checked)")}
   </div>`;
 }
 
@@ -4531,6 +4558,13 @@ async function clearAllFiles(){
     }catch(e){ alert('Clear failed: '+e.message); if(btn) btn.disabled=false; }
     return;
   }
+  // Users/Deployment share the MAIN dashboard's store (_activeStore falls back
+  // to it) — clearing from there would silently wipe the dashboard's in-memory
+  // data under a misleading prompt. Block it; clear from the dashboard itself.
+  if(APP_VIEW!=='stations'&&APP_VIEW!=='bc'&&APP_VIEW!=='dashboard'){
+    alert('Clearing dashboard data is only available from the dashboard page itself.');
+    return;
+  }
   // Stations/BC — clear only this page's in-memory state (no DB tables yet).
   if(APP_VIEW!=='dashboard'){
     if(!confirm('Clear this page?')) return;
@@ -4553,7 +4587,6 @@ async function clearAllFiles(){
     ST.unsaved.clear();
     ST.rfiSupersededCount=0;
     localStorage.removeItem('wep_rfi_superseded_count');
-    ST._dateSet=false;
     render();
   }catch(e){
     alert('Clear failed: '+e.message);
@@ -4855,6 +4888,21 @@ async function sbRpc(fn, body){
   return r.json();
 }
 
+// ── Shared app state (app_state table) — panel layouts, hidden panels, QA panel
+// size. Supabase is the source of truth so layout edits reach every user on
+// every browser; localStorage keeps working as the offline cache underneath.
+async function pullAppState(){
+  try{
+    const rows=await sbSelect('app_state','select=key,value');
+    rows.forEach(r=>{ try{ localStorage.setItem(r.key, JSON.stringify(r.value)); }catch(e){} });
+    qaApplySavedSize(); // QA panel size was already applied from local cache at parse time — re-apply the shared value
+  }catch(e){ console.warn('[app_state] pull failed — using local cache', e); }
+}
+function pushAppState(key, value){
+  sbUpsert('app_state',{key, value, updated_by:AUTH.currentUser?AUTH.currentUser.username:null, updated_at:new Date().toISOString()})
+    .catch(e=>console.warn('[app_state] push failed — saved locally only', e));
+}
+
 // ═══════════════════════════════════════════════════
 // Q&A ASSISTANT (chat widget)
 // ═══════════════════════════════════════════════════
@@ -4899,8 +4947,9 @@ function qaRefreshResizeHandle(){
   h.style.display=EDIT_MODE?'flex':'none';
 }
 
-(function qaInitResize(){
-  // Restore saved size
+// Apply the saved QA panel size — at boot from the local cache, and again after
+// pullAppState() hydrates the shared value from Supabase.
+function qaApplySavedSize(){
   try{
     const s=JSON.parse(localStorage.getItem('wep_qa_panel_size')||'{}');
     if(s.w||s.h){
@@ -4908,6 +4957,9 @@ function qaRefreshResizeHandle(){
       if(p){ if(s.w) p.style.width=s.w+'px'; if(s.h) p.style.height=s.h+'px'; }
     }
   }catch(e){}
+}
+(function qaInitResize(){
+  qaApplySavedSize();
   // Resize drag from bottom-left handle (panel is fixed to bottom-right)
   document.addEventListener('mousedown',e=>{
     const h=document.getElementById('qaResizeHandle');
@@ -4927,6 +4979,7 @@ function qaRefreshResizeHandle(){
       document.removeEventListener('mousemove',onMove);
       document.removeEventListener('mouseup',onUp);
       try{ localStorage.setItem('wep_qa_panel_size',JSON.stringify({w:panel.offsetWidth,h:panel.offsetHeight})); }catch(e){}
+      pushAppState('wep_qa_panel_size',{w:panel.offsetWidth,h:panel.offsetHeight});
     }
     document.addEventListener('mousemove',onMove);
     document.addEventListener('mouseup',onUp);
@@ -5358,7 +5411,7 @@ const QA_TOPIC_STOP=new Set(['a','an','the','is','are','was','were','what','whic
   // qaFollowCue/qaIsFollowUp treat as a follow-up CUE, not real content
   // (e.g. "list all of them" must not extract "all them" as a search term).
   'them','those','these','it','ones','one','all','any','some','each','every','both',
-  'and','also','but','then','now','ok','okay']);
+  'also','but','then','now','ok','okay']); // ('and' already listed above)
 // Returns the leftover free-text "topic"/reason phrase in q (after stripping
 // dates, punctuation, and known structural/filler words), or null if nothing
 // meaningful survives. Used for NCR/SOR description search — see qaNCR/qaSOR.
@@ -5838,8 +5891,9 @@ async function qaSend(){
 async function loadAllFromDB(){
   const DAILY_COLS='date,welded,ndt_rev,ndt_appr,ndt_rescan,ndt_repair,fjc_released,fjc_total,fjc_accepted,fjc_repair,fjc_balance';
   const loadDaily=t=>sbSelectAll(t,`select=${DAILY_COLS}&order=date.asc`);
+  let meta=[]; // shared by the MOL block below — stays [] if the main load fails
   try{
-    const [rfi,s1,s2,s3,wld,sor,ncr,dep,constAct,meta]=await Promise.all([
+    const [rfi,s1,s2,s3,wld,sor,ncr,dep,constAct,metaRows]=await Promise.all([
       sbSelectAll('rfi_records','select=rfi_no,date,discipline,section,ic,status&order=date.asc'),
       loadDaily('daily_sec1'),
       loadDaily('daily_sec2'),
@@ -5851,6 +5905,7 @@ async function loadAllFromDB(){
       sbSelectAll('const_activities_data','select=payload,file_name').catch(()=>[]),
       sbSelect('dataset_meta','select=key,file_name,row_count,uploaded_by,uploaded_at,date_start,date_end'),
     ]);
+    meta=metaRows;
 
     // Map DB column names back to the JS field names the parsers produce
     if(rfi.length)  ST.data.rfi    = rfi.map(dbRowToRfi);
@@ -5877,32 +5932,33 @@ async function loadAllFromDB(){
     // Restore main file names from meta (skip deployment + the mol_* keys)
     meta.forEach(m=>{ if(m.key!=='deployment' && m.key.indexOf('mol_')!==0) ST.files[m.key]=m.file_name||''; });
 
-    // ── MOL 3.3 datasets — own namespace, mol_* tables (best-effort). No section
-    // split: single mol_daily table (unlike main's daily_sec1/2/3). ──
-    try{
-      const [mrfi,md,mwld,msor,mncr]=await Promise.all([
-        sbSelectAll('mol_rfi_records','select=rfi_no,date,discipline,section,ic,status&order=date.asc').catch(()=>[]),
-        loadDaily('mol_daily').catch(()=>[]),
-        sbSelectAll('mol_welder_records','select=welder_id,name,section,cum_aut,cum_rep,cum_pct,wk_aut,wk_rep,wk_pct,remarks').catch(()=>[]),
-        sbSelectAll('mol_sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc').catch(()=>[]),
-        sbSelectAll('mol_ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description,repeated_ncr&order=date.asc').catch(()=>[]),
-      ]);
-      const M=ST.molData;
-      if(mrfi.length) M.rfi    = mrfi.map(dbRowToRfi);
-      if(md.length)   M.daily  = md.map(dbRowToDaily);
-      if(mwld.length) M.welders= mwld.map(dbRowToWld);
-      if(msor.length) M.sor    = msor.map(dbRowToSor);
-      if(mncr.length) M.ncr    = mncr.map(dbRowToNcr);
-      ST.molSupersededCount = +(localStorage.getItem('wep_mol_rfi_superseded_count')||0);
-      // Pre-create the MOL page store with restored file names (meta keys 'mol_<key>').
-      const molFiles={};
-      meta.forEach(m=>{ if(m.key && m.key.indexOf('mol_')===0) molFiles[m.key.slice(4)]=m.file_name||''; });
-      ST.pageState.mol={data:ST.molData,files:molFiles,errors:{},processing:{},unsaved:new Set()};
-    }catch(e){ /* mol_ tables not provisioned yet — MOL page just shows empty */ }
-
   }catch(e){
     // DB unreachable or local file — dashboard shows defaults
   }
+
+  // ── MOL 3.3 datasets — own namespace, mol_* tables (best-effort). No section
+  // split: single mol_daily table (unlike main's daily_sec1/2/3). Deliberately
+  // OUTSIDE the main try so a main-table failure can never skip the MOL load. ──
+  try{
+    const [mrfi,md,mwld,msor,mncr]=await Promise.all([
+      sbSelectAll('mol_rfi_records','select=rfi_no,date,discipline,section,ic,status&order=date.asc').catch(()=>[]),
+      loadDaily('mol_daily').catch(()=>[]),
+      sbSelectAll('mol_welder_records','select=welder_id,name,section,cum_aut,cum_rep,cum_pct,wk_aut,wk_rep,wk_pct,remarks').catch(()=>[]),
+      sbSelectAll('mol_sor_records','select=sor_no,short_name,date,status,ic,km,description&order=date.asc').catch(()=>[]),
+      sbSelectAll('mol_ncr_records','select=ncr_no,date,status,raised_by,against_name,target_close,actual_close,description,repeated_ncr&order=date.asc').catch(()=>[]),
+    ]);
+    const M=ST.molData;
+    if(mrfi.length) M.rfi    = mrfi.map(dbRowToRfi);
+    if(md.length)   M.daily  = md.map(dbRowToDaily);
+    if(mwld.length) M.welders= mwld.map(dbRowToWld);
+    if(msor.length) M.sor    = msor.map(dbRowToSor);
+    if(mncr.length) M.ncr    = mncr.map(dbRowToNcr);
+    ST.molSupersededCount = +(localStorage.getItem('wep_mol_rfi_superseded_count')||0);
+    // Pre-create the MOL page store with restored file names (meta keys 'mol_<key>').
+    const molFiles={};
+    meta.forEach(m=>{ if(m.key && m.key.indexOf('mol_')===0) molFiles[m.key.slice(4)]=m.file_name||''; });
+    ST.pageState.mol={data:ST.molData,files:molFiles,errors:{},processing:{},unsaved:new Set()};
+  }catch(e){ /* mol_ tables not provisioned yet — MOL page just shows empty */ }
 }
 
 function dbRowToDaily(r){
@@ -6344,7 +6400,7 @@ async function loadAndShow(){
   if(ov) ov.style.display='none';
   // Reset date slicer to last completed Sat→Fri week on login
   const {start,end}=defaultWeekDates();
-  ST.start=start; ST.end=end; ST._dateSet=false;
+  ST.start=start; ST.end=end;
   // Load saved color scheme for this user (guests have no DB record — skip)
   if(!AUTH.currentUser.isGuest){
     try{
@@ -6367,7 +6423,7 @@ async function loadAndShow(){
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="svg-spin" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="9" stroke="#1e2940" stroke-width="1.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/></svg>
     &nbsp; Loading dashboard data…</div>`;
   await Promise.race([
-    loadAllFromDB(),
+    Promise.all([loadAllFromDB(), pullAppState()]), // pull shared layouts/hidden-panels alongside data
     new Promise(res=>setTimeout(res, 20000)), // 20 s hard ceiling — always reach render()
   ]);
   render();
@@ -6551,8 +6607,13 @@ function logout(){
   Object.keys(ST.data).forEach(k=>ST.data[k]=null);
   Object.keys(ST.files).forEach(k=>ST.files[k]='');
   Object.keys(ST.errors).forEach(k=>ST.errors[k]='');
+  // MOL + per-page stores get the same wipe as the main store — nothing from
+  // one session may linger in memory into the next (pageState is lazily
+  // re-created; the next login's loadAllFromDB re-populates from the DB).
+  Object.keys(ST.molData).forEach(k=>ST.molData[k]=null);
+  ST.pageState={};
   const {start,end}=defaultWeekDates();
-  ST.start=start; ST.end=end; ST._dateSet=false;
+  ST.start=start; ST.end=end;
   showLogin();
 }
 
@@ -7368,7 +7429,9 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
       if(!sorDetailRecs.length){ put(sdRow,1,'No SOR records in range.',S_DLBL); sdRow++; }
 
       // ── MANPOWER DEPLOYMENT — ACTUAL (not plan) ─────────────────────────
-      if(dep){
+      // Deployment data belongs to the MAIN pipeline only — never embed the
+      // main roster in a MOL 3.3 report (MOL has no deployment dataset).
+      if(dep&&!isMolExport){
         const monthsCapped=(dep.months||[]).filter(m=>m<='2027-12');
         const fromYM=from.slice(0,7), toYM=to.slice(0,7);
         const periodMonths=monthsCapped.filter(m=>m>=fromYM&&m<=toYM);
@@ -7436,8 +7499,10 @@ async function exportDashboardImage(){
   const u=AUTH.currentUser||{};
   const isAdmin=(u.role==='superadmin'||u.role==='admin');
   const isGuest=!!u.isGuest;
+  const molHasData=Object.values(ST.molData).some(v=>v!=null);
   const ALL_PAGES=[
     {view:'dashboard',  label:'Main Dashboard'},
+    ...(molHasData?[{view:'mol', label:'MOL 3.3 Dashboard'}]:[]),
     {view:'deployment', label:'Manpower Deployment'},
   ];
   const pages=isAdmin?ALL_PAGES:isGuest?ALL_PAGES.slice(0,1):ALL_PAGES;
@@ -7463,6 +7528,11 @@ async function exportDashboardImage(){
     chartAnimOrig=Chart.defaults.animation;
     Chart.defaults.animation=false;
   }
+  // Disable the scramble cascade: it hides every numeric cell and resolves
+  // them over ~1.5s+, so a capture taken mid-cascade would have blank/garbled
+  // numbers and 0-width progress bars. With this flag each page renders its
+  // final values immediately.
+  CASCADE_OFF=true;
 
   const date=new Date().toISOString().slice(0,10);
   try{
@@ -7521,6 +7591,7 @@ async function exportDashboardImage(){
     switchView(origView);
     alert('Failed to export dashboard image: '+e.message);
   }finally{
+    CASCADE_OFF=false;
     if(chartAnimOrig!==null&&typeof Chart!=='undefined'&&Chart.defaults)
       Chart.defaults.animation=chartAnimOrig;
     overlay.remove();
@@ -7668,7 +7739,7 @@ function setActiveLayout(arr){
 // (falling back to DEFAULT_LAYOUT) instead of rendering incorrectly.
 const LAYOUT_KEY    = `wep_canvas_layout_g${GRID_SCALE}_v5`; // v5: neon-reskin default arrangement
 const DP_LAYOUT_KEY = `wep_dp_canvas_layout_g${GRID_SCALE}_v7`;
-function saveLayout(){ try{ localStorage.setItem(getActiveLayoutKey(), JSON.stringify(getActiveLayout())); }catch(e){} }
+function saveLayout(){ try{ localStorage.setItem(getActiveLayoutKey(), JSON.stringify(getActiveLayout())); }catch(e){} pushAppState(getActiveLayoutKey(), getActiveLayout()); }
 function loadLayout(){ try{ const s=localStorage.getItem(getActiveLayoutKey()); if(s) setActiveLayout(JSON.parse(s)); }catch(e){} }
 
 // ── Panel visibility (hide/show in edit mode) ─────────
@@ -7711,7 +7782,7 @@ function getHiddenKey(){
   return HIDDEN_KEY_DASH;
 }
 function getHiddenPanels(){ try{return new Set(JSON.parse(localStorage.getItem(getHiddenKey())||'[]'));}catch{return new Set();} }
-function saveHiddenPanels(s){ localStorage.setItem(getHiddenKey(),JSON.stringify([...s])); }
+function saveHiddenPanels(s){ localStorage.setItem(getHiddenKey(),JSON.stringify([...s])); pushAppState(getHiddenKey(), [...s]); }
 function hidePanel(id){
   const h=getHiddenPanels(); h.add(id); saveHiddenPanels(h);
   document.querySelector(`.cp[data-id="${id}"]`)?.remove();
@@ -7827,6 +7898,11 @@ function renderCanvas(htmlMap){
 
     canvas.appendChild(div);
   });
+
+  // Plain render() paths (login load, date change, upload, save, theme switch,
+  // resize) never run triggerCascade — fill the progress bars instantly here.
+  // When a cascade IS queued (_animRender), leave them at 0 for it to animate.
+  if(!_cascadePending) applyProgFills(canvas,false);
 }
 
 // ── Edit mode ────────────────────────────────────────
