@@ -4567,7 +4567,7 @@ function bEvalEditor(){
         <input class="umg-inp" value="${esc(d.last_eval_date||'')}" oninput="EVAL_DRAFT.last_eval_date=this.value" style="width:110px;margin-left:6px;font-size:12px"></label>
       <span style="font-size:11px;font-weight:700;color:var(--${{draft:'amber',pending:'violet',approved:'good'}[d.status]||'amber'})">● ${{draft:'Draft',pending:'Pending Approval',approved:'Approved'}[d.status]||'Draft'}</span>
       ${(!isSA&&d.status==='draft'&&d.id)?`<button onclick="evalSubmitForApproval()" style="font-size:11px;font-weight:700;color:var(--violet);background:rgba(139,92,255,.1);border:1px solid rgba(139,92,255,.4);border-radius:6px;padding:5px 11px;cursor:pointer">Send for SA Approval</button>`:''}
-      ${(isSA&&d.status==='pending')?`<button onclick="evalApprove()" style="font-size:11px;font-weight:700;color:var(--good);background:rgba(var(--gooda),.1);border:1px solid rgba(var(--gooda),.4);border-radius:6px;padding:5px 11px;cursor:pointer">Approve</button>`:''}
+      ${(isSA&&d.status!=='approved'&&d.id)?`<button onclick="evalApprove()" style="font-size:11px;font-weight:700;color:var(--good);background:rgba(var(--gooda),.1);border:1px solid rgba(var(--gooda),.4);border-radius:6px;padding:5px 11px;cursor:pointer">Approve</button>`:''}
       ${(isSA&&d.status!=='draft')?`<button onclick="evalSendBackToDraft()" style="font-size:11px;color:var(--muted);background:none;border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:5px 11px;cursor:pointer">Send back to Draft</button>`:''}
     </div>
     <div style="overflow-x:auto"><table class="tbl"><thead><tr>
