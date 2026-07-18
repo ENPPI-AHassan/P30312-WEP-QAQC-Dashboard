@@ -60,10 +60,6 @@ body{background-color:var(--bg);
 .ntip-l{font:600 10.5px 'JetBrains Mono',monospace;color:#8ea0c4;line-height:1.65}
 /* Hover-focus: hovered panel zooms, siblings blur (bindNeonFX) */
 [data-panel]{transition:transform .32s cubic-bezier(.2,.8,.2,1), filter .32s ease}
-@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 8px rgba(var(--gooda),.8)}50%{opacity:.45;box-shadow:0 0 3px rgba(var(--gooda),.3)}}
-.tb-live{display:flex;align-items:center;gap:7px;flex-shrink:0;margin-right:22px}
-.tb-live .live-dot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:livePulse 2s ease-in-out infinite}
-.tb-live .live-lbl{font-weight:700;font-size:9.5px;letter-spacing:.22em;color:var(--good)}
 /* ── Side navigation: slim rail permanently visible, slides wider to reveal links ── */
 .sidenav{position:fixed;top:0;left:0;bottom:0;width:58px;background:#181b28;border-right:1px solid #2d3348;
   z-index:1200;display:flex;flex-direction:column;overflow:hidden;white-space:nowrap;
@@ -243,6 +239,8 @@ td.tf.tl{letter-spacing:.1em;color:var(--muted)}
 .snav-st:hover .snav-abbrev,.snav-st.snav-active .snav-abbrev{filter:drop-shadow(0 0 5px #34d399) drop-shadow(0 0 11px #34d39966);opacity:1}
 .snav-bc:hover,.snav-bc.snav-active{background:linear-gradient(90deg,#fb923c0d,transparent)!important;border-left-color:#fb923c!important;color:#e2e8f0!important}
 .snav-bc:hover .snav-abbrev,.snav-bc.snav-active .snav-abbrev{filter:drop-shadow(0 0 5px #fb923c) drop-shadow(0 0 11px #fb923c66);opacity:1}
+.snav-eval:hover,.snav-eval.snav-active{background:linear-gradient(90deg,#f472b60d,transparent)!important;border-left-color:#f472b6!important;color:#e2e8f0!important}
+.snav-eval:hover svg,.snav-eval.snav-active svg{filter:drop-shadow(0 0 5px #f472b6) drop-shadow(0 0 11px #f472b666)}
 .snav-manpower:hover,.snav-manpower.snav-active{background:linear-gradient(90deg,#00ff9d0d,transparent)!important;border-left-color:#00ff9d!important;color:#e2e8f0!important}
 .snav-manpower:hover svg,.snav-manpower.snav-active svg{filter:drop-shadow(0 0 5px #00ff9d) drop-shadow(0 0 11px #00ff9d66)}
 .snav-export:hover{background:linear-gradient(90deg,#fbbf240d,transparent)!important;border-left-color:#fbbf24!important;color:#e2e8f0!important}
@@ -422,20 +420,10 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 .exp-chk input{accent-color:#f59e0b;cursor:pointer;width:14px;height:14px;flex-shrink:0}
 .exp-note{font-size:10px;color:#7a809a;margin-top:8px;line-height:1.5}
 /* ── Users Management Page ──────────────────────────── */
-.up-user-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;cursor:pointer;transition:background .15s,border-color .15s;border:1px solid transparent;margin-bottom:3px}
-.up-user-row:hover{background:rgba(255,255,255,.04)}
-.up-user-row.selected{background:rgba(56,139,253,.08);border-color:rgba(56,139,253,.25)}
-.up-user-row.up-blocked{border-color:rgba(244,63,94,.25)!important;background:rgba(244,63,94,.04)!important}
-.up-tabs{display:flex;border-bottom:1px solid #2d3348;flex-shrink:0;overflow-x:auto;margin:0 -14px;padding:0 14px}
-.up-tab{padding:10px 16px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#7a809a;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s,border-color .15s}
-.up-tab.active{color:#f1f0e8;border-bottom-color:#388bfd}
-.up-tab:hover:not(.active){color:#a8afc7}
-.up-section{margin-bottom:20px}
-.up-section-title{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7a809a;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.05)}
+.up-section-title{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7a809a;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.05)}
 .up-toggle-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03)}
 .up-toggle-row:last-child{border-bottom:none}
-.up-toggle-lbl{font-size:12px;color:#e2e8f0;flex:1}
-.up-toggle-sub{font-size:10px;color:#7a809a;margin-top:1px}
+.up-toggle-lbl{font-size:13px;color:#e2e8f0;flex:1}
 .up-toggle{position:relative;width:36px;height:20px;flex:none}
 .up-toggle input{opacity:0;width:0;height:0;position:absolute}
 .up-toggle-slider{position:absolute;inset:0;border-radius:10px;background:#2d3348;cursor:pointer;transition:background .2s}
@@ -444,16 +432,12 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 .up-toggle input:checked+.up-toggle-slider::before{transform:translateX(16px);background:#fff}
 .up-toggle input:disabled+.up-toggle-slider{opacity:.45;cursor:not-allowed}
 .up-ceiling-chip{font-size:9px;font-weight:600;letter-spacing:.04em;color:#f59e0b;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:2px 7px;flex:none}
-.up-radio-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .up-radio-opt{padding:7px 14px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #2d3348;color:#7a809a;background:none;transition:all .15s;white-space:nowrap}
 .up-radio-opt.active,.up-radio-opt:hover:not([disabled]){border-color:#388bfd;color:#388bfd;background:rgba(56,139,253,.08)}
 .up-radio-opt[disabled]{opacity:.4;cursor:not-allowed}
-.up-save-bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 0 0;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;margin-top:auto}
 .up-save-btn{background:linear-gradient(135deg,#1d6fa4,#388bfd);border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;padding:8px 22px;cursor:pointer;transition:opacity .15s}
 .up-save-btn:hover{opacity:.88}
 .up-save-msg{font-size:11px}
-.up-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#4a5068;gap:10px;font-size:12px;text-align:center}
-.up-field-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#7a809a;margin-bottom:4px}
 @media print{
   .upl-bar{position:relative!important;left:0!important;box-shadow:none!important}
   .upl-strip{display:none!important}
@@ -464,10 +448,10 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
 }
 
 /* ── FREE CANVAS LAYOUT ── */
-#dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
+#dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas,#evalCanvas{position:relative;padding:12px 20px 60px;min-height:400px}
 .cp{position:absolute;box-sizing:border-box;padding:4px}
 .cp>.card{width:100%;height:100%;box-sizing:border-box;overflow:auto}
-#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode,#molCanvas.edit-mode,#stCanvas.edit-mode,#bcCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode,#molCanvas.edit-mode,#stCanvas.edit-mode,#bcCanvas.edit-mode,#evalCanvas.edit-mode{background-image:radial-gradient(circle,var(--border,#2d3348) 1px,transparent 1px);background-position:0 0}
 .cp.editable{cursor:default}.cp.editable:hover{z-index:100}
 .cp-drag{position:absolute;top:0;left:0;right:28px;height:24px;cursor:grab;z-index:20;
   border-radius:8px 8px 0 0;display:flex;align-items:center;padding-left:8px;opacity:0;transition:opacity .2s}
@@ -501,7 +485,7 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
   box-shadow:0 4px 24px rgba(0,0,0,.6)}
 .canvas-mode-bar.on{display:flex}
 /* Push canvas content below the edit bar when active */
-#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode,#molCanvas.edit-mode,#stCanvas.edit-mode,#bcCanvas.edit-mode{margin-top:36px}
+#dashCanvas.edit-mode,#dpCanvas.edit-mode,#usersCanvas.edit-mode,#molCanvas.edit-mode,#stCanvas.edit-mode,#bcCanvas.edit-mode,#evalCanvas.edit-mode{margin-top:36px}
 .cp-span-tip{position:absolute;top:2px;right:30px;font-size:9px;color:var(--accent,#f59e0b);
   opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:none;
   background:rgba(0,0,0,.5);padding:1px 5px;border-radius:3px}
@@ -561,22 +545,28 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
    TABLET  641px – 1024px
 ════════════════════════════════════════════════════════ */
 @media (min-width:641px) and (max-width:1024px){
-  /* 2-column grid canvas */
-  #dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas{
-    display:grid!important;grid-template-columns:1fr 1fr!important;
+  /* 2-column grid canvas — minmax(0,1fr) so wide content (tables) scrolls inside
+     its panel instead of pushing the track past the viewport */
+  #dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas,#evalCanvas{
+    display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
     align-content:start!important;width:auto!important;height:auto!important;
     min-height:unset!important;padding:10px 10px 40px!important;gap:8px!important;
     background-image:none!important}
 
   .cp{position:relative!important;left:auto!important;top:auto!important;
-    width:auto!important;height:auto!important;min-height:200px}
+    width:auto!important;height:auto!important;min-height:200px;min-width:0}
   .cp>.card{height:auto!important;overflow:visible!important}
 
   /* Full-width panels */
+  .cp[data-id="kpiStrip"],.cp[data-id="molKpiStrip"]{grid-column:span 2;min-height:unset}
   .cp[data-id="rfiPeriod"]{grid-column:span 2}
   .cp[data-id="progress"]{grid-column:span 2}
   .cp[data-id="molRfiPeriod"]{grid-column:span 2}
   .cp[data-id="molProgress"]{grid-column:span 2}
+
+  /* KPI strip: 6-across is unreadable below desktop — wrap to 3×2 */
+  #kpiStrip{grid-template-columns:repeat(3,1fr);height:auto}
+  .ks-card{min-height:120px}
 }
 
 /* ════════════════════════════════════════════════════════
@@ -593,18 +583,23 @@ table.qa-tbl tbody tr:last-child td{border-bottom:none}
   .tb-logo{height:20px}
 
   /* Single-column stacked canvas */
-  #dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas{
+  #dashCanvas,#dpCanvas,#usersCanvas,#molCanvas,#stCanvas,#bcCanvas,#evalCanvas{
     display:flex!important;flex-direction:column!important;
     width:auto!important;height:auto!important;min-height:unset!important;
     padding:8px 8px 72px!important;gap:8px!important;
     background-image:none!important}
 
   .cp{position:relative!important;left:auto!important;top:auto!important;
-    width:100%!important;height:auto!important;min-height:160px}
+    width:100%!important;height:auto!important;min-height:160px;min-width:0}
   .cp>.card{height:auto!important;overflow:visible!important}
 
-  /* Show mobile tab bar */
-  #mobTabBar{display:flex}
+  /* KPI strip: wrap to 2×3 on phones */
+  .cp[data-id="kpiStrip"],.cp[data-id="molKpiStrip"]{min-height:unset}
+  #kpiStrip{grid-template-columns:repeat(2,1fr);height:auto;gap:8px}
+  .ks-card{min-height:120px}
+
+  /* Show mobile tab bar — offset past the 58px sidebar rail so tabs aren't clipped */
+  #mobTabBar{display:flex;left:58px}
 }
 
 /* ── Onboarding Tour ─────────────────────────────────────────── */
@@ -2131,7 +2126,8 @@ function bUploadBar(){
   const loadedCount=Object.values(_d).filter(v=>v!=null).length;
   const anyProcessing=Object.values(_p).some(v=>v);
   const hasRFI=!!_d.rfi;
-  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const showUp=canUpload();       // per-user permission (SA always)
+  const showEdit=canEditLayout(); // per-user permission (SA always)
   const isEditing=!!EDIT_MODE;
   const anyUnsaved=_u.size>0;
 
@@ -2152,7 +2148,7 @@ function bUploadBar(){
   }).join('');
 
   return bTopBar(`
-    <button id="btnUploadAll" class="upl-strip-btn" onclick="document.getElementById('fileMulti').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="Upload All Files" ${anyProcessing?'disabled':''}>
+    ${showUp?`<button id="btnUploadAll" class="upl-strip-btn" onclick="document.getElementById('fileMulti').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="Upload All Files" ${anyProcessing?'disabled':''}>
       ${anyProcessing?UPL_ICONS.spin:UPL_ICONS.upload}
     </button>
     <div class="upl-dots">${dots}</div>
@@ -2161,8 +2157,8 @@ function bUploadBar(){
     </button>
     <button id="btnClearFiles" class="upl-strip-btn" onclick="clearAllFiles()" style="background:rgba(244,63,94,.1);color:#f87171" title="Clear Dashboard" ${!loadedCount?'disabled':''}>
       ${UPL_ICONS.trash}
-    </button>
-${isSA?`<div class="upl-strip-sep"></div>
+    </button>`:''}
+${showEdit?`<div class="upl-strip-sep"></div>
     <button id="btnEdit" class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
       ${UPL_ICONS.layout}
     </button>`:''}
@@ -2192,9 +2188,9 @@ function bTopBar(stripHtml){
   const dateSection = isAdmin
     ? `<div class="date-row">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" style="stroke:var(--c1)" stroke-width="1.4" opacity=".45"/><line x1="3" y1="10" x2="21" y2="10" style="stroke:var(--c1)" stroke-width="1.2" opacity=".5"/><line x1="8" y1="2" x2="8" y2="6" style="stroke:var(--c1)" stroke-width="1.5" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="6" style="stroke:var(--c1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="15" r="1.2" style="fill:var(--c1)" opacity=".6"/><circle cx="12" cy="15" r="1.2" style="fill:var(--c1)"/><circle cx="16" cy="15" r="1.2" style="fill:var(--c1)" opacity=".6"/></svg>
-        <input type="date" id="dStart" class="d-inp" value="${ST.start}" title="Period start date" ${DASH_TAB==='cumul'?'disabled':''}>
+        <input type="date" id="dStart" class="d-inp" value="${ST.start}" title="${canChangeSlicer()?'Period start date':'Reporting duration is locked for your account'}" ${(DASH_TAB==='cumul'||!canChangeSlicer())?'disabled':''}>
         <span style="color:var(--c1);font-size:12px">→</span>
-        <input type="date" id="dEnd"   class="d-inp" value="${ST.end}"   title="Period end date" ${DASH_TAB==='cumul'?'disabled':''}>
+        <input type="date" id="dEnd"   class="d-inp" value="${ST.end}"   title="${canChangeSlicer()?'Period end date':'Reporting duration is locked for your account'}" ${(DASH_TAB==='cumul'||!canChangeSlicer())?'disabled':''}>
       </div>`
     : `<div style="font-size:11px;color:var(--muted);padding:5px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:6px">
         Reporting Duration &nbsp;From: <span style="color:var(--text);font-family:'JetBrains Mono',monospace">${fmtDisp(ST.start)}</span>
@@ -2207,7 +2203,6 @@ function bTopBar(stripHtml){
       <div class="hdr-sub">P30312 · WEST → EAST PIPELINE · 500 KM ROUTE</div>
     </div>
     <div class="upl-strip">${stripHtml}</div>
-    <div class="tb-live"><span class="live-dot"></span><span class="live-lbl">LIVE</span></div>
     <div class="tb-date">${dateSection}</div>
     <img class="tb-logo" src="${ENPPI_LOGO}" alt="ENPPI">
   </div>`;
@@ -2282,6 +2277,7 @@ function bSidenavExtra(){
   const isMol=APP_VIEW==='mol';
   const isSt=APP_VIEW==='stations';
   const isBc=APP_VIEW==='bc';
+  const isEval=APP_VIEW==='eval';
   return `
     <!-- Page Navigation -->
     <button class="sidenav-link snav-pipeline${isDash?' snav-active':''}" data-tip="Pipeline Dashboard" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('dashboard')">
@@ -2317,6 +2313,16 @@ function bSidenavExtra(){
       </svg>
       <span class="snav-lbl">Manpower Deployment</span>
     </button>
+
+    ${(isSA||u.role==='admin')?`<button class="sidenav-link snav-eval${isEval?' snav-active':''}" data-tip="Evaluations" style="width:100%;background:none;border:none;cursor:pointer" onclick="switchView('eval')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none">
+        <rect x="5" y="3.5" width="14" height="17" rx="2" stroke="#f472b6" stroke-width="1.4"/>
+        <path d="M9 3.5h6v2.5H9z" stroke="#f472b6" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M8.5 12l2 2 4-4.5" stroke="#f472b6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="8.5" y1="17" x2="15.5" y2="17" stroke="#f472b6" stroke-width="1.2" opacity=".5"/>
+      </svg>
+      <span class="snav-lbl">Evaluations</span>
+    </button>`:''}
 
     <!-- Export -->
     <div class="sidenav-item" id="exportDropWrap">
@@ -2363,7 +2369,7 @@ function bSidenavExtra(){
       <div class="sidenav-uirow"><span class="sidenav-uilbl">Access Type</span><span class="role-badge ${roleCls}">${roleLabel}</span></div>
       ${(!isGuest&&u.lastLogin)?`<div class="sidenav-uirow"><span class="sidenav-uilbl">Last Sign-in</span><span class="sidenav-uival" style="font-size:10px">${fmtLoginTime(u.lastLogin)}</span></div>`:''}
     </div>
-    ${!isGuest?`<button class="sidenav-link" data-tip="Change Password" style="width:100%;background:none;border:none;cursor:pointer;margin-top:4px" onclick="openChangePw()">
+    ${(!isGuest&&MY_PERM.changeOwnPw)?`<button class="sidenav-link" data-tip="Change Password" style="width:100%;background:none;border:none;cursor:pointer;margin-top:4px" onclick="openChangePw()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none" stroke="#7a809a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         <circle cx="12" cy="16" r="1.3" fill="#7a809a"/>
@@ -2607,6 +2613,7 @@ function triggerCascade(){
 // get the blur/dim treatment. Leaving (or switching panels) resets the cycle.
 let _focusHot=null,_focusT=null;
 function _setPanelFocus(p){
+  if(p&&window.innerWidth<=1024) p=null; // tablet/mobile reflow layouts — no hover zoom/blur
   if(p===_focusHot) return;
   _focusHot=p;
   clearTimeout(_focusT); _focusT=null;
@@ -2938,7 +2945,7 @@ function bKPIStrip({ weldRepair, fjcRepair, ndtBacklog, ndtBacklogGoal, pWeldRep
 function switchView(v){
   const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
   const isAdmin=AUTH.currentUser&&AUTH.currentUser.role==='admin';
-  if(v==='users'&&!isSA&&!isAdmin) return;
+  if((v==='users'||v==='eval')&&!isSA&&!isAdmin) return; // admin/SA-only pages
   APP_VIEW = v;
   toggleSidenav(false);
   _animRender();
@@ -3003,6 +3010,7 @@ function render(){
   if(APP_VIEW==='mol')      { ACTIVE_CANVAS_ID='molCanvas';   renderMol();        return; }
   if(APP_VIEW==='stations') { ACTIVE_CANVAS_ID='stCanvas';    renderStations();   return; }
   if(APP_VIEW==='bc')       { ACTIVE_CANVAS_ID='bcCanvas';    renderBC();         return; }
+  if(APP_VIEW==='eval')     { ACTIVE_CANVAS_ID='evalCanvas';  renderEval();       return; }
   ACTIVE_CANVAS_ID='dashCanvas';
 
   const m=buildDashPanels('');
@@ -3303,7 +3311,7 @@ function bViewerMonthStrip(sc, dep){
 }
 
 function bDeployBar(sc, dep){
-  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const showUp=canUpload(), showEdit=canEditLayout();
   const isEditing=!!EDIT_MODE;
   const loaded=!!dep;
   const fname=ST.files.deployment?ST.files.deployment.split('/').pop().split('\\').pop():'';
@@ -3312,13 +3320,13 @@ function bDeployBar(sc, dep){
   const periodN=(ST.dpMonths||[]).length;
 
   return bTopBar(`
-    <button class="upl-strip-btn" onclick="document.getElementById('dpFileInput').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="${loaded?'Replace EPCM File':'Upload EPCM File'}">
+    ${showUp?`<button class="upl-strip-btn" onclick="document.getElementById('dpFileInput').click()" style="background:rgba(245,158,11,.15);color:#f59e0b" title="${loaded?'Replace EPCM File':'Upload EPCM File'}">
       ${UPL_ICONS.upload}
-    </button>
-    ${loaded?`<button class="upl-strip-btn" onclick="clearDeployment()" style="background:rgba(244,63,94,.1);color:#f87171" title="Clear Deployment">
+    </button>`:''}
+    ${(loaded&&showUp)?`<button class="upl-strip-btn" onclick="clearDeployment()" style="background:rgba(244,63,94,.1);color:#f87171" title="Clear Deployment">
       ${UPL_ICONS.trash}
     </button>`:''}
-    ${isSA?`<div class="upl-strip-sep"></div>
+    ${showEdit?`<div class="upl-strip-sep"></div>
     <button id="btnEdit" class="upl-strip-btn" onclick="toggleEditMode()" title="${isEditing?'Exit Edit Mode':'Edit Layout'}" style="${isEditing?'background:rgba(245,158,11,.18);color:#f59e0b':'background:rgba(255,255,255,.06);color:#6b7280'}">
       ${UPL_ICONS.layout}
     </button>`:''}
@@ -3983,6 +3991,7 @@ function initHiringChart(dep, sc, curIdx, nowStr, totalPlan, totalActual){
 }
 
 function exportHiringChart(){
+  if(!MY_PERM.datasets.hiring){ alert('Your account is not allowed to export the hiring data.'); return; }
   const d=CHARTS.dpHiring?._exportData;
   if(!d) return;
   const {months,totalPlan,totalActual,recoveryData,monthlyHires,hireByRole,dep,curIdx,targetIdx}=d;
@@ -4048,57 +4057,68 @@ function exportHiringChart(){
 // USERS MANAGEMENT PAGE
 // ═══════════════════════════════════════════════════
 
-let UMG_SEL   = null;       // selected username
-let UMG_TAB   = 'profile';  // 'profile'|'pages'|'export'|'dates'
+let UMG_SEL   = null;       // selected username (drawer open)
 let UMG_USERS = [];         // cached user list from Supabase
-let UMG_PERMS_DRAFT = {};   // {username: permObj} — in-flight edits, not yet saved
+let UMG_PERMS_DRAFT = {};   // {username: raw perm obj} — in-flight edits, not yet saved
+let UMG_ADD_OPEN = false;   // add-user form visible
 
-const UMG_DEFAULT_PERMS = {
-  pages:   { dashboard:true, deployment:true },
-  panels:  {
-    kpiStrip:true, rfiPeriod:true, rfiDonut:true, ndtPeriod:true,
-    fjcPeriod:true, welders:true, progress:true,
-    ncrTable:true, ncrBar:true, sorTable:true, sorScatter:true,
-    dpCtrl:true, dpCats:true, dpRoles:true,
-    dpChart6m:true, dpHiring:true, dpLocRole:true, dpPersonnel:true,
-    dpUpload:false
-  },
-  export: {
-    excel:true, image:true, changeDates:false,
-    datasets:{rfi:true,ncr:true,sor:true,welders:true,fjc:true,ndt:true,daily:true,deployment:true,hiring:true}
-  },
-  dateControl:'locked', lockedFrom:null, lockedTo:null, restrictedCutoff:null
-};
+// ── PERMISSION MODEL (redesign 2026-07-16) ──────────────────────────────────
+// 8 controls, stored raw in dashboard_users.permissions (jsonb):
+//   export:{datasets:{rfi,ndt,fjc,ncr,sor,deployment,hiring}, duration:'free'|'locked'|'slicer', lockedFrom, lockedTo}
+//   slicer:'free'|'locked'|'restricted', lockedFrom, lockedTo, restrictedCutoff
+//   upload, editLayout, createUsers, changeOwnPw : booleans
+// Legacy saved objects (pages/panels/dateControl/changeDates) are migrated on
+// read by resolvePerm and overwritten on the next save.
+const PERM_DATASETS=[['rfi','RFI'],['ndt','NDT'],['fjc','FJC'],['ncr','NCR'],['sor','SOR'],['deployment','Deployment'],['hiring','Hiring']];
 
-// Maximum capability for each role
-function _umgCeiling(role){
-  if(role==='superadmin'||role==='admin') return {dateControl:'free',exportChangeDates:true,dpUpload:true};
-  return {dateControl:'locked',exportChangeDates:false,dpUpload:false};
+// Raw stored perms + role → EFFECTIVE permissions. Single source of truth for
+// both the User Access page display and runtime enforcement (MY_PERM below).
+function resolvePerm(u){
+  const raw=(u&&u.permissions&&typeof u.permissions==='object')?u.permissions:{};
+  const isSA=!!u&&u.username===SUPER_ADMIN;
+  const isAdmin=isSA||(!!u&&(u.role==='admin'||u.role==='superadmin'));
+  const ex=raw.export||{};
+  const ds={}; PERM_DATASETS.forEach(([k])=>ds[k]=isSA||!ex.datasets||ex.datasets[k]!==false);
+  return {
+    datasets: ds,
+    expDur:  isSA?'free':(ex.duration||(ex.changeDates===true?'free':'slicer')),
+    expFrom: ex.lockedFrom||null, expTo: ex.lockedTo||null,
+    slicer:  isSA?'free':(raw.slicer||raw.dateControl||(isAdmin?'free':'locked')),
+    lockedFrom: raw.lockedFrom||null, lockedTo: raw.lockedTo||null,
+    restrictedCutoff: raw.restrictedCutoff||null,
+    upload:     isSA||(isAdmin&&raw.upload!==false),
+    editLayout: isSA||(isAdmin&&raw.editLayout===true),
+    createUsers:isSA||(isAdmin&&raw.createUsers===true),
+    changeOwnPw: raw.changeOwnPw!==false,
+  };
 }
-
-// Merge saved permissions with defaults
-function _umgGetPerm(uname){
-  if(UMG_PERMS_DRAFT[uname]) return UMG_PERMS_DRAFT[uname];
-  const u=UMG_USERS.find(u=>u.username===uname);
-  const saved=u&&u.permissions&&typeof u.permissions==='object'?u.permissions:{};
-  const merged=JSON.parse(JSON.stringify(UMG_DEFAULT_PERMS));
-  if(saved.pages)   Object.assign(merged.pages,saved.pages);
-  if(saved.panels)  Object.assign(merged.panels,saved.panels);
-  if(saved.export){
-    const {datasets,...rest}=saved.export;
-    Object.assign(merged.export,rest);
-    if(datasets) Object.assign(merged.export.datasets,datasets);
+// Effective permissions of the SIGNED-IN user — set at login (loadAndShow).
+let MY_PERM=resolvePerm(null);
+const canUpload     =()=>!!AUTH.currentUser&&!AUTH.currentUser.isGuest&&MY_PERM.upload;
+const canEditLayout =()=>!!AUTH.currentUser&&!AUTH.currentUser.isGuest&&MY_PERM.editLayout;
+const canCreateUsers=()=>!!AUTH.currentUser&&!AUTH.currentUser.isGuest&&MY_PERM.createUsers;
+const canChangeSlicer=()=>{const u=AUTH.currentUser;return !!u&&!u.isGuest&&(u.username===SUPER_ADMIN||MY_PERM.slicer==='free');};
+// Apply the slicer permission to the date range at login (SA/free untouched).
+function applySlicerPerm(){
+  const u=AUTH.currentUser; if(!u||u.isGuest||u.username===SUPER_ADMIN) return;
+  if(MY_PERM.slicer==='locked'&&MY_PERM.lockedFrom&&MY_PERM.lockedTo){ ST.start=MY_PERM.lockedFrom; ST.end=MY_PERM.lockedTo; }
+  else if(MY_PERM.slicer==='restricted'&&MY_PERM.restrictedCutoff){
+    const d=new Date(MY_PERM.restrictedCutoff+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()-6);
+    ST.start=d.toISOString().slice(0,10); ST.end=MY_PERM.restrictedCutoff;
   }
-  if(saved.dateControl) merged.dateControl=saved.dateControl;
-  if(saved.lockedFrom!==undefined)      merged.lockedFrom=saved.lockedFrom;
-  if(saved.lockedTo!==undefined)        merged.lockedTo=saved.lockedTo;
-  if(saved.restrictedCutoff!==undefined) merged.restrictedCutoff=saved.restrictedCutoff;
-  return merged;
 }
 
-function _umgGetDraft(uname){
-  if(!UMG_PERMS_DRAFT[uname]) UMG_PERMS_DRAFT[uname]=_umgGetPerm(uname);
-  return UMG_PERMS_DRAFT[uname];
+// Editable draft (raw schema) for the drawer — initialised from the user's
+// current EFFECTIVE permissions so the controls show what actually applies.
+function _umgDraft(un){
+  if(!UMG_PERMS_DRAFT[un]){
+    const p=resolvePerm(UMG_USERS.find(x=>x.username===un));
+    UMG_PERMS_DRAFT[un]={
+      export:{datasets:{...p.datasets},duration:p.expDur,lockedFrom:p.expFrom,lockedTo:p.expTo},
+      slicer:p.slicer,lockedFrom:p.lockedFrom,lockedTo:p.lockedTo,restrictedCutoff:p.restrictedCutoff,
+      upload:p.upload,editLayout:p.editLayout,createUsers:p.createUsers,changeOwnPw:p.changeOwnPw};
+  }
+  return UMG_PERMS_DRAFT[un];
 }
 
 async function renderUsers(){
@@ -4127,232 +4147,143 @@ async function renderUsers(){
     }catch(e2){ console.error('[Users] fallback also failed:',e2); UMG_USERS=[]; }
   }
 
-  // If the user hasn't saved a custom layout, fit the two panels to the viewport
-  // height so the Add-User form never sits below the fold.
-  if(!localStorage.getItem(USERS_LAYOUT_KEY)){
-    recalcUnit();
-    const availH=window.innerHeight - 60 - 24; // viewport − top bar − canvas top padding
-    const h=Math.max(14, Math.floor(availH/(UNIT+GAP)));
-    USERS_CANVAS_LAYOUT=DEFAULT_USERS_LAYOUT.map(p=>({...p,h}));
-  }
-
-  const USERS_PANELS={ usersLeft:bUsersLeft(), usersRight:bUsersRight() };
+  const USERS_PANELS={ usersMain:bUsersMain() };
   renderCanvas(USERS_PANELS);
   bindEvents();
   if(EDIT_MODE) activateEditMode();
+  _umgLoadLogins();
 }
 
-// ── Refresh helpers (avoid full re-render on interaction) ──
-function _umgRefreshLeft(){
+// Re-render the single User Access panel (matrix + drawer) in place.
+function _umgRefresh(){
   const c=document.getElementById('usersCanvas');
-  const el=c&&c.querySelector('.cp[data-id="usersLeft"]');
-  if(el) el.innerHTML=bUsersLeft();
-}
-function _umgRefreshRight(){
-  const c=document.getElementById('usersCanvas');
-  const el=c&&c.querySelector('.cp[data-id="usersRight"]');
-  if(el) el.innerHTML=bUsersRight();
+  const el=c&&c.querySelector('.cp[data-id="usersMain"]');
+  if(el){ el.innerHTML=bUsersMain(); _umgLoadLogins(); }
 }
 
-// ── Left panel: user list + add-user form ─────────────────
-function bUsersLeft(){
-  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
-  const rc={superadmin:{bg:'#2a1f0a',txt:'#f59e0b',cls:'role-superadmin',lbl:'Super Admin'},
-            admin:{bg:'#0f2420',txt:'#14b8a6',cls:'role-admin',lbl:'Admin'},
-            viewer:{bg:'#252a3a',txt:'#7a809a',cls:'role-viewer',lbl:'Viewer'}};
-  const rows=UMG_USERS.map(u=>{
-    const r=rc[u.role]||rc.viewer;
-    const ini=(u.display_name||u.username).substring(0,2).toUpperCase();
-    const isSel=UMG_SEL===u.username;
-    const isBlocked=!!u.is_blocked;
-    return`<div class="up-user-row${isSel?' selected':''}${isBlocked?' up-blocked':''}" onclick="selectUser('${esc(u.username)}')">
-      <div class="umg-avatar" style="background:${r.bg};color:${r.txt}">${ini}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:600;color:#f1f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.display_name||u.username)}</div>
-        <div style="font-size:10px;color:#7a809a">@${esc(u.username)}${isBlocked?' · <span style="color:#f43f5e;font-weight:600">BLOCKED</span>':''}</div>
-      </div>
-      <span class="role-badge ${r.cls}" style="font-size:8px">${r.lbl}</span>
-    </div>`;
+// ── User Access panel: permission matrix + editor drawer ──
+function bUsersMain(){
+  const canCreate=canCreateUsers();
+  const dot=(on,capable)=>capable?(on?'<span style="color:var(--good)">\u25cf</span>':'<span style="color:var(--muted)">\u25cb</span>'):'<span style="color:var(--faint)">\u2014</span>';
+  const SLICER_CHIP={free:['Free','good'],locked:['Locked','amber'],restricted:['Restricted','violet']};
+  const rows=UMG_USERS.map((u,i)=>{
+    const p=resolvePerm(u);
+    const isSAu=u.username===SUPER_ADMIN;
+    const isAdm=isSAu||u.role==='admin';
+    const nOn=PERM_DATASETS.filter(([k])=>p.datasets[k]).length;
+    const expTxt=nOn===0?'off':(nOn===PERM_DATASETS.length?'all':nOn+' types')+' \u00b7 '+p.expDur;
+    const [sl,scv]=SLICER_CHIP[p.slicer]||['\u2014','gray'];
+    const rc={superadmin:['role-superadmin','SA'],admin:['role-admin','Admin'],viewer:['role-viewer','Viewer']};
+    const [rcls,rlbl]=rc[isSAu?'superadmin':u.role]||rc.viewer;
+    const sel=UMG_SEL===u.username;
+    return`<tr data-u="${esc((u.username+' '+(u.display_name||'')).toLowerCase())}" onclick="selectUser('${esc(u.username)}')"
+      class="${!sel&&i%2?'tr-alt':''}" style="cursor:pointer${sel?';background:rgba(var(--c1a),.08);outline:1px solid rgba(var(--c1a),.4)':''}">
+      <td class="td tl" style="font-size:12px;text-transform:none">${esc(u.display_name||u.username)} <span style="color:var(--faint)">@${esc(u.username)}</span>${u.is_blocked?' <span class="umg-blocked-badge">BLOCKED</span>':''}</td>
+      <td class="td" style="text-align:center"><span class="role-badge ${rcls}" style="font-size:10px">${rlbl}</span></td>
+      <td class="td" style="text-align:center;font-size:14px">${dot(p.upload,isAdm)}</td>
+      <td class="td" style="text-align:center;font-size:14px">${dot(p.editLayout,isAdm)}</td>
+      <td class="td" style="text-align:center;font-size:11px;color:var(--${nOn?'c1':'faint'})">${expTxt}</td>
+      <td class="td" style="text-align:center;font-size:11px;font-weight:700;color:var(--${scv})">${sl}</td>
+      <td class="td tl" style="font-size:11px;color:var(--muted);text-transform:none">${fmtLoginTime(u.last_login)}</td>
+    </tr>`;
   }).join('');
-
-  return`<div class="card" style="display:flex;flex-direction:column;height:100%;gap:0;overflow:hidden">
-    <div class="slbl" style="flex-shrink:0;margin-bottom:8px">Users <span style="font-size:9px;color:#7a809a;font-weight:400;text-transform:none;letter-spacing:0">(${UMG_USERS.length})</span></div>
-    <div style="flex:1;min-height:0;overflow-y:auto;margin:-4px -4px 0;padding:4px">
-      ${rows||'<div style="color:#4a5068;font-size:11px;padding:8px">No users found</div>'}
+  const addForm=(UMG_ADD_OPEN&&canCreate)?`
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px;border:1px solid rgba(var(--c1a),.25);border-radius:9px;margin-bottom:10px;background:rgba(var(--c1a),.04)">
+      <input class="umg-inp" id="umgNewUser" placeholder="username" style="width:130px">
+      <input class="umg-inp" id="umgNewName" placeholder="Display name" style="width:150px">
+      <input class="umg-inp" id="umgNewPass" type="password" placeholder="Password (min 8)" style="width:150px">
+      <select class="umg-sel" id="umgNewRole" style="width:110px"><option value="admin">Admin</option><option value="viewer" selected>Viewer</option></select>
+      <button class="umg-add-btn" onclick="addUser()">Create</button>
+      <div class="umg-msg" id="umgMsg" style="margin:0"></div>
+    </div>`:'';
+  return`<div class="card" style="min-height:100%">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div class="slbl" style="margin:0">User Access <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--faint)">(${UMG_USERS.length})</span></div>
+      <input class="umg-inp" placeholder="Search users\u2026" oninput="umgSearch(this.value)" style="width:150px;margin-left:auto">
+      <button onclick="exportLoginHistory()" title="Export the full login log to Excel" style="font-size:11px;font-weight:600;color:var(--muted);background:none;border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:6px 12px;cursor:pointer">\u2913 Login history</button>
+      ${canCreate?`<button onclick="UMG_ADD_OPEN=!UMG_ADD_OPEN;_umgRefresh()" style="font-size:11px;font-weight:700;color:var(--c1);background:rgba(var(--c1a),.1);border:1px solid rgba(var(--c1a),.4);border-radius:6px;padding:6px 14px;cursor:pointer">${UMG_ADD_OPEN?'\u2715 Close':'+ Add User'}</button>`:''}
     </div>
-    ${isSA?`<div style="flex-shrink:0;padding-top:10px;border-top:1px solid rgba(255,255,255,.05);margin-top:10px">
-      <div class="up-field-lbl" style="margin-bottom:6px">Add New User</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">
-        <input class="umg-inp" id="umgNewUser" placeholder="username" style="font-size:11px;padding:6px 8px">
-        <input class="umg-inp" id="umgNewName" placeholder="Display name" style="font-size:11px;padding:6px 8px">
-        <input class="umg-inp" id="umgNewPass" type="password" placeholder="Password (min 8)" style="font-size:11px;padding:6px 8px">
-        <select class="umg-sel" id="umgNewRole" style="font-size:11px;padding:6px 8px">
-          <option value="admin">Admin</option>
-          <option value="viewer" selected>Viewer</option>
-        </select>
-      </div>
-      <button class="umg-add-btn" style="width:100%;font-size:11px" onclick="addUser()">+ Add User</button>
-      <div class="umg-msg" id="umgMsg" style="margin-top:6px"></div>
-    </div>`:''}
+    ${addForm}
+    <div style="overflow-x:auto"><table class="tbl" id="umgMatrix"><thead><tr>
+      <th class="th tl">User</th><th class="th" style="text-align:center">Role</th>
+      <th class="th" style="text-align:center">Upload</th><th class="th" style="text-align:center">Layout</th>
+      <th class="th" style="text-align:center">Export</th><th class="th" style="text-align:center">Slicer</th>
+      <th class="th tl">Last Login</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="margin-top:10px">${UMG_SEL?bUserDrawer():`<div style="display:flex;align-items:center;justify-content:center;min-height:60px;font-size:11px;color:var(--faint)">Select a user to edit their access</div>`}</div>
   </div>`;
 }
 
-// ── Right panel: selected-user detail editor ──────────────
-function bUsersRight(){
-  if(!UMG_SEL) return`<div class="card" style="height:100%;display:flex;align-items:center;justify-content:center">
-    <div class="up-empty">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2d3348" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-7 7-7s7 3 7 7"/></svg>
-      <div>Select a user from the list to<br>view and edit their settings</div>
-    </div>
+// ── Editor drawer for the selected user ──
+function bUserDrawer(){
+  const u=UMG_USERS.find(x=>x.username===UMG_SEL);
+  if(!u) return '';
+  const meSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const isSAu=u.username===SUPER_ADMIN;
+  const isAdm=isSAu||u.role==='admin';
+  const isMe=AUTH.currentUser&&u.username===AUTH.currentUser.username;
+  const d=_umgDraft(u.username);
+  const ro=!meSA||isSAu; // perm controls locked for non-SA editors and for the SA row itself
+  const seg=(cur,opts,fn)=>opts.map(([v,l])=>`<button class="up-radio-opt${cur===v?' active':''}" ${ro?'disabled':''} onclick="${fn}('${v}')" style="padding:5px 13px;font-size:11.5px">${l}</button>`).join('');
+  const tgl=(k,lbl,val,capable)=>`<div class="up-toggle-row">
+    <div class="up-toggle-lbl">${lbl}</div>
+    ${capable?'':'<span class="up-ceiling-chip">Role ceiling</span>'}
+    <label class="up-toggle" style="margin-left:10px"><input type="checkbox" ${val&&capable?'checked':''} ${(ro||!capable)?'disabled':''} onchange="umgToggleFlag('${k}',this.checked)"><span class="up-toggle-slider"></span></label>
   </div>`;
-
-  const u=UMG_USERS.find(u=>u.username===UMG_SEL);
-  if(!u) return`<div class="card" style="height:100%"></div>`;
-  const perm=_umgGetPerm(u.username);
-  const ceil=_umgCeiling(u.role);
-  const isSA_user=u.username===SUPER_ADMIN;
-  const isMe=u.username===AUTH.currentUser.username;
-  const canEdit=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
-  const rc={superadmin:{bg:'#2a1f0a',txt:'#f59e0b',cls:'role-superadmin',lbl:'Super Admin'},
-            admin:{bg:'#0f2420',txt:'#14b8a6',cls:'role-admin',lbl:'Admin'},
-            viewer:{bg:'#252a3a',txt:'#7a809a',cls:'role-viewer',lbl:'Viewer'}};
-  const r=rc[u.role]||rc.viewer;
-
-  const tabLabels={profile:'Profile & Role',pages:'Pages & Panels',export:'Export Settings',dates:'Date Controls'};
-  let tabContent='';
-  if(UMG_TAB==='profile')       tabContent=bUpTabProfile(u,r,isSA_user,isMe,canEdit);
-  else if(UMG_TAB==='pages')    tabContent=bUpTabPages(perm,ceil);
-  else if(UMG_TAB==='export')   tabContent=bUpTabExport(perm,ceil);
-  else if(UMG_TAB==='dates')    tabContent=bUpTabDates(perm,ceil);
-
-  return`<div class="card" style="display:flex;flex-direction:column;height:100%;gap:0;overflow:hidden">
-    <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0">
-      <div class="umg-avatar" style="width:34px;height:34px;border-radius:8px;font-size:14px;background:${r.bg};color:${r.txt}">${(u.display_name||u.username).substring(0,2).toUpperCase()}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:#f1f0e8">${esc(u.display_name||u.username)}</div>
-        <div style="font-size:10px;color:#7a809a">@${esc(u.username)} · Last sign-in: ${fmtLoginTime(u.last_login)}</div>
+  const chips=PERM_DATASETS.map(([k,l])=>`<span onclick="${ro?'':`umgToggleDs('${k}')`}" style="cursor:${ro?'default':'pointer'};font-size:11.5px;font-weight:600;padding:5px 13px;border-radius:11px;border:1px solid ${d.export.datasets[k]?'rgba(var(--c1a),.45)':'rgba(255,255,255,.12)'};background:${d.export.datasets[k]?'rgba(var(--c1a),.12)':'none'};color:${d.export.datasets[k]?'var(--c1)':'var(--faint)'}">${l}</span>`).join('');
+  const rc=isSAu?['role-superadmin','Super Admin']:u.role==='admin'?['role-admin','Admin']:['role-viewer','Viewer'];
+  const nameVal=d._name!==undefined&&d._name!==null?d._name:(u.display_name||'');
+  return`<div style="border:1px solid rgba(var(--c1a),.35);border-radius:11px;padding:13px 15px;background:rgba(var(--c1a),.03)">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <div class="umg-avatar" style="width:32px;height:32px;font-size:12px;background:rgba(var(--c1a),.15);color:var(--c1)">${esc((u.display_name||u.username).substring(0,2).toUpperCase())}</div>
+      ${meSA?`<input class="umg-inp" id="upEditName" value="${esc(nameVal)}" placeholder="Display name" style="width:170px;font-size:13px">`:`<b style="font-size:14px;color:var(--text)">${esc(u.display_name||u.username)}</b>`}
+      <span style="font-size:11px;color:var(--faint);font-family:'JetBrains Mono',monospace">@${esc(u.username)}</span>
+      ${(meSA&&!isSAu)?`<select class="umg-sel" id="upEditRole" style="width:96px">${['admin','viewer'].map(r=>`<option value="${r}"${(d._role||u.role)===r?' selected':''}>${r==='admin'?'Admin':'Viewer'}</option>`).join('')}</select>`:`<span class="role-badge ${rc[0]}">${rc[1]}</span>`}
+      ${u.is_blocked?`<span class="umg-blocked-badge">BLOCKED</span><button class="umg-unblock-btn" onclick="unblockUser('${esc(u.username)}')">Unblock</button>`:''}
+      <div style="flex:1"></div>
+      ${meSA?`<input class="umg-inp" id="upEditPass" type="password" placeholder="Reset password (8+)" style="width:180px;font-size:12px" value="${esc(d._pass||'')}">`:''}
+      <button onclick="resetTourForUser('${esc(u.username)}');const m=document.getElementById('upSaveMsg');if(m){m.style.color='var(--good)';m.textContent='Tour reset \u2014 applies on next login.';}" style="font-size:11px;color:#60a5fa;background:none;border:1px solid rgba(99,179,237,.3);border-radius:6px;padding:5px 12px;cursor:pointer">Reset Tour</button>
+      ${(meSA&&!isSAu&&!isMe)?`<button onclick="deleteUser('${esc(u.username)}')" style="font-size:11px;color:var(--bad);background:none;border:1px solid rgba(var(--bada),.35);border-radius:6px;padding:5px 12px;cursor:pointer">Delete</button>`:''}
+    </div>
+    ${isSAu?`<div style="font-size:10.5px;color:var(--muted);margin-bottom:10px">Super Admin always has full access \u2014 the controls below are fixed.</div>`:''}
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(240px,340px));gap:34px;justify-content:start">
+      <div>
+        <div class="up-section-title">Data Export</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px">${chips}</div>
+        <div class="up-section-title">Export Duration</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${seg(d.export.duration,[['free','Free'],['locked','Locked range'],['slicer','Follow slicer']],'umgSetExpDur')}</div>
+        ${d.export.duration==='locked'?`<div style="display:flex;gap:6px;margin-top:8px">
+          <input class="umg-inp d-inp" id="upExpFrom" type="date" value="${d.export.lockedFrom||''}" ${ro?'disabled':''}>
+          <input class="umg-inp d-inp" id="upExpTo" type="date" value="${d.export.lockedTo||''}" ${ro?'disabled':''}>
+        </div>`:''}
       </div>
-      <span class="role-badge ${r.cls}">${r.lbl}</span>
-      ${u.is_blocked?`<span class="umg-blocked-badge">BLOCKED</span>`:''}
+      <div>
+        <div class="up-section-title">Reporting Slicer</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">${seg(d.slicer,[['free','Free'],['locked','Locked'],['restricted','Restricted']],'umgSetSlicer')}</div>
+        ${d.slicer==='locked'?`<div style="display:flex;gap:6px;margin-bottom:10px">
+          <input class="umg-inp d-inp" id="upLockFrom" type="date" value="${d.lockedFrom||''}" ${ro?'disabled':''}>
+          <input class="umg-inp d-inp" id="upLockTo" type="date" value="${d.lockedTo||''}" ${ro?'disabled':''}>
+        </div>`:''}
+        ${d.slicer==='restricted'?`<select class="umg-sel" id="upRestrictedCutoff" style="margin-bottom:10px;width:100%" ${ro?'disabled':''}>
+          <option value="">\u2014 cutoff Friday \u2014</option>
+          ${genCutoffFridays(52).map(({iso,label})=>`<option value="${iso}"${d.restrictedCutoff===iso?' selected':''}>${label}</option>`).join('')}
+        </select>`:''}
+      </div>
+      <div>
+        <div class="up-section-title">Workspace</div>
+        ${tgl('upload','Upload data',d.upload,isAdm)}
+        ${tgl('editLayout','Edit layouts',d.editLayout,isAdm)}
+        ${tgl('createUsers','Create users',d.createUsers,isAdm)}
+        ${tgl('changeOwnPw','Change own password',d.changeOwnPw,true)}
+      </div>
     </div>
-    <div class="up-tabs" style="flex-shrink:0">
-      ${['profile','pages','export','dates'].map(t=>`<button class="up-tab${UMG_TAB===t?' active':''}" onclick="switchUsersTab('${t}')">${tabLabels[t]}</button>`).join('')}
-    </div>
-    <div style="flex:1;min-height:0;overflow-y:auto;padding-top:14px">
-      ${tabContent}
-    </div>
-    ${UMG_TAB!=='profile'?`<div class="up-save-bar">
+    <div style="display:flex;align-items:center;gap:12px;border-top:1px solid rgba(255,255,255,.08);margin-top:12px;padding-top:10px">
+      <div class="up-section-title" style="margin:0;border:none;padding:0">Login Activity</div>
+      <span id="umgLoginList" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">Loading\u2026</span>
+      <div style="flex:1"></div>
       <span class="up-save-msg" id="upSaveMsg"></span>
-      <button class="up-save-btn" onclick="saveUserPermissions()">Save Permissions</button>
-    </div>`:''}
-  </div>`;
-}
-
-// ── Tab: Profile & Role ───────────────────────────────────
-function bUpTabProfile(u,r,isSA_user,isMe,canEdit){
-  return`<div class="up-section">
-    <div class="up-section-title">Account Details</div>
-    <div style="display:grid;grid-template-columns:1fr;gap:10px;max-width:360px">
-      <div>
-        <div class="up-field-lbl">Display Name</div>
-        <input class="umg-inp" id="upEditName" type="text" value="${esc(u.display_name||'')}" ${canEdit?'':'disabled'}>
-      </div>
-      <div>
-        <div class="up-field-lbl">Role</div>
-        <select class="umg-sel" id="upEditRole" ${(!canEdit||isSA_user)?'disabled':''}>
-          ${isSA_user?`<option value="superadmin" selected>Super Admin</option>`:`
-          <option value="admin" ${u.role==='admin'?'selected':''}>Admin — upload, save, export</option>
-          <option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer — read-only</option>`}
-        </select>
-      </div>
-      ${canEdit?`<div>
-        <div class="up-field-lbl">Reset Password <span style="text-transform:none;font-weight:400;color:#4a5068">(leave blank to keep current)</span></div>
-        <input class="umg-inp" id="upEditPass" type="password" placeholder="Min 8 characters">
-      </div>`:''}
+      ${meSA?`<button class="up-save-btn" onclick="saveUserAccess()">Save</button>`:''}
     </div>
-    ${canEdit?`<div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button class="umg-add-btn" onclick="saveUserProfile('${esc(u.username)}')">Save Profile</button>
-      ${u.is_blocked?`<button class="umg-unblock-btn" onclick="unblockUser('${esc(u.username)}')">Unblock Account</button>`:''}
-      <button onclick="resetTourForUser('${esc(u.username)}');document.getElementById('upProfileMsg').innerHTML='<span style=color:#34d399>Onboarding tour reset — takes effect on next login.</span>'" style="padding:7px 14px;border:1px solid rgba(99,179,237,.25);border-radius:6px;background:none;color:#60a5fa;font-size:11px;font-weight:600;cursor:pointer" title="Reset onboarding tour for this user">Reset Tour</button>
-      ${(!isSA_user&&!isMe)?`<button onclick="deleteUser('${esc(u.username)}')" style="margin-left:auto;padding:7px 14px;border:1px solid rgba(244,63,94,.3);border-radius:6px;background:none;color:#f43f5e;font-size:11px;font-weight:600;cursor:pointer">Delete User</button>`:''}
-    </div>`:'<div style="color:#4a5068;font-size:11px;margin-top:10px">Only Super Admin can edit profiles.</div>'}
-    <div class="umg-msg" id="upProfileMsg" style="margin-top:8px"></div>
-  </div>`;
-}
-
-// ── Tab: Pages & Panels ───────────────────────────────────
-function bUpTabPages(perm,ceil){
-  const pages=perm.pages||{};
-  const panels=perm.panels||{};
-  const mkRow=(lbl,val,ceilVal,changeExpr)=>{
-    const locked=!ceilVal;
-    return`<div class="up-toggle-row">
-      <div style="flex:1"><div class="up-toggle-lbl">${lbl}</div></div>
-      ${locked?`<span class="up-ceiling-chip">Role ceiling</span>`:''}
-      <label class="up-toggle" style="margin-left:10px">
-        <input type="checkbox" ${val&&!locked?'checked':''} ${locked?'disabled':''} onchange="${changeExpr}">
-        <span class="up-toggle-slider"></span>
-      </label>
-    </div>`;
-  };
-  return`<div class="up-section">
-    <div class="up-section-title">Pages</div>
-    ${mkRow('Pipeline Dashboard',pages.dashboard!==false,true,"umgTogglePanel('page_dashboard',this.checked)")}
-    ${mkRow('Manpower Deployment',pages.deployment!==false,true,"umgTogglePanel('page_deployment',this.checked)")}
-  </div>
-  <div class="up-section">
-    <div class="up-section-title">Dashboard Panels</div>
-    ${mkRow('KPI Strip',panels.kpiStrip!==false,true,"umgTogglePanel('panel_kpiStrip',this.checked)")}
-    ${mkRow('RFI Status Table',panels.rfiPeriod!==false,true,"umgTogglePanel('panel_rfiPeriod',this.checked)")}
-    ${mkRow('RFI Donut Chart',panels.rfiDonut!==false,true,"umgTogglePanel('panel_rfiDonut',this.checked)")}
-    ${mkRow('NDT (EPCM) Table',panels.ndtPeriod!==false,true,"umgTogglePanel('panel_ndtPeriod',this.checked)")}
-    ${mkRow('FJC Status Table',panels.fjcPeriod!==false,true,"umgTogglePanel('panel_fjcPeriod',this.checked)")}
-    ${mkRow('Welder Activity Chart',panels.welders!==false,true,"umgTogglePanel('panel_welders',this.checked)")}
-    ${mkRow('Welding Progress Bars',panels.progress!==false,true,"umgTogglePanel('panel_progress',this.checked)")}
-    ${mkRow('NCR Table',panels.ncrTable!==false,true,"umgTogglePanel('panel_ncrTable',this.checked)")}
-    ${mkRow('NCR Bar Chart',panels.ncrBar!==false,true,"umgTogglePanel('panel_ncrBar',this.checked)")}
-    ${mkRow('SOR Table',panels.sorTable!==false,true,"umgTogglePanel('panel_sorTable',this.checked)")}
-    ${mkRow('SOR Scatter Plot',panels.sorScatter!==false,true,"umgTogglePanel('panel_sorScatter',this.checked)")}
-  </div>
-  <div class="up-section">
-    <div class="up-section-title">Deployment Panels</div>
-    ${mkRow('File Upload Panel',panels.dpUpload!==false,ceil.dpUpload,"umgTogglePanel('panel_dpUpload',this.checked)")}
-    ${mkRow('Month Selector',panels.dpCtrl!==false,true,"umgTogglePanel('panel_dpCtrl',this.checked)")}
-    ${mkRow('By Category Chart',panels.dpCats!==false,true,"umgTogglePanel('panel_dpCats',this.checked)")}
-    ${mkRow('By Role Chart',panels.dpRoles!==false,true,"umgTogglePanel('panel_dpRoles',this.checked)")}
-    ${mkRow('6-Month Trend Chart',panels.dpChart6m!==false,true,"umgTogglePanel('panel_dpChart6m',this.checked)")}
-    ${mkRow('Hiring Status Chart',panels.dpHiring!==false,true,"umgTogglePanel('panel_dpHiring',this.checked)")}
-    ${mkRow('Location & Role Matrix',panels.dpLocRole!==false,true,"umgTogglePanel('panel_dpLocRole',this.checked)")}
-    ${mkRow('Personnel Table',panels.dpPersonnel!==false,true,"umgTogglePanel('panel_dpPersonnel',this.checked)")}
-  </div>`;
-}
-
-// ── Tab: Export Settings ──────────────────────────────────
-function bUpTabExport(perm,ceil){
-  const ex=perm.export||{};
-  const ds=ex.datasets||{};
-  const mkRow=(lbl,val,ceilVal,changeExpr)=>{
-    const locked=!ceilVal;
-    return`<div class="up-toggle-row">
-      <div class="up-toggle-lbl">${lbl}</div>
-      ${locked?`<span class="up-ceiling-chip">Role ceiling</span>`:''}
-      <label class="up-toggle" style="margin-left:10px">
-        <input type="checkbox" ${val&&!locked?'checked':''} ${locked?'disabled':''} onchange="${changeExpr}">
-        <span class="up-toggle-slider"></span>
-      </label>
-    </div>`;
-  };
-  const DS_LABELS={rfi:'RFI Register',ncr:'NCRs',sor:'Site Observations (SOR)',welders:'Welder Activity',fjc:'FJC Coating',ndt:'NDT Backlog',daily:'Daily Progress',deployment:'Manpower Deployment',hiring:'Hiring Status'};
-  return`<div class="up-section">
-    <div class="up-section-title">Export Types</div>
-    ${mkRow('Excel Export',ex.excel!==false,true,"umgToggleExport('excel',this.checked)")}
-    ${mkRow('Image / Chart Export',ex.image!==false,true,"umgToggleExport('image',this.checked)")}
-    ${mkRow('Allow Changing Export Date Range',ex.changeDates===true,ceil.exportChangeDates,"umgToggleExport('changeDates',this.checked)")}
-  </div>
-  <div class="up-section">
-    <div class="up-section-title">Excel Datasets</div>
-    <div style="font-size:10px;color:#7a809a;margin-bottom:10px">Select which sheets appear in the exported Excel workbook for this user.</div>
-    ${Object.entries(DS_LABELS).map(([k,lbl])=>mkRow(lbl,ds[k]!==false,true,`umgToggleExportDs('${k}',this.checked)`)).join('')}
   </div>`;
 }
 
@@ -4375,142 +4306,640 @@ function genCutoffFridays(n=52){
   return out;
 }
 
-// ── Tab: Date Controls ────────────────────────────────────
-function bUpTabDates(perm,ceil){
-  const dc=perm.dateControl||'locked';
-  const ceilDC=ceil.dateControl;
-  const aboveCeil=(k)=>ceilDC==='locked'&&k!=='locked';
-  const opts=[
-    {k:'free',   lbl:'Free',       desc:'User can freely change start and end dates.'},
-    {k:'locked', lbl:'Locked',     desc:'Dates are fixed — you set them below and the user cannot change them.'},
-    {k:'restricted',lbl:'Restricted',desc:'User selects from a predefined list of preset periods.'},
-  ];
-  return`<div class="up-section">
-    <div class="up-section-title">Date Slicer Mode</div>
-    <div class="up-radio-row">
-      ${opts.map(o=>{
-        const above=aboveCeil(o.k);
-        return`<button class="up-radio-opt${dc===o.k?' active':''}${above?' disabled':''}" ${above?'disabled':''} onclick="umgSetDateControl('${o.k}')">${o.lbl}${above?` <span class="up-ceiling-chip" style="display:inline;margin-left:4px">ceiling</span>`:''}</button>`;
-      }).join('')}
+// ── User Access interaction handlers ─────────────────────
+function selectUser(un){ UMG_SEL=UMG_SEL===un?null:un; _umgRefresh(); }
+
+// Client-side row filter — no re-render, so the search box keeps focus.
+function umgSearch(v){
+  v=(v||'').toLowerCase();
+  document.querySelectorAll('#umgMatrix tbody tr').forEach(tr=>{ tr.style.display=(tr.dataset.u||'').includes(v)?'':'none'; });
+}
+
+// Snapshot every editable drawer field into the draft BEFORE a re-render, so
+// typed values (dates, name, password) survive chip/segment clicks.
+function _umgCapture(){
+  if(!UMG_SEL) return; const d=_umgDraft(UMG_SEL);
+  const v=id=>{const el=document.getElementById(id);return el?el.value:undefined;};
+  const ef=v('upExpFrom'); if(ef!==undefined) d.export.lockedFrom=ef||null;
+  const et=v('upExpTo');   if(et!==undefined) d.export.lockedTo=et||null;
+  const lf=v('upLockFrom');if(lf!==undefined) d.lockedFrom=lf||null;
+  const lt=v('upLockTo');  if(lt!==undefined) d.lockedTo=lt||null;
+  const rc=v('upRestrictedCutoff'); if(rc!==undefined) d.restrictedCutoff=rc||null;
+  const en=v('upEditName'); if(en!==undefined) d._name=en.trim();
+  const ep=v('upEditPass'); if(ep!==undefined) d._pass=ep;
+  const er=v('upEditRole'); if(er!==undefined) d._role=er;
+}
+function umgToggleDs(k){ _umgCapture(); const d=_umgDraft(UMG_SEL); d.export.datasets[k]=!d.export.datasets[k]; _umgRefresh(); }
+function umgSetExpDur(v){ _umgCapture(); _umgDraft(UMG_SEL).export.duration=v; _umgRefresh(); }
+function umgSetSlicer(v){ _umgCapture(); _umgDraft(UMG_SEL).slicer=v; _umgRefresh(); }
+function umgToggleFlag(k,val){ _umgCapture(); _umgDraft(UMG_SEL)[k]=val; }
+
+// Save the drawer: permissions + display name/role/password in one PATCH.
+async function saveUserAccess(){
+  if(!UMG_SEL) return;
+  _umgCapture();
+  const un=UMG_SEL, msg=document.getElementById('upSaveMsg');
+  const show=(t,ok)=>{if(msg){msg.style.color=ok?'var(--good)':'var(--bad)';msg.textContent=t;}};
+  const {_name,_pass,_role,...perm}=UMG_PERMS_DRAFT[un]||_umgDraft(un);
+  const patch={permissions:perm};
+  if(_name!==undefined) patch.display_name=_name||un;
+  if(_role&&un!==SUPER_ADMIN) patch.role=_role;
+  try{
+    if(_pass){ if(_pass.length<8) return show('Password must be at least 8 characters.',false); patch.pw_hash=await hashPw(_pass); }
+    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(un)}`,{
+      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)});
+    if(!r.ok) throw new Error('Save failed ('+r.status+')');
+    const u=UMG_USERS.find(x=>x.username===un);
+    if(u){ u.permissions=JSON.parse(JSON.stringify(perm)); if(patch.display_name) u.display_name=patch.display_name; if(patch.role) u.role=patch.role; }
+    delete UMG_PERMS_DRAFT[un];
+    // Self-edit applies immediately (a slicer lock takes effect on next login).
+    if(AUTH.currentUser&&un===AUTH.currentUser.username&&u) MY_PERM=resolvePerm(u);
+    show(_pass?'Saved \u2014 password reset.':'Saved.',true);
+    setTimeout(_umgRefresh,700);
+  }catch(e){ show('Error: '+e.message,false); }
+}
+
+// Recent logins for the selected user (drawer footer). Requires the
+// login_history table — supabase_login_history.sql, run once.
+async function _umgLoadLogins(){
+  const el=document.getElementById('umgLoginList');
+  if(!el||!UMG_SEL) return;
+  try{
+    const rows=await sbSelect('login_history',`select=logged_at&username=eq.${encodeURIComponent(UMG_SEL)}&order=logged_at.desc&limit=6`);
+    el.textContent=rows.length?rows.map(r=>fmtLoginTime(r.logged_at)).join('  \u00b7  '):'No logins recorded yet.';
+  }catch(e){ el.textContent='Login log unavailable \u2014 run supabase_login_history.sql once.'; }
+}
+
+// Full login log (all users) → Excel. Admin/SA only (page access already gates this).
+async function exportLoginHistory(){
+  try{
+    const rows=await sbSelectAll('login_history','select=username,logged_at&order=logged_at.desc');
+    if(!rows.length) return alert('No login history recorded yet.');
+    const aoa=[['USERNAME','LOGIN TIME']];
+    rows.forEach(r=>aoa.push([r.username,fmtLoginTime(r.logged_at)]));
+    const ws=XLSX.utils.aoa_to_sheet(aoa); ws['!cols']=[{wch:20},{wch:26}];
+    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Login History');
+    XLSX.writeFile(wb,'P30312_Login_History.xlsx');
+  }catch(e){ alert('Login log unavailable \u2014 run supabase_login_history.sql once in Supabase.'); }
+}
+
+// ═══════════════════════════════════════════════════
+// EMPLOYEE EVALUATIONS PAGE (Admin / Super Admin only)
+// Self-contained performance-evaluation tool — reproduces the client's 2-page
+// Excel report exactly (page 1 template + page 2 weighted scoring), persists to
+// the `evaluations` table, and exports a pixel-faithful PDF. NOT linked to any
+// progress data. SQL: supabase_evaluations.sql (run once).
+// ═══════════════════════════════════════════════════
+// Fixed criteria template — exact wording, grouping, weights and the original
+// 1,2,3,4,6,7 numbering preserved from the approved report (typos included) so
+// the exported PDF matches byte-for-byte.
+const EVAL_CRITERIA=[
+  {group:'Quality', short:'Quality  (40%)', weight:0.4, items:[
+    {n:1, key:'q1', label:'Quality of work output (deliverables/outcomes meets international standrds and codes/company specifications)'},
+    {n:2, key:'q2', label:'Consistency and attention to detail.'},
+  ]},
+  {group:'Productivity and Reliability', short:'Productivity and Reliability (30%)', weight:0.3, items:[
+    {n:1, key:'p1', label:'Efficiency and volume of work (meeting scheduale milestones)'},
+    {n:2, key:'p2', label:'Initiative, ownership,Accountability and dependability'},
+    {n:3, key:'p3', label:'Problem-solving,Strategic thinking and decision-making'},
+    {n:4, key:'p4', label:'Creativity and innovation'},
+    {n:6, key:'p6', label:'Development and continuous learning'},
+    {n:7, key:'p7', label:'leadership skills and guidance'},
+  ]},
+  {group:'Attitude', short:'Attitude (30%)', weight:0.3, items:[
+    {n:1, key:'a1', label:'Attendance and punctuality'},
+    {n:2, key:'a2', label:'Professional relationships (Personal relation with collegues) '},
+    {n:3, key:'a3', label:'Teamwork and collaboration'},
+    {n:4, key:'a4', label:'Client/customer satisfaction'},
+  ]},
+];
+const EVAL_SCALE=[
+  ['NI','= Needs Improvement (0-59%): Performance does not meet minimum expectations; requires immediate improvement.'],
+  ['BE','= Below Expectations (60–74%): Occasionally meets expectations but lacks consistency.'],
+  ['ME','= Meets Expectations (75–84%): Consistently meets job requirements and expectations.'],
+  ['EE','= Exceeds Expectations (85–94%): Frequently exceeds expectations with high-quality performance.'],
+  ['OS','= Outstanding (95–100%): Exceptional performance; serves as a role model.'],
+];
+const EVAL_GREEN='#8bc34a'; // report highlight green
+// Score (0-100) → scale band letter (matches the highlighted cell in the report).
+function evalBand(v){ if(v==null||v==='') return null; const s=+v; if(isNaN(s)) return null;
+  return s<60?'NI':s<75?'BE':s<85?'ME':s<95?'EE':'OS'; }
+// Weighted totals — reproduces the Excel formulas exactly:
+// group weighted = average(scores in group) × weight; total = sum of the three.
+function evalTotals(scores){
+  scores=scores||{}; let total=0; const groups=[];
+  EVAL_CRITERIA.forEach(g=>{
+    const vals=g.items.map(it=>scores[it.key]).filter(v=>v!=null&&v!==''&&!isNaN(+v)).map(Number);
+    const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
+    const weighted=avg*g.weight; total+=weighted;
+    groups.push({avg, weighted, n:vals.length, of:g.items.length});
+  });
+  return {groups, total};
+}
+// Excel-parity rounding: Excel rounds .5 half-up, but 91.425 stored in binary
+// float is 91.42499… so plain toFixed gives 91.42. Nudge by an epsilon first.
+const evalR2 = v => Math.round((v + 1e-9) * 100) / 100;
+const evalF2 = v => evalR2(v).toFixed(2);
+const evalFmtDate=d=>{ if(!d||d==='N/A') return d||'—'; const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m?`${m[3]}/${m[2]}/${m[1]}`:d; };
+
+let EVAL_ROWS=[];    // cached evaluation roster (list rows)
+let EVAL_SEL=null;   // selected id | 'new' | null
+let EVAL_DRAFT=null; // in-flight editor object (full record)
+
+function _evalBlank(){
+  return {id:null, employee_name:'', payroll:'', position:'', department:'Quality',
+    eval_date:new Date().toISOString().slice(0,10), last_eval_date:'N/A',
+    comments:'', scores:{}, crit_comments:{}, status:'draft'};
+}
+// Distinct people from the deployment actual roster (name + role) for the picker.
+function _evalRoster(){
+  const dep=ST.data.deployment; if(!dep||!dep.actual) return [];
+  const seen=new Set(), out=[];
+  dep.actual.forEach(r=>{ const nm=(r.name||'').trim(); if(!nm||seen.has(nm.toLowerCase())) return;
+    seen.add(nm.toLowerCase()); out.push({name:nm, role:r.role||''}); });
+  return out.sort((a,b)=>a.name.localeCompare(b.name));
+}
+// Most recent prior evaluation date for a person (for "Date of Last Evaluation").
+function _evalLastDate(name, exceptId){
+  const n=(name||'').trim().toLowerCase(); if(!n) return 'N/A';
+  const prior=EVAL_ROWS.filter(r=>r.id!==exceptId&&(r.employee_name||'').trim().toLowerCase()===n&&r.eval_date)
+    .sort((a,b)=>String(b.eval_date).localeCompare(String(a.eval_date)));
+  return prior.length?prior[0].eval_date:'N/A';
+}
+
+async function renderEval(){
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const isAdmin=AUTH.currentUser&&AUTH.currentUser.role==='admin';
+  if(!isSA&&!isAdmin){ APP_VIEW='dashboard'; render(); return; }
+  document.getElementById('app').innerHTML=`${bUploadBar()}<div id="uplBarSpacer"></div><div id="evalCanvas"></div>`;
+  const sne=document.getElementById('sidenavExtra'); if(sne) sne.innerHTML=bSidenavExtra();
+  fillSidenavDrops();
+  try{ EVAL_ROWS=await sbSelectAll('evaluations','select=id,employee_name,payroll,position,department,eval_date,last_eval_date,total_score,status,updated_at&order=updated_at.desc'); }
+  catch(e){ EVAL_ROWS=[]; }
+  renderCanvas({ evalMain:bEvalMain() });
+  bindEvents();
+  if(EDIT_MODE) activateEditMode();
+}
+function _evalRefresh(){
+  const c=document.getElementById('evalCanvas'); const el=c&&c.querySelector('.cp[data-id="evalMain"]');
+  if(el) el.innerHTML=bEvalMain();
+}
+
+// ── Roster matrix + editor drawer ──
+function bEvalMain(){
+  const STCH={draft:['Draft','amber'],pending:['Pending Approval','violet'],approved:['Approved','good']};
+  const rows=EVAL_ROWS.map((r,i)=>{
+    const [sl,sc]=STCH[r.status]||STCH.draft;
+    const sel=EVAL_SEL===r.id;
+    const ts=r.total_score!=null?+r.total_score:null;
+    const tcv=ts==null?'faint':ts>=75?'good':ts>=60?'amber':'bad';
+    return `<tr data-e="${esc(((r.employee_name||'')+' '+(r.payroll||'')+' '+(r.position||'')).toLowerCase())}" onclick="evalSelect(${r.id})"
+      class="${!sel&&i%2?'tr-alt':''}" style="cursor:pointer${sel?';background:rgba(var(--c1a),.08);outline:1px solid rgba(var(--c1a),.4)':''}">
+      <td class="td tl" style="font-size:12px;text-transform:none">${esc(r.employee_name||'—')} <span style="color:var(--faint)">#${esc(r.payroll||'')}</span></td>
+      <td class="td tl" style="font-size:11px;text-transform:none">${esc(r.position||'—')}</td>
+      <td class="td tl" style="font-size:11px;text-transform:none">${esc(r.department||'—')}</td>
+      <td class="td" style="text-align:center;font-size:11px">${evalFmtDate(r.eval_date)}</td>
+      <td class="td" style="text-align:center;font-size:12px;font-weight:700;color:var(--${tcv})">${ts!=null?ts.toFixed(2):'—'}</td>
+      <td class="td" style="text-align:center"><span style="font-size:9.5px;font-weight:700;color:var(--${sc})">${sl}</span></td>
+    </tr>`;
+  }).join('');
+  return `<div class="card" style="min-height:100%">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div class="slbl" style="margin:0">Employee Evaluations <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--faint)">(${EVAL_ROWS.length})</span></div>
+      <input class="umg-inp" placeholder="Search…" oninput="evalSearch(this.value)" style="width:160px;margin-left:auto">
+      <button onclick="evalNew()" style="font-size:11px;font-weight:700;color:var(--c1);background:rgba(var(--c1a),.1);border:1px solid rgba(var(--c1a),.4);border-radius:6px;padding:6px 14px;cursor:pointer">+ New Evaluation</button>
     </div>
-    <div style="font-size:11px;color:#7a809a;margin-bottom:16px;line-height:1.6">
-      ${opts.find(o=>o.k===dc)?.desc||''}
-    </div>
-    ${dc==='locked'?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:360px">
-      <div><div class="up-field-lbl">Locked From</div><input class="umg-inp d-inp" id="upLockFrom" type="date" value="${perm.lockedFrom||''}"></div>
-      <div><div class="up-field-lbl">Locked To</div><input class="umg-inp d-inp" id="upLockTo" type="date" value="${perm.lockedTo||''}"></div>
-    </div>`:''}
-    ${dc==='restricted'?(()=>{
-      const fridays=genCutoffFridays(52);
-      return`<div style="max-width:220px">
-        <div class="up-field-lbl">Cutoff Friday</div>
-        <select class="umg-sel" id="upRestrictedCutoff">
-          <option value="">— select —</option>
-          ${fridays.map(({iso,label})=>`<option value="${iso}"${perm.restrictedCutoff===iso?' selected':''}>${label}</option>`).join('')}
-        </select>
-        <div style="font-size:10px;color:#4a5068;margin-top:5px">Period: Saturday before selected Friday → selected Friday</div>
-      </div>`;
-    })():''}
+    <div style="overflow-x:auto"><table class="tbl" id="evalMatrix"><thead><tr>
+      <th class="th tl">Employee</th><th class="th tl">Position</th><th class="th tl">Department</th>
+      <th class="th" style="text-align:center">Eval Date</th><th class="th" style="text-align:center">Total</th><th class="th" style="text-align:center">Status</th>
+    </tr></thead><tbody>${rows||`<tr><td colspan="6" class="td tl cm" style="padding:16px">No evaluations yet — click “New Evaluation”.</td></tr>`}</tbody></table></div>
+    <div style="margin-top:10px">${(EVAL_SEL!=null)?bEvalEditor():`<div style="display:flex;align-items:center;justify-content:center;min-height:60px;font-size:11px;color:var(--faint)">Select an evaluation, or start a new one</div>`}</div>
   </div>`;
 }
 
-// ── User interaction handlers ─────────────────────────────
-function selectUser(uname){
-  UMG_SEL=uname;
-  UMG_TAB='profile';
-  _umgRefreshLeft();
-  _umgRefreshRight();
+// Live scale-band chips for one criterion row (evalRecalc rewrites these).
+function evalScaleChips(v){
+  const cur=evalBand(v);
+  return ['NI','BE','ME','EE','OS'].map(b=>`<span style="display:inline-block;min-width:28px;text-align:center;font-size:10.5px;font-weight:700;padding:3px 5px;border-radius:4px;margin:0 1px;${b===cur?`background:${EVAL_GREEN};color:#1a2e05`:'color:var(--faint)'}">${b}</span>`).join('');
 }
 
-function switchUsersTab(tab){
-  UMG_TAB=tab;
-  _umgRefreshRight();
+function bEvalEditor(){
+  const d=EVAL_DRAFT; if(!d) return '';
+  const t=evalTotals(d.scores);
+  const roster=_evalRoster();
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  const canExport=evalCanExport(d);
+  const inp=(k,ph,w,extra='')=>`<input class="umg-inp" value="${esc(d[k]||'')}" placeholder="${ph}" oninput="EVAL_DRAFT.${k}=this.value" style="width:${w};font-size:12px${extra}">`;
+  const picker=roster.length?`<select class="umg-sel" onchange="evalPickPerson(this.value)" style="width:180px;font-size:12px">
+      <option value="">— pick from roster —</option>
+      ${roster.map(r=>`<option value="${esc(r.name)}"${d.employee_name===r.name?' selected':''}>${esc(r.name)}</option>`).join('')}
+    </select>`:'';
+  const grid=EVAL_CRITERIA.map((g,gi)=>{
+    const items=g.items.map((it,ii)=>`<tr>
+      <td class="td" style="text-align:center;font-weight:700">${it.n}</td>
+      <td class="td tl" style="text-transform:none;font-size:11px;white-space:normal;max-width:340px">${esc(it.label)}</td>
+      <td class="td" style="text-align:center"><span id="band-${it.key}">${evalScaleChips(d.scores[it.key])}</span></td>
+      <td class="td" style="text-align:center"><input type="number" min="0" max="100" class="umg-inp" value="${d.scores[it.key]!=null?esc(d.scores[it.key]):''}" oninput="EVAL_DRAFT.scores['${it.key}']=this.value;evalRecalc()" style="width:64px;text-align:center;font-size:12px"></td>
+      <td class="td" style="text-align:center"><input class="umg-inp" value="${esc(d.crit_comments[it.key]||'')}" oninput="EVAL_DRAFT.crit_comments['${it.key}']=this.value" placeholder="—" style="width:100%;font-size:11px"></td>
+    </tr>`).join('');
+    return `<tr style="background:rgba(var(--c1a),.06)">
+      <td class="td tl" colspan="2" style="text-transform:none;font-weight:700;color:var(--c1)">${esc(g.short)}</td>
+      <td class="td" style="text-align:right;font-size:10px;color:var(--muted)">weight ${g.weight}</td>
+      <td class="td" style="text-align:center;font-size:10px;color:var(--muted)">weighted</td>
+      <td class="td" style="text-align:center;font-weight:700;color:var(--c1)"><span id="gw-${gi}">${evalF2(t.groups[gi].weighted)}</span></td>
+    </tr>${items}`;
+  }).join('');
+  return `<div style="border:1px solid rgba(var(--c1a),.35);border-radius:11px;padding:14px 16px;background:rgba(var(--c1a),.03)">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      ${picker}
+      ${inp('employee_name','Employee name','190px')}
+      ${inp('payroll','Payroll','90px')}
+      ${inp('position','Current position','160px')}
+      ${inp('department','Department','120px')}
+      <div style="flex:1"></div>
+      <button onclick="evalExportExcel()" title="${canExport?'':'Waiting for Super Admin approval'}" ${canExport?'':'disabled'} style="font-size:11px;font-weight:700;color:#f472b6;background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.4);border-radius:6px;padding:6px 13px;cursor:pointer${canExport?'':';opacity:.4;cursor:not-allowed'}">⤓ Export Excel</button>
+      ${d.id?`<button onclick="evalDelete()" style="font-size:11px;color:var(--bad);background:none;border:1px solid rgba(var(--bada),.35);border-radius:6px;padding:6px 12px;cursor:pointer">Delete</button>`:''}
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+      <label style="font-size:11px;color:var(--muted)">Date of current evaluation
+        <input class="umg-inp d-inp" type="date" value="${esc(d.eval_date||'')}" oninput="EVAL_DRAFT.eval_date=this.value" style="margin-left:6px"></label>
+      <label style="font-size:11px;color:var(--muted)">Date of last evaluation
+        <input class="umg-inp" value="${esc(d.last_eval_date||'')}" oninput="EVAL_DRAFT.last_eval_date=this.value" style="width:110px;margin-left:6px;font-size:12px"></label>
+      <span style="font-size:11px;font-weight:700;color:var(--${{draft:'amber',pending:'violet',approved:'good'}[d.status]||'amber'})">● ${{draft:'Draft',pending:'Pending Approval',approved:'Approved'}[d.status]||'Draft'}</span>
+      ${(!isSA&&d.status==='draft'&&d.id)?`<button onclick="evalSubmitForApproval()" style="font-size:11px;font-weight:700;color:var(--violet);background:rgba(139,92,255,.1);border:1px solid rgba(139,92,255,.4);border-radius:6px;padding:5px 11px;cursor:pointer">Send for SA Approval</button>`:''}
+      ${(isSA&&d.status==='pending')?`<button onclick="evalApprove()" style="font-size:11px;font-weight:700;color:var(--good);background:rgba(var(--gooda),.1);border:1px solid rgba(var(--gooda),.4);border-radius:6px;padding:5px 11px;cursor:pointer">Approve</button>`:''}
+      ${(isSA&&d.status!=='draft')?`<button onclick="evalSendBackToDraft()" style="font-size:11px;color:var(--muted);background:none;border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:5px 11px;cursor:pointer">Send back to Draft</button>`:''}
+    </div>
+    <div style="overflow-x:auto"><table class="tbl"><thead><tr>
+      <th class="th" style="text-align:center">No</th><th class="th tl">Selection Criteria</th>
+      <th class="th" style="text-align:center">Scale</th><th class="th" style="text-align:center">Score (0–100)</th><th class="th tl">Comments / Evidence</th>
+    </tr></thead><tbody>${grid}
+      <tr style="background:rgba(var(--c1a),.1)"><td class="td tl" colspan="4" style="text-transform:none;font-weight:800;color:var(--text)">Total Weighted Score</td>
+      <td class="td" style="text-align:center;font-weight:800;font-size:14px;color:var(--c1)"><span id="evalTotal">${evalF2(t.total)}</span></td></tr>
+    </tbody></table></div>
+    <div style="margin-top:12px">
+      <div class="up-section-title" style="margin-bottom:6px">Evaluator Comments / Recommendations</div>
+      <textarea class="umg-inp" oninput="EVAL_DRAFT.comments=this.value" placeholder="Provide specific examples, achievements, or areas for improvement" style="width:100%;min-height:70px;font-size:12px;resize:vertical;font-family:inherit">${esc(d.comments||'')}</textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;border-top:1px solid rgba(255,255,255,.08);margin-top:12px;padding-top:10px">
+      <span style="font-size:10.5px;color:var(--faint)">Signatures are left blank on the exported Excel for wet-ink signing after printing.</span>
+      <div style="flex:1"></div>
+      <span class="up-save-msg" id="evalSaveMsg"></span>
+      <button class="up-save-btn" onclick="evalSave()">Save</button>
+    </div>
+  </div>`;
 }
 
-function umgTogglePanel(key,val){
-  if(!UMG_SEL) return;
-  const perm=_umgGetDraft(UMG_SEL);
-  if(key.startsWith('page_')){
-    if(!perm.pages) perm.pages={};
-    perm.pages[key.replace('page_','')]=val;
-  } else if(key.startsWith('panel_')){
-    if(!perm.panels) perm.panels={};
-    perm.panels[key.replace('panel_','')]=val;
-  }
+// ── interactions ──
+function evalRecalc(){
+  if(!EVAL_DRAFT) return; const t=evalTotals(EVAL_DRAFT.scores);
+  EVAL_CRITERIA.forEach((g,gi)=>{
+    const gw=document.getElementById('gw-'+gi); if(gw) gw.textContent=evalF2(t.groups[gi].weighted);
+    g.items.forEach(it=>{ const b=document.getElementById('band-'+it.key); if(b) b.innerHTML=evalScaleChips(EVAL_DRAFT.scores[it.key]); });
+  });
+  const tot=document.getElementById('evalTotal'); if(tot) tot.textContent=evalF2(t.total);
 }
-
-function umgToggleExport(key,val){
-  if(!UMG_SEL) return;
-  const perm=_umgGetDraft(UMG_SEL);
-  if(!perm.export) perm.export={};
-  perm.export[key]=val;
+function evalSearch(v){
+  v=(v||'').toLowerCase();
+  document.querySelectorAll('#evalMatrix tbody tr').forEach(tr=>{ tr.style.display=(tr.dataset.e||'').includes(v)?'':'none'; });
 }
-
-function umgToggleExportDs(dsKey,val){
-  if(!UMG_SEL) return;
-  const perm=_umgGetDraft(UMG_SEL);
-  if(!perm.export) perm.export={};
-  if(!perm.export.datasets) perm.export.datasets={};
-  perm.export.datasets[dsKey]=val;
+function evalNew(){ EVAL_SEL='new'; EVAL_DRAFT=_evalBlank(); _evalRefresh(); }
+function evalSelect(id){
+  if(EVAL_SEL===id){ EVAL_SEL=null; EVAL_DRAFT=null; _evalRefresh(); return; }
+  EVAL_SEL=id;
+  // Load the full record (roster rows omit scores/comments to stay light).
+  sbSelect('evaluations',`id=eq.${id}&select=*`).then(rows=>{
+    const r=rows[0]||{};
+    EVAL_DRAFT={...r, scores:r.scores||{}, crit_comments:r.crit_comments||{}};
+    _evalRefresh();
+  }).catch(()=>{ EVAL_DRAFT=_evalBlank(); _evalRefresh(); });
+  _evalRefresh(); // immediate selection highlight; drawer fills when the load returns
 }
-
-function umgSetDateControl(val){
-  if(!UMG_SEL) return;
-  const perm=_umgGetDraft(UMG_SEL);
-  perm.dateControl=val;
-  _umgRefreshRight();
+function evalPickPerson(name){
+  if(!EVAL_DRAFT) return;
+  const p=_evalRoster().find(r=>r.name===name);
+  if(p){ EVAL_DRAFT.employee_name=p.name; if(p.role) EVAL_DRAFT.position=p.role; }
+  EVAL_DRAFT.last_eval_date=_evalLastDate(name, EVAL_DRAFT.id);
+  _evalRefresh();
 }
-
-async function saveUserPermissions(){
-  if(!UMG_SEL) return;
-  const msg=document.getElementById('upSaveMsg');
-  const perm=UMG_PERMS_DRAFT[UMG_SEL]||_umgGetPerm(UMG_SEL);
-  // Capture locked date inputs if visible
-  if(perm.dateControl==='locked'){
-    perm.lockedFrom=document.getElementById('upLockFrom')?.value||null;
-    perm.lockedTo=document.getElementById('upLockTo')?.value||null;
-  }
-  if(perm.dateControl==='restricted'){
-    perm.restrictedCutoff=document.getElementById('upRestrictedCutoff')?.value||null;
-  }
+async function evalSave(){
+  if(!EVAL_DRAFT) return;
+  const d=EVAL_DRAFT, msg=document.getElementById('evalSaveMsg');
+  const show=(t,ok)=>{ if(msg){ msg.style.color=ok?'var(--good)':'var(--bad)'; msg.textContent=t; } };
+  if(!(d.employee_name||'').trim()) return show('Employee name is required.',false);
+  const total=evalR2(evalTotals(d.scores).total);
+  const body={ employee_name:d.employee_name.trim(), payroll:d.payroll||null, position:d.position||null,
+    department:d.department||null, eval_date:d.eval_date||null, last_eval_date:d.last_eval_date||null,
+    comments:d.comments||null, scores:d.scores||{}, crit_comments:d.crit_comments||{}, total_score:total,
+    evaluator:(AUTH.currentUser||{}).username||null, status:d.status||'draft', updated_at:new Date().toISOString() };
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(UMG_SEL)}`,{
-      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify({permissions:perm})
-    });
-    if(!r.ok) throw new Error('Save failed');
-    const u=UMG_USERS.find(u=>u.username===UMG_SEL);
-    if(u) u.permissions=JSON.parse(JSON.stringify(perm));
-    delete UMG_PERMS_DRAFT[UMG_SEL];
-    if(msg){msg.style.color='#14b8a6';msg.textContent='Saved successfully.';}
-    setTimeout(()=>{if(msg)msg.textContent='';},2500);
-  }catch(e){
-    if(msg){msg.style.color='#f43f5e';msg.textContent='Error: '+e.message;}
-  }
+    if(d.id){
+      const r=await fetch(`${SB_URL}/rest/v1/evaluations?id=eq.${d.id}`,{method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(body)});
+      if(!r.ok) throw new Error('Save failed ('+r.status+')');
+    }else{
+      const r=await fetch(`${SB_URL}/rest/v1/evaluations`,{method:'POST',headers:{...SB_HDR,'Prefer':'return=representation'},body:JSON.stringify(body)});
+      if(!r.ok) throw new Error('Save failed ('+r.status+')');
+      const row=(await r.json())[0]; if(row){ d.id=row.id; EVAL_SEL=row.id; }
+    }
+    EVAL_ROWS=await sbSelectAll('evaluations','select=id,employee_name,payroll,position,department,eval_date,last_eval_date,total_score,status,updated_at&order=updated_at.desc');
+    show('Saved.',true);
+    setTimeout(_evalRefresh,600);
+  }catch(e){ show('Error: '+e.message,false); }
+}
+async function evalDelete(){
+  if(!EVAL_DRAFT||!EVAL_DRAFT.id) return;
+  if(!confirm(`Delete the evaluation for "${EVAL_DRAFT.employee_name||'this employee'}"?`)) return;
+  try{
+    await fetch(`${SB_URL}/rest/v1/evaluations?id=eq.${EVAL_DRAFT.id}`,{method:'DELETE',headers:SB_HDR});
+    EVAL_ROWS=EVAL_ROWS.filter(r=>r.id!==EVAL_DRAFT.id);
+    EVAL_SEL=null; EVAL_DRAFT=null; _evalRefresh();
+  }catch(e){ alert('Delete failed: '+e.message); }
 }
 
-async function saveUserProfile(uname){
-  const nameEl=document.getElementById('upEditName');
-  const roleEl=document.getElementById('upEditRole');
-  const passEl=document.getElementById('upEditPass');
-  const msg=document.getElementById('upProfileMsg');
-  const showMsg=(txt,ok)=>{if(msg){msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');}};
-  const dname=(nameEl?.value||'').trim();
-  const role=roleEl?.value;
-  const pw=(passEl?.value||'');
-  if(pw&&pw.length<8) return showMsg('Password must be at least 8 characters.',false);
-  const patch={display_name:dname||uname};
-  if(role&&uname!==SUPER_ADMIN) patch.role=role;
-  try{
-    if(pw) patch.pw_hash=await hashPw(pw);
-    const r=await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uname)}`,{
-      method:'PATCH',headers:{...SB_HDR,'Prefer':'return=minimal'},body:JSON.stringify(patch)
+// ── Approval workflow: draft → pending → approved. Only a Super Admin can
+// approve or send a record back to draft; only the export button reads this
+// gate (editing itself stays open at every status — see evalCanExport). ──
+function evalCanExport(d){
+  if(!d) return false;
+  const isSA=AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN;
+  return isSA || d.status==='approved';
+}
+async function evalSubmitForApproval(){
+  if(!EVAL_DRAFT||!EVAL_DRAFT.id) return;
+  EVAL_DRAFT.status='pending';
+  await evalSave();
+}
+async function evalApprove(){
+  if(!EVAL_DRAFT||!EVAL_DRAFT.id) return;
+  if(!(AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN)) return;
+  EVAL_DRAFT.status='approved';
+  await evalSave();
+}
+async function evalSendBackToDraft(){
+  if(!EVAL_DRAFT||!EVAL_DRAFT.id) return;
+  if(!(AUTH.currentUser&&AUTH.currentUser.username===SUPER_ADMIN)) return;
+  EVAL_DRAFT.status='draft';
+  await evalSave();
+}
+
+// ── Excel export — exact-format reproduction of the client's original
+// MOSTAFA ZAHRAN.xlsx template (fonts/fills/borders/merges/column widths/
+// row heights/formulas were extracted directly from that source workbook —
+// this is a cell-for-cell rebuild, not a redesign). The company logo is
+// embedded by patching the zip after XLSX.write: xlsx-js-style (a SheetJS
+// Community fork) can style cells but cannot write images, so the real PNG
+// + drawing XML from the source file are spliced in afterward via JSZip,
+// anchored at the same position as the source template.
+const EVAL_LOGO_PNG_B64='iVBORw0KGgoAAAANSUhEUgAAAL4AAAAkCAYAAAA3iYC4AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAFxEAABcRAcom8z8AAAzuSURBVHhe7dwHtBxVGcDxZ8PeUIFkNwny9j1i7L2hWMHeFRv2LnYRO/auKIp6rNgQ60Gx16OIigXFjg2posQIyUteAiTr93tn7jmX4c7s7gskxzDfOf+z+2bv3Jm597tfu5NMdfL/L/NLVu6zYdn0fsOpqUtXhzrpZMeXTb3Z/Tf2Bset7w1uUx3qpJMdX+b6Mweev3zP4dyywaHDqVU7VYc76WTHlXPCyq/vzxw/XLFyONcfnLxmt5k7Vj910smOKaf2Bv31vZmjtyxj7WeG5wUbls4cMtx76rJVk0462fEklP6p872ZjfOh8Kv7g+HmZbPDdb3BsWfvMrNH1aSTFnlU8IrgldXntsQ1Xxs8Orha0MkEsrE/e/C5ofRrK8XftHx2uLY3OOWsXafvXDXppEXWBpuDLduJYfDn4JZBJxPIuUsGB833ZzYnxd8Yn+t602esXrL7PlWTTlqE4m1vTgluH3QygdQV/7yw+HP96RPW9Ha/cdWkkxYpKeK25u9BV4OeUM5eMn1AxPSb1oXirwnFH0aSO98fHLl6MOjCxjHkhOBXwa+D/wQlxUzMB6zzXwPKWsJvfwz+UPGn6hhOC1J4k+O8TvEnlHN6M7fe0B+cqJozH4ltWP/5tZHwVj93MkJWBntWn28J6kqZ8+WAgt4suHkDNwluVH2m7zcNnHO74PBATpH32yn+ImS4atVOc8v2OGzz8pnh+ax9b/bw05auvFb1cycTyBODXCHrHBKMkmsGLw/eHRwaPCHI68rXDX4S5P12ir9IWbNkdq+N/cGZG3qD03mA6nAnE8ozglwh61DkUaKUti5I53w7WBrkUvcsJwW3DTqZUFbvPLja3NLBUWuXTh9x0ooVV6gOdzKhjFJ8VnyUvDA4P0jnHB3sGuSifp/3e3rQKf4iZUt/z323LJ+9S/VnJ4uQUYr/s8CG1z2D+2bcpzr25EBCm58jL6gr/mOC31ZIhD8TLAsuCrlyxTii+rFzIDzLSceSXC6QAym53iGQr2jTJJcKrh409X2NIAkrvSrQ916BfMi5TaLvKwVXCRaedTA1dfn49HKavx2/TNDJBDJK8VVkzg7+Hayu4dhcUD+npPgUbjagTNcLhEImNEnM5dS+wd2Cu9a4e/WZ+jTZvMXTg9cFHw4+Un2/d0Ap6kKR9ws+FXw2+HQNxyzGZwb3CN4WqHydGqhM/SX4XPDYIF8g5IrB4wJ966PUt0/VF/cnfFRR0zdODPz+iIAS52KMnPOh4KPBByveF7w/cPxjgfu+atDJmDJK8RdDSfFHycuCfwYUQfk0h+I5bsJ5jk8ESqV5eJU4M/BqRN0DUNbPB/X2dexqn1E7lrM+UKWSsCfhub4blNrnnBP8q3Ys57/BYUEvSGIRvzcotc/5UbA86GRM2R6KX/pXQ28PSn3lUHSKWfotR5tHBrko+ck9Su0Xw5FBesYVwTFBqd2k8LA8WCpR8ib+LrXN+X5wUYWOlwgZpfgbg5MDrv5vNdKmljb5OSXF7wdKp28OuHoJcW413xnkfWwtHwjyuFcMTYFsyNX3FOp4Hhb8a0HTQrMIXxSQXYIvBPoubdblbAhUvcB7lNq4/gEBEce/NeANzgtK7eF+jXEnY8ooxT828AKUjalb1JDw3Sp4T5Ar05eCuuI/PsgnmpI4luRJgckT+24KUrs6Fpz4+x2BxVhqA3F1HvPyMt5n4QmESk1K5Lj4WdjgGV4TUNZS2xRe6Nt4KAKI8Zv69lw8m1AGnuPcoNT2O0EaQ5uNCgpyjKaFNaniC6HkUzYY81xLEm2+5VS8zdaKzUxj7m1cOZaEPs9jJP73D7ywmN/HuHL94MFBU5jHG8vLFBMuIKMU/4tBPeGqi6pHrtTfCpYEubBgeb8mXHKaREx+ncBiagob1gQWCEtug0xC6VipLcVven/lgUG+75Cj4pS/8EVBfxCU2krw9ZXLQwLFgFJ7FS1KnGQmUDUrtf1HUH/V+LlB06KaVPH1LX/6YZB7XgrknoROW7sjzCC8MWA4eCzjIgdTBDDPhOH0rIznYuTgQL8PWPjrwqLyqOooN7yAjFJ8YQtX3iYmkOtO7+dIQq8d5HJQkFsrg6EUWhernkXO7yHx+4DnSeI7RS21ZXmbqhwsRJPify/IFy3LaKJKbSmh8cvloUGT4jMIuSdkXZv6lgjXJ+vAoMlDTKL4jAZvk85lTJKwkBbojwPW+X7Bw4J8warKqaql8VU4UJYt/WMYCm2cLICnBPTJNe3kW2TmkAERKvonlA8KeIlcGMW9A/fhOoyREvBuwasCoSFd4r14Xf2kyh5Lr9hxoR1uVjcNQAlhS12J6+IiLqBzWAj5Kwvq1kcEeb9Niu8h620TVi4LkcS1vBBXatum+JSzSfFNyO5BEn0cFZTapgHP5eEBpS21FxrlFRsW9StBqS1PJjTI5XlBk+JbVDzmOHLDQKnWv4lQkv5qkM6VIPO4KlteZmShefNfBkIjZWHK/LuA8hHegwHy2kpdVKm8CEkpCS9sU9Q9vzgQqjCWjIXdfOVx1xX+EEbX9c4KtJFTCgMtTkoukjDe7kc/cjLP9OpAfmQR6E/bC4jVXh/EHCt0a155FZZ4d6f+FmiT4rdZWEoulk7CXTZZfH2YpJK0KT6XnOceauhCglJbLvpOQS5tim/yXDsJxTZJpbaeKykWIyLcNJmlEi4o6w2Cehm3LjyqpNzC2j+wo+47S0t4DeGPPilYamNcfhEYcx7ZYkjvWhkj8yl/ycW1KK25z8M2oaTSNYPCglNY88ErvCGQC7kHhuGlgXvh0czL6wP34hgPwnDLL/VnIYnn5aWMkrG20aqtMHHh5lVYKJ6EyQ9NSCYleM8OXtDC8ws8J5CEej2h3m+bxWet6+3B+nB3SQy4+n6p7XEBV23HNLm9JG2KDwvMQNlw+nl1rIT8p76b26b4+E1gsuB7qQ0sXKEQb2uPg7LZ6Cq1BeVl9e0x3CtoShRtHFokwg/9mh/nfzxgIYV5FJwFZY2TvCQwZjbKXMMiTkbIBqPrq9jVhcXXVqiShFfhbb4e8CLmUGTBUDGUPBDLLj4XcpkPm5/Ec1mIFof5MU8WoftKIiqgc3RbuMgLPCtYuHEnevhR5beEdouh1Bfqim/n1gPZgeXySufAhEhkDLrQoekaLKO23wzE4Xlpc5Tiw9g0hRWwEVVKqEYpPvTb1rdJs4tNWMc2hS9hw6u+2JPwMsIJVpJCiq+do2QttmZlhUGUMu9DrK+txfLJgKdKsbgKECvcpPja5p6aFzG+qmeOp83JJHajLQxjaQ4l2rnI0SgzZWdg9Z97XsZCddB5DIwQaUHxPVR9sLY1ypn5P6DgxrinUts63CGX1qY8Oaxl/hbjOIrfhoGUaJaUaxzFb4NyWagpR+Kded1S2yYoUemtzeRNjbO3ZVlDMDbOY3jE+gwKCy4qEGLJeYQllE1I9K6A4jpXDqSywtAIQ+oi1DHWwl0lSzG5RUZZVQPlG4wIY5zEKxiemZdwXYtKjM4Dupe0Ay9MF4kwfs4RprlfSu4ZvVJvrhlZ7RZcYj5Q2wMW52lBEotg1MZS4k2BhWLwS7/XMai5krYpvnDKxPus/+Z6rCGFaHoduE3x9cl1s7T133hg4ZkJznMTLl58a/IpSxsWjVjXoiztjqdYXOUqD9FUY1hYCaPQw/XS/aZE0t8WCMXi6VISqZqXvAaDlIuwxCLxmzifglsglNpCIAoUxktol8Iz7y15Dh6F53MfrudelFo9gz5TqON7Gj/P5neFEKGacMnvCgMLK5TVh93JbY2B9XB5hYbLE9uJe8XVJY4PxJ/clwdSX/e3By7hHANlgeUxb5viO0fS5kU11QevOXwj4DVYKy/ZtUmb4v80YPUooBDA85oDC9MkTgd1EXcLd9yPWJpiNmHjyavK9c3DJDbBjLvPXIwN68lTuI6cTVIpmXbPxtJ35UNiY8scSCItZHmCsRKC5KJfY02pxdvGUGKdknZi0TmXMUkiBLaTn17BsFdCbyxAffGIrinE8sySYiGPPIH+eEb5HXEtoZPxWXB56ZXZ7YE4sr4pJgZX11UvFu+XUCZlAVkr59t4MXBNUCRt6tcykCxIk3LmisOVlxLkJmnbwFIqzUvDXqPQN+XeFsKTtF3Lb8hL0eaqqZztuNCIgiPPo5LwPK6Lkhdynuvl5/rumN+SqCxKvJOn1VcitTPPFmfujf2ur9K1L3HCKjdZfIkki2hfor77PI7Ymm+y+Ppm7XmNUZuCnXRykYk6t9KsbL8pP5AwqyopoSnxjfvGoyRU7qH+PKpv8aeX6FLo0EknF6uI0dtKrHXUkvM8pE0kT6U+mrBBldfJO+nkYhPKOW7lCCyz/z5lHJFclfpoQnXIOy+ddHKxi13fpsSzhERXkjyOeFNUSa3UT4ljAi+EdbJNZGrqfy9kTTEt+FlMAAAAAElFTkSuQmCC';
+
+// Sheet1 per-cell border codes: 'L R T B' single-char, one string per cell
+// (t=thin m=medium d=dashed .=none) — extracted directly from the source
+// template's styles.xml so the outer box + section dividers render unbroken.
+const EVAL_S1_BORDERS={A2:".m..",B2:"mmmm",C2:"..mm",D2:"..mm",E2:"..mm",F2:"..mm",G2:"..mm",H2:"..mm",I2:"..mm",J2:"..mm",K2:".mmm",A3:".m..",B3:"mmm.",C3:"..m.",D3:"..m.",E3:"..m.",F3:"..m.",G3:"..m.",H3:"..m.",I3:"..m.",J3:"..m.",K3:".mm.",A4:".m..",B4:"mm.t",C4:"...t",D4:"...t",E4:"...t",F4:"...t",G4:"...t",H4:"...t",I4:"...t",J4:"...t",K4:".m.t",A5:".m..",B5:"mmtt",C5:"..tt",D5:"..tt",E5:"..tt",F5:"..tt",G5:"..tt",H5:"..tt",I5:"..tt",J5:"..tt",K5:".mtt",A6:".m..",B6:"mm..",K6:".m..",A7:".m..",B7:"mm..",K7:".m..",A8:".m..",B8:"mm..",K8:".m..",A9:".m..",B9:"mm..",K9:".m..",A10:".m..",B10:"mm..",K10:".m..",A11:".m..",B11:"mm.t",C11:"...t",D11:"...t",E11:"...t",F11:"...t",G11:"...t",H11:"...t",I11:"...t",J11:"...t",K11:".m.t",A12:".m..",B12:"mm..",K12:".m..",A13:".m..",B13:"mmmm",C13:"mmmm",D13:"..mm",E13:"..mm",F13:"..mm",G13:"..mm",H13:".mmm",I13:"mmmm",J13:".mmm",K13:"mmmm",A14:".m..",B14:"mmmm",C14:"mmmm",D14:"..mm",E14:"..mm",F14:"..mm",G14:"..mm",H14:".mmm",I14:"mmmm",J14:".mmm",K14:"mmmm",A15:".m..",B15:"mmmm",C15:"mmmm",D15:"..mm",E15:"..mm",F15:"..mm",G15:"..mm",H15:".mmm",I15:"mmmm",J15:".mmm",K15:"mmmm",A16:".m..",B16:"mmmt",C16:"..mt",D16:"..mt",E16:"..mt",F16:"..mt",G16:"..mt",H16:"..mt",I16:"..mt",J16:"..mt",K16:".mmt",A17:".m..",B17:"mmtd",C17:"..td",D17:"..td",E17:"..td",F17:"..td",G17:"..td",H17:"..td",I17:"..td",J17:"..td",K17:".mtd",A18:".m..",B18:"mmdd",C18:"..dd",D18:"..dd",E18:"..dd",F18:"..dd",G18:"..dd",H18:"..dd",I18:"..dd",J18:"..dd",K18:".mdd",A19:".m..",B19:"mmdd",C19:"..dd",D19:"..dd",E19:"..dd",F19:"..dd",G19:"..dd",H19:"..dd",I19:"..dd",J19:"..dd",K19:".mdd",A20:".m..",B20:"mmdd",C20:"..dd",D20:"..dd",E20:"..dd",F20:"..dd",G20:"..dd",H20:"..dd",I20:"..dd",J20:"..dd",K20:".mdd",A21:".m..",B21:"mmdd",C21:"..dd",D21:"..dd",E21:"..dd",F21:"..dd",G21:"..dd",H21:"..dd",I21:"..dd",J21:"..dd",K21:".mdd",A22:".m..",B22:"mmdd",C22:"..dd",D22:"..dd",E22:"..dd",F22:"..dd",G22:"..dd",H22:"..dd",I22:"..dd",J22:"..dd",K22:".mdd",A23:".m..",B23:"mmdd",C23:"..dd",D23:"..dd",E23:"..dd",F23:"..dd",G23:"..dd",H23:"..dd",I23:"..dd",J23:"..dd",K23:".mdd",A24:".m..",B24:"mmdd",C24:"..dd",D24:"..dd",E24:"..dd",F24:"..dd",G24:"..dd",H24:"..dd",I24:"..dd",J24:"..dd",K24:".mdd",A25:".m..",B25:"mmdd",C25:"..dd",D25:"..dd",E25:"..dd",F25:"..dd",G25:"..dd",H25:"..dd",I25:"..dd",J25:"..dd",K25:".mdd",A26:".m..",B26:"mmdd",C26:"..dd",D26:"..dd",E26:"..dd",F26:"..dd",G26:"..dd",H26:"..dd",I26:"..dd",J26:"..dd",K26:".mdd",A27:".m..",B27:"mmdt",C27:"..dt",D27:"..dt",E27:"..dt",F27:"..dt",G27:"..dt",H27:"..dt",I27:"..dt",J27:"..dt",K27:".mdt",A28:".m..",B28:"mm..",K28:".m..",A29:".m..",B29:"mmm.",C29:"..m.",D29:"..m.",E29:"..m.",F29:"..m.",G29:"..m.",H29:"..m.",I29:"..m.",J29:"..m.",K29:".mm.",A30:".m..",B30:"mm..",K30:".m..",A31:".m..",B31:"mm..",K31:".m..",A32:".m..",B32:"mm.m",C32:"...m",D32:"...m",E32:"...m",F32:"...m",G32:"...m",H32:"...m",I32:"...m",J32:"...m",K32:".m.m"};
+const EVAL_S1_MERGES=['I15:J15','B9:K9','B30:K30','B6:K6','B24:K24','B20:K20','A1:K1','B5:K5','B32:K32','B4:K4','B26:K26','B7:K7','A25:A32','B25:K25','B16:K16','B3:K3','B31:K31','B22:K22','B18:K18','B27:K27','C13:H13','B21:K21','B12:K12','B2:K2','I14:J14','B11:K11','C15:H15','B23:K23','B8:K8','C14:H14','B17:K17','B29:K29','A2:A24','I13:J13','B10:K10','B28:K28','B19:K19'];
+const EVAL_S1_COLW=[0.1640625,16,3.5,8.83203125,10.1640625,2.83203125,15.83203125,10,3.33203125,11.5,11.1640625];
+const EVAL_S1_ROWH={1:40,2:60,4:23.25,5:36,7:15,8:15,12:21.75,13:23.25,14:22.5,15:22.5,16:21.75,17:10.5,18:10.5,19:10.5,20:10.5,21:10.5,22:10.5,23:10.5,24:10.5,25:10.5,26:10.5,27:10.5,28:20,29:23,30:23,31:23,32:23};
+
+// Sheet2 (scoring matrix) — same encoding.
+const EVAL_S2_BORDERS={B2:"mmmm",C2:"..mm",D2:"..mm",E2:"..mm",F2:"..mm",G2:"..mm",H2:"..mm",I2:"..mm",J2:"..mm",K2:"..mm",L2:"..mm",M2:".mmm",B3:"m..t",C3:"tt.m",E3:"mm..",I3:".m..",J3:"mm..",K3:"mm..",L3:"mm..",M3:"mm..",B4:"m.m.",C4:"t.tt",D4:"mtmt",E4:"ttmt",F4:"ttmt",G4:"ttmt",H4:"ttmt",I4:"ttmt",J4:"ttmt",K4:"ttmt",L4:"ttmt",M4:"tmmt",B5:"m...",C5:"t.t.",D5:"mttm",E5:"tttm",F5:"tttm",G5:"tttm",H5:"tttm",I5:"tttm",J5:"tttm",K5:"tt.t",L5:"tttm",M5:"tm.t",B6:"mtmt",C6:"t.mt",D6:"mt.t",E6:"tt.t",F6:"tt.t",G6:"tt.t",H6:"tt.t",I6:"tt.t",J6:"tt.t",K6:"tt.t",L6:"tt.t",M6:"tm.t",B7:"mt..",C7:"t.tt",D7:"mttt",E7:"tttt",F7:"tttt",G7:"tttt",H7:"tttt",I7:"tttt",J7:"tttt",K7:"tt..",L7:"tttt",M7:"tm..",B8:"mt..",C8:"t.tt",D8:"mttt",E8:"tttt",F8:"tttt",G8:"tttt",H8:"tttt",I8:"tttt",J8:"tttt",K8:"tt..",L8:"tttt",M8:"tm..",B9:"mt..",C9:"t.tt",D9:"mttt",E9:"tttt",F9:"tttt",G9:"tttt",H9:"tttt",I9:"tttt",J9:"tttt",K9:"tt..",L9:"tttt",M9:"tm..",B10:"mt..",C10:"t.tt",D10:"mttt",E10:"tttt",F10:"tttt",G10:"tttt",H10:"tttt",I10:"tttt",J10:"tttt",K10:"tt..",L10:"tttt",M10:"tm..",B11:"mt.t",C11:"t.t.",D11:"mttm",E11:"tttm",F11:"tttm",G11:"tttm",H11:"tttm",I11:"tttm",J11:"tttm",K11:"tt.t",L11:"tttm",M11:"tm.t",B12:"mtmt",C12:"ttmt",D12:"tt..",E12:"tt.t",F12:"tt.t",G12:"tt.t",H12:"tttt",I12:"tt.t",J12:"tt.t",K12:"tt.t",L12:"tt.t",M12:"tm.t",B13:"mt..",C13:"tttt",D13:"tttt",E13:"tttt",F13:"tttt",G13:"tttt",H13:"tttt",I13:"tt.t",J13:"tttt",K13:"tt..",L13:"tt.t",M13:"tm..",A14:".m..",B14:"mt..",C14:"tttt",D14:"tttt",E14:"tttt",F14:"tttt",G14:"tttt",H14:"tttt",I14:"tttt",J14:"tttt",K14:"tt..",L14:"tttt",M14:"tm..",A15:".m..",B15:"mt.t",C15:"tttm",D15:"tttm",E15:"tttm",F15:"tttm",G15:"tttm",H15:"tttt",I15:"tttm",J15:"tttm",K15:"tt.t",L15:"tttm",M15:"tm.t",A16:".m..",B16:"mt.m",C16:"...m",D16:"...m",E16:"...m",F16:"...m",G16:"...m",H16:"...m",I16:"...m",J16:".t.m",K16:"mm.m",L16:"mm.m",M16:".m.m"};
+const EVAL_S2_MERGES=['E3:I3','B2:M2','M4:M5','B4:B5','M12:M15','M6:M11','B6:B11','K6:K11','B12:B15','K4:K5','K12:K15','B1:M1','A14:A16','B16:J16'];
+const EVAL_S2_COLW=[2.5,2.6640625,3.1640625,30.5,3.83203125,3.83203125,3.83203125,3.83203125,3.83203125,18.5,7,10,10.1640625];
+const EVAL_S2_ROWH={1:40,2:60,3:30,4:50,5:50,6:50,7:50,8:50,9:50,10:50,11:50,12:50,13:50,14:50,15:50,16:31.5};
+
+// Group fill colours — computed from the source theme (accent1 4F81BD at
+// 80%/40%/-25% tint) so they match the client's original palette exactly.
+const EVAL_GROUP_FILL=['DCE6F2','95B3D7','376092'];
+const EVAL_GROUP_TEXT=['000000','000000','FFFFFF'];
+const EVAL_HDR_GRAY='D9D9D9';
+const EVAL_SCALE_SELECTED='9BBB59'; // theme accent3 — the green highlight on the chosen NI/BE/ME/EE/OS cell
+
+// 'L R T B' code -> xlsx-js-style border object (black, matching the source —
+// its "thin"/"dashed" borders use color auto/indexed64, which is black).
+// OOXML requires an 8-digit ARGB hex on every <color rgb="..."/> — a bare
+// 6-digit RGB is spec-non-conformant and strict parsers (openpyxl, LibreOffice,
+// some Excel builds) read the missing alpha as 00 (fully transparent) rather
+// than defaulting to opaque, silently turning "black text" into invisible
+// text. xlsx-js-style only auto-prepends 'FF' for fill colors, not font/
+// border colors, so every color handed to those must be normalized here.
+const evalARGB=hex=>/^[0-9A-Fa-f]{8}$/.test(hex)?hex:'FF'+hex;
+function evalBorderObj(code){
+  if(!code) return undefined;
+  const S={t:'thin',m:'medium',d:'dashed'};
+  const side=c=>S[c]?{style:S[c],color:{rgb:evalARGB('000000')}}:undefined;
+  const [l,r,t,b]=code.split('');
+  const o={}; const L=side(l),R=side(r),T=side(t),B=side(b);
+  if(L)o.left=L; if(R)o.right=R; if(T)o.top=T; if(B)o.bottom=B;
+  return o;
+}
+const evalFont=(o)=>({name:o.name||'Times New Roman',sz:o.sz||9,bold:!!o.bold,italic:!!o.italic,color:{rgb:evalARGB(o.color||'000000')}});
+const evalAlign=(h,v,wrap,rot)=>{const a={};if(h)a.horizontal=h;if(v)a.vertical=v;if(wrap)a.wrapText=true;if(rot)a.textRotation=rot;return a;};
+const evalFill=rgb=>({patternType:'solid',fgColor:{rgb:evalARGB(rgb)}});
+
+function evalBuildSheet1(d,t){
+  const ws={};
+  const put=(addr,v,s)=>{ ws[addr]={t:typeof v==='number'?'n':'s',v:v==null?'':v,...(s?{s}:{})}; };
+  const styl=(addr,font,align,fillRgb)=>{
+    const b=evalBorderObj(EVAL_S1_BORDERS[addr]);
+    const s={font,alignment:align};
+    if(b) s.border=b;
+    if(fillRgb) s.fill=evalFill(fillRgb);
+    return s;
+  };
+  const F=(sz,bold)=>evalFont({sz,bold});
+
+  put('B2','Employee Performance Evaluation Report', styl('B2',evalFont({name:'Cambria',sz:16,bold:true}),evalAlign('center','center')));
+  put('B3','Dear Panel Member,', styl('B3',F(9,true),evalAlign('left','center')));
+  put('B4','Please read the following guideline to get acquainted with the main framework of the evaluation report', styl('B4',F(10,false),evalAlign('left','center',true)));
+  put('B5','This is designed to compile candidate’s evaluation by choosing the appropriate numeric score based on structured question on a specific scale.', styl('B5',F(10,false),evalAlign('left','center',true)));
+  put('B6','•  The Scale definition is as follows:', styl('B6',F(9,true),evalAlign('left','center')));
+  [
+    ['B7','¬ NI = Needs Improvement (0-59%): Performance does not meet minimum expectations; requires immediate improvement.'],
+    ['B8','¬ BE = Below Expectations (60–74%): Occasionally meets expectations but lacks consistency.'],
+    ['B9','➢ ME = Meets Expectations (75–84%): Consistently meets job requirements and expectations.'],
+    ['B10','➢ EE = Exceeds Expectations (85–94%): Frequently exceeds expectations with high-quality performance.'],
+    ['B11','➢ OS = Outstanding (95–100%): Exceptional performance; serves as a role model.'],
+  ].forEach(([addr,txt])=>put(addr,txt, styl(addr,F(9,true),evalAlign('left','center'))));
+
+  [
+    [13,'Employee Name:',d.employee_name,'Employee Payroll:',d.payroll],
+    [14,'Current Position:',d.position,'Date of Current Evaluation:',evalFmtDate(d.eval_date)],
+    [15,'Department:',d.department,'Date of Last Evaluation:',d.last_eval_date||'N/A'],
+  ].forEach(([r,lbl1,val1,lbl2,val2])=>{
+    put('B'+r,' '+lbl1, styl('B'+r,F(9,true),evalAlign('left','center',true)));
+    put('C'+r,val1||'', styl('C'+r,F(10,false),evalAlign('left','center',true)));
+    put('I'+r,lbl2, styl('I'+r,F(9,true),evalAlign('left','center',true)));
+    put('K'+r,val2||'', styl('K'+r,F(10,false),evalAlign('center','center',true)));
+  });
+
+  put('B16','Evaluator Comments/Recomendations: (Provide specific examples, achievements, or areas for improvement)', styl('B16',F(9,true),evalAlign('left','center',true)));
+  put('B17', d.comments||'', styl('B17',F(10,false),evalAlign('left','top',true)));
+  put('B25','Total Score : '+evalF2(t.total), styl('B25',F(9,true),evalAlign('center','center')));
+  put('B28',' Panel member confirmation: MANDATORY TO BE SIGNED FROM Department General Manager (DGM)', styl('B28',F(9,true),evalAlign('left','center',true)));
+  [
+    [29,' 1. Employee ________________________ Signature___________________ Date ______________'],
+    [30,' 2. Direct Manager Approval ________________________ Signature___________________ Date ______________'],
+    [31,' 3. Department General Manager Approval________________________  Signature___________ Date______________'],
+    [32,' 4. Project Manager Approval________________________  Signature___________________ Date ______________'],
+  ].forEach(([r,txt])=>put('B'+r,txt, styl('B'+r,F(10,false),evalAlign('left','center',true))));
+
+  // Fill in border-only cells that carry no value — needed so the outer
+  // rectangle / section-divider lines render unbroken across every column.
+  Object.keys(EVAL_S1_BORDERS).forEach(addr=>{
+    if(ws[addr]) return;
+    put(addr,'', {border:evalBorderObj(EVAL_S1_BORDERS[addr])});
+  });
+  // Comments row gets extra breathing room when there's real text to show
+  // (the blank template's 10.5pt line is meant for handwriting, not type).
+  const commentRowH=(d.comments||'').trim() ? Math.max(60,Math.ceil(d.comments.length/70)*16) : null;
+
+  ws['!merges']=EVAL_S1_MERGES.map(r=>XLSX.utils.decode_range(r));
+  ws['!cols']=EVAL_S1_COLW.map(w=>({wch:w}));
+  ws['!rows']=[];
+  for(let r=1;r<=32;r++) ws['!rows'][r-1]= r===17&&commentRowH ? {hpt:commentRowH} : (EVAL_S1_ROWH[r]?{hpt:EVAL_S1_ROWH[r]}:{});
+  ws['!ref']='A1:M32';
+  return ws;
+}
+
+function evalBuildSheet2(d,t){
+  const ws={};
+  // cachedV: for formula cells, the precomputed result — written alongside
+  // the formula so the number displays immediately in viewers that don't
+  // auto-recalculate on open (real Excel does; some preview tools don't).
+  const put=(addr,v,s,cachedV)=>{
+    const isF=typeof v==='string'&&v[0]==='=';
+    const cell=isF ? {t:'n',f:v.slice(1),v:cachedV} : {t:typeof v==='number'?'n':'s',v:v==null?'':v};
+    if(s) cell.s=s;
+    ws[addr]=cell;
+  };
+  const styl=(addr,font,align,fillRgb,numFmt)=>{
+    const b=evalBorderObj(EVAL_S2_BORDERS[addr]);
+    const s={font,alignment:align};
+    if(b) s.border=b;
+    if(fillRgb) s.fill=evalFill(fillRgb);
+    if(numFmt) s.numFmt=numFmt;
+    return s;
+  };
+  const hdrStyle=addr=>styl(addr,evalFont({sz:10,bold:true}),evalAlign('center','center',true),EVAL_HDR_GRAY);
+
+  put('B2','Employee Performance Evaluation Report', styl('B2',evalFont({name:'Cambria',sz:16,bold:true}),evalAlign('center','center',true)));
+  put('C3','No', hdrStyle('C3'));
+  put('D3','Selection Criteria', hdrStyle('D3'));
+  put('E3','Scale', hdrStyle('E3'));
+  put('J3','Comments/Evidence', hdrStyle('J3'));
+  put('K3','Weight', hdrStyle('K3'));
+  put('L3','Score (0–100)', hdrStyle('L3'));
+  put('M3','Weighted Score', hdrStyle('M3'));
+
+  let row=4;
+  EVAL_CRITERIA.forEach((g,gi)=>{
+    const startRow=row, endRow=row+g.items.length-1;
+    const grpFill=EVAL_GROUP_FILL[gi], grpText=EVAL_GROUP_TEXT[gi];
+    put('B'+startRow, g.short, styl('B'+startRow,evalFont({sz:10,bold:true,color:grpText}),evalAlign('center','center',false,90),grpFill));
+    put('K'+startRow, g.weight, styl('K'+startRow,evalFont({sz:12}),evalAlign('center','center',true)));
+    put('M'+startRow, '=AVERAGE(L'+startRow+':L'+endRow+')*K'+startRow, styl('M'+startRow,evalFont({sz:12,bold:gi===EVAL_CRITERIA.length-1}),evalAlign('center','center',true),null,'0.00'), +evalF2(t.groups[gi].weighted));
+
+    g.items.forEach((it,ii)=>{
+      const r=startRow+ii;
+      put('C'+r, it.n, styl('C'+r,evalFont({sz:12,bold:true}),evalAlign('center','center')));
+      put('D'+r, it.label, styl('D'+r,evalFont({sz:9,bold:true}),evalAlign(null,'center',true)));
+      const cur=evalBand(d.scores[it.key]);
+      ['E','F','G','H','I'].forEach((col,ci)=>{
+        const band=['NI','BE','ME','EE','OS'][ci];
+        put(col+r, band, styl(col+r,evalFont({sz:9,color:'3F3F3F'}),evalAlign('center','center',true), band===cur?EVAL_SCALE_SELECTED:null));
+      });
+      put('J'+r, d.crit_comments[it.key]||'', styl('J'+r,evalFont({sz:9}),evalAlign(null,null,true)));
+      put('L'+r, d.scores[it.key]!=null&&d.scores[it.key]!==''?+d.scores[it.key]:'', styl('L'+r,evalFont({sz:12}),evalAlign('center','center',true)));
     });
-    if(!r.ok) throw new Error('Update failed');
-    const u=UMG_USERS.find(u=>u.username===uname);
-    if(u){ u.display_name=dname||uname; if(role) u.role=role; }
-    showMsg(pw?'Profile updated and password reset.':'Profile updated.',true);
-    setTimeout(()=>{ _umgRefreshLeft(); _umgRefreshRight(); },700);
-  }catch(e){ showMsg('Error: '+e.message,false); }
+    row=endRow+1;
+  });
+
+  const totalWeight=EVAL_CRITERIA.reduce((s,g)=>s+g.weight,0);
+  put('B16','Total', styl('B16',evalFont({sz:12,bold:true}),evalAlign('center','center'),EVAL_HDR_GRAY));
+  put('K16','=SUM(K4:K15)', styl('K16',evalFont({sz:12}),evalAlign('center','center',true),EVAL_HDR_GRAY), totalWeight);
+  put('M16','=SUM(M4:M15)', styl('M16',evalFont({sz:12,bold:true}),evalAlign('center','center',true),EVAL_HDR_GRAY,'0.00'), +evalF2(t.total));
+
+  Object.keys(EVAL_S2_BORDERS).forEach(addr=>{
+    if(ws[addr]) return;
+    put(addr,'', {border:evalBorderObj(EVAL_S2_BORDERS[addr])});
+  });
+
+  ws['!merges']=EVAL_S2_MERGES.map(r=>XLSX.utils.decode_range(r));
+  ws['!cols']=EVAL_S2_COLW.map(w=>({wch:w}));
+  ws['!rows']=[]; for(let r=1;r<=16;r++) ws['!rows'][r-1]=EVAL_S2_ROWH[r]?{hpt:EVAL_S2_ROWH[r]}:{};
+  ws['!ref']='A1:M16';
+  return ws;
+}
+
+// Splice the real ENPPI logo into the written workbook. xlsx-js-style can't
+// write images itself, so this re-opens the .xlsx (an ordinary zip) with
+// JSZip (already loaded elsewhere in the app) and adds the media/drawing
+// parts by hand, anchored at the same position the source template used.
+async function evalEmbedLogos(arrayBuffer){
+  const zip=await JSZip.loadAsync(arrayBuffer);
+  const png=Uint8Array.from(atob(EVAL_LOGO_PNG_B64), c=>c.charCodeAt(0));
+  zip.file('xl/media/image1.png', png);
+
+  const drawingXml=(fromCol,fromColOff,fromRowOff,toCol,toColOff,toRowOff)=>
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n`+
+    `<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">`+
+    `<xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>${fromCol}</xdr:col><xdr:colOff>${fromColOff}</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>${fromRowOff}</xdr:rowOff></xdr:from>`+
+    `<xdr:to><xdr:col>${toCol}</xdr:col><xdr:colOff>${toColOff}</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>${toRowOff}</xdr:rowOff></xdr:to>`+
+    `<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="1" name="ENPPI Logo"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>`+
+    `<xdr:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId1"/><a:stretch/></xdr:blipFill>`+
+    `<xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>`;
+  const relsXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.png"/></Relationships>`;
+
+  // Anchors reproduced exactly from the source template's two drawings.
+  zip.file('xl/drawings/drawing1.xml', drawingXml(4,457200,166686,6,759012,394138));
+  zip.file('xl/drawings/drawing2.xml', drawingXml(4,160020,121920,9,398786,419100));
+  zip.file('xl/drawings/_rels/drawing1.xml.rels', relsXml);
+  zip.file('xl/drawings/_rels/drawing2.xml.rels', relsXml);
+
+  for(const n of [1,2]){
+    const path=`xl/worksheets/sheet${n}.xml`;
+    let xml=await zip.file(path).async('string');
+    if(!xml.includes('<drawing ')) xml=xml.replace('</worksheet>', `<drawing r:id="rIdDrawing"/></worksheet>`);
+    zip.file(path, xml);
+    const relsPath=`xl/worksheets/_rels/sheet${n}.xml.rels`;
+    const existing=zip.file(relsPath);
+    const relEntry=`<Relationship Id="rIdDrawing" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${n}.xml"/>`;
+    if(existing){
+      let relXml=await existing.async('string');
+      relXml=relXml.replace('</Relationships>', relEntry+'</Relationships>');
+      zip.file(relsPath, relXml);
+    } else {
+      zip.file(relsPath, `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${relEntry}</Relationships>`);
+    }
+  }
+
+  let ct=await zip.file('[Content_Types].xml').async('string');
+  if(!ct.includes('Extension="png"')) ct=ct.replace('<Default Extension="xml"','<Default Extension="png" ContentType="image/png"/><Default Extension="xml"');
+  if(!ct.includes('drawing1.xml')) ct=ct.replace('</Types>',
+    '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>'+
+    '<Override PartName="/xl/drawings/drawing2.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/></Types>');
+  zip.file('[Content_Types].xml', ct);
+
+  return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+
+async function evalExportExcel(){
+  if(!EVAL_DRAFT) return;
+  if(!evalCanExport(EVAL_DRAFT)) return alert('This evaluation must be approved by the Super Admin before it can be exported.');
+  try{
+    const d=EVAL_DRAFT, t=evalTotals(d.scores);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, evalBuildSheet1(d,t), 'Sheet1');
+    XLSX.utils.book_append_sheet(wb, evalBuildSheet2(d,t), 'Sheet2');
+    const out=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+    let blob;
+    try{ blob=await evalEmbedLogos(out); }
+    catch(e){ console.warn('[eval export] logo embed failed, exporting without logo:',e); blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}); }
+    const nm=(d.employee_name||'Evaluation').replace(/[^\w\s-]/g,'').trim()||'Evaluation';
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=nm+'.xlsx';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }catch(e){ alert('Excel export failed: '+e.message); console.error(e); }
 }
 
 // ═══════════════════════════════════════════════════
@@ -4521,6 +4950,7 @@ async function saveUserProfile(uname){
 // ═══════════════════════════════════════════════════
 
 async function saveAllToDB(){
+  if(!canUpload()){ alert('Your account is not allowed to save data.'); return; }
   // Stations/BC have no DB tables yet. MOL → mol_* tables; dashboard → main tables.
   if(APP_VIEW==='stations'||APP_VIEW==='bc'){ alert('Saving data for this page is coming soon.'); return; }
   const pfx = APP_VIEW==='mol' ? 'mol_' : '';
@@ -4540,6 +4970,7 @@ async function saveAllToDB(){
 }
 
 async function clearAllFiles(){
+  if(!canUpload()){ alert('Your account is not allowed to clear data.'); return; }
   // MOL 3.3 — delete its own mol_* tables + meta, then reset its store. Isolated
   // from the main pipeline data.
   if(APP_VIEW==='mol'){
@@ -4692,6 +5123,7 @@ function uiYield(){
 }
 
 async function handleFile(forcedKey, file){
+  if(!canUpload()){ alert('Your account is not allowed to upload data.'); return; }
   // Stations/BC pages have no data wiring yet — block their uploads.
   if(APP_VIEW==='stations'||APP_VIEW==='bc'){
     alert('Data upload for this page is coming soon.');
@@ -5338,7 +5770,8 @@ function qaGroupedList(rows, groupField, headers, rowFn, title, groupLabel){
   const fullTables=[];
   const parts=sorted.map(([k,gr])=>{
     fullTables.push({headers,rows:gr.map(r=>rowFn(r).map(qaCell))});
-    const body=gr.slice(0,200).map(r=>`| ${rowFn(r).map(qaCell).join(' | ')} |`).join('\n');
+    // Truncated for chat display only — fullTables above keeps the full text.
+    const body=gr.slice(0,200).map(r=>`| ${rowFn(r).map(v=>qaTruncate(qaCell(v),80)).join(' | ')} |`).join('\n');
     const note=gr.length>200?`\n\n_Showing first 200 of ${gr.length}._`:'';
     return `**${k}** — ${gr.length} record${gr.length===1?'':'s'}\n\n${head}\n${sep}\n${body}${note}`;
   });
@@ -5555,10 +5988,12 @@ function qaTable(headers,rows,title,total){
   const head=`| ${headers.join(' | ')} |`;
   const sep=`| ${headers.map(()=>'---').join(' | ')} |`;
   const shown=rows.slice(0,200);
-  const body=shown.map(r=>`| ${r.map(qaCell).join(' | ')} |`).join('\n');
+  // Long cells (e.g. NCR/SOR descriptions) are truncated for CHAT DISPLAY only —
+  // the export stash below keeps the full untruncated text.
+  const body=shown.map(r=>`| ${r.map(v=>qaTruncate(qaCell(v),80)).join(' | ')} |`).join('\n');
   const note=total>shown.length?`\n\n_Showing first ${shown.length} of ${total}._`:'';
-  // Stash the FULL row set (not just the 200 shown in chat) so the "Export to
-  // Excel" button on this answer exports everything, not just what's rendered.
+  // Stash the FULL row set (not just the 200 shown in chat) AND full cell text
+  // (not the display-truncated text) so "Export to Excel" exports everything.
   QA.pendingFullTables=[{headers,rows:rows.map(r=>r.map(qaCell))}];
   return `${title} — ${total} total\n\n${head}\n${sep}\n${body}${note}`;
 }
@@ -5599,7 +6034,9 @@ function qaNCR(q,op,df){
   // DESCRIPTION is always included in NCR list/export output — not just for topic
   // searches — so every NCR export carries the description (user requirement).
   const ncrHeaders=['NCR NO','DATE','TARGET CLOSE','STATUS','AGAINST','DESCRIPTION'];
-  const ncrRow=r=>[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName,qaTruncate(r.desc,80)];
+  // Full description here — qaTable/qaGroupedList truncate for chat display only,
+  // so the export always carries the complete text.
+  const ncrRow=r=>[r.ncrNo,qaFmtDate(r.date),qaFmtDate(r.targetClose),r.status,r.againstName,r.desc];
   // "by IC"/"by contractor" maps to againstName for NCRs.
   const ncrGroupBy=qaGroupBy(q), ncrDim=ncrGroupBy==='ic'?'against':ncrGroupBy;
   if(ncrGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,ncrDim==='against'?'againstName':ncrDim,ncrHeaders,ncrRow,'NCRs'+sct,ncrDim==='against'?'contractor':ncrDim);
@@ -5619,7 +6056,8 @@ function qaSOR(q,op,df){
   const sct=sc.length?` (${sc.join(', ')})`:'';
   // DESCRIPTION is always included in SOR list/export output — same convention as qaNCR.
   const sorHeaders=['SOR NO','DATE','STATUS','IC','KM','DESCRIPTION'];
-  const sorRow=r=>[r.sorNo,qaFmtDate(r.date),r.status,r.ic,r.km,qaTruncate(r.desc,80)];
+  // Full description here — same convention as qaNCR (see comment there).
+  const sorRow=r=>[r.sorNo,qaFmtDate(r.date),r.status,r.ic,r.km,r.desc];
   const sorGroupBy=qaGroupBy(q);
   if(sorGroupBy&&(op==='list'||/list|show|give/.test(q))) return qaGroupedList(rows,sorGroupBy,sorHeaders,sorRow,'SORs'+sct);
   if(op==='breakdown'||(!op&&/status/.test(q))) return qaBreakdownDim(rows,sorGroupBy,'SOR',sct);
@@ -6401,14 +6839,25 @@ async function loadAndShow(){
   // Reset date slicer to last completed Sat→Fri week on login
   const {start,end}=defaultWeekDates();
   ST.start=start; ST.end=end;
-  // Load saved color scheme for this user (guests have no DB record — skip)
+  // Load saved color scheme + permissions for this user (guests have no DB
+  // record — they get plain viewer defaults from resolvePerm).
+  MY_PERM=resolvePerm(AUTH.currentUser);
   if(!AUTH.currentUser.isGuest){
     try{
-      const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(AUTH.currentUser.username)}&select=color_scheme`);
-      if(rows.length && rows[0].color_scheme && SCHEMES[rows[0].color_scheme]){
-        CURRENT_SCHEME=rows[0].color_scheme;
+      const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(AUTH.currentUser.username)}&select=color_scheme,permissions,role`);
+      if(rows.length){
+        if(rows[0].color_scheme && SCHEMES[rows[0].color_scheme]) CURRENT_SCHEME=rows[0].color_scheme;
+        MY_PERM=resolvePerm({username:AUTH.currentUser.username,role:rows[0].role,permissions:rows[0].permissions});
       }
-    }catch(e){}
+    }catch(e){
+      // permissions column not granted to anon yet (run supabase_login_history.sql)
+      // — fall back to theme-only so the scheme still loads; perms = role defaults.
+      try{
+        const rows=await sbSelect('dashboard_users',`username=eq.${encodeURIComponent(AUTH.currentUser.username)}&select=color_scheme`);
+        if(rows.length && rows[0].color_scheme && SCHEMES[rows[0].color_scheme]) CURRENT_SCHEME=rows[0].color_scheme;
+      }catch(e2){}
+    }
+    applySlicerPerm(); // locked/restricted slicer overrides the default week
   }
   applyScheme(CURRENT_SCHEME);
   // Fetch blocked user count for admin/superadmin so the sidebar badge is ready
@@ -6632,6 +7081,7 @@ async function addUser(){
   const role=document.getElementById('umgNewRole').value;
   const msg=document.getElementById('umgMsg');
   const showMsg=(txt,ok)=>{msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');};
+  if(!canCreateUsers()) return showMsg('You are not allowed to create users.',false);
   if(!uname) return showMsg('Username is required.',false);
   if(!/^[a-z0-9._-]{3,30}$/.test(uname)) return showMsg('Username: 3-30 chars, letters/numbers/._- only.',false);
   if(!pw||pw.length<8) return showMsg('Password must be at least 8 characters.',false);
@@ -6647,7 +7097,8 @@ async function addUser(){
       const rows=await sbSelect('dashboard_users','select=username,display_name,role,last_login,is_blocked,permissions&order=created_at.asc');
       UMG_USERS=rows;
     }catch(e){}
-    _umgRefreshLeft();
+    UMG_ADD_OPEN=false;
+    _umgRefresh();
   }catch(e){ showMsg('Error: '+e.message,false); }
 }
 async function deleteUser(uname){
@@ -6657,15 +7108,14 @@ async function deleteUser(uname){
     await fetch(`${SB_URL}/rest/v1/dashboard_users?username=eq.${encodeURIComponent(uname)}`,{method:'DELETE',headers:SB_HDR});
     UMG_USERS=UMG_USERS.filter(u=>u.username!==uname);
     delete UMG_PERMS_DRAFT[uname];
-    if(UMG_SEL===uname){ UMG_SEL=null; UMG_TAB='profile'; }
-    _umgRefreshLeft();
-    _umgRefreshRight();
+    if(UMG_SEL===uname) UMG_SEL=null;
+    _umgRefresh();
   }catch(e){alert('Delete failed: '+e.message);}
 }
 // ── Change Password Modal (all non-guest roles) ──────
 function openChangePw(){
   const u=AUTH.currentUser;
-  if(!u||u.isGuest) return;
+  if(!u||u.isGuest||!MY_PERM.changeOwnPw) return;
   const roleColors={superadmin:{bg:'#1a0f3a',txt:'#a371f7',cls:'role-superadmin',lbl:'Super Admin'},admin:{bg:'#0d1f4f',txt:'#388bfd',cls:'role-admin',lbl:'Admin'},viewer:{bg:'#1a1a1a',txt:'#8b949e',cls:'role-viewer',lbl:'Viewer'}};
   const rc=roleColors[u.role]||roleColors.viewer;
   const initials=(u.displayName||u.username).substring(0,2).toUpperCase();
@@ -6741,8 +7191,7 @@ async function unblockUser(uname){
     // Update cache and refresh canvas panels
     const uu=UMG_USERS.find(u=>u.username===uname);
     if(uu){ uu.is_blocked=false; uu.login_attempts=0; }
-    _umgRefreshLeft();
-    _umgRefreshRight();
+    _umgRefresh();
   }catch(e){ alert('Error: '+e.message); }
 }
 
@@ -7024,12 +7473,24 @@ function openExportOptions(){
   const f=document.getElementById('expFrom'), t=document.getElementById('expTo');
   if(f&&!f.value) f.value=ST.start;
   if(t&&!t.value) t.value=ST.end;
-  // Guests cannot change the date range — lock the inputs
+  // Guests cannot change the date range — lock the inputs. Named users follow
+  // their per-user Export Duration permission (free / locked range / follow slicer).
   const isGuest=!!(AUTH.currentUser&&AUTH.currentUser.isGuest);
-  if(f) f.disabled=isGuest;
-  if(t) t.disabled=isGuest;
+  const expLocked=isGuest||MY_PERM.expDur!=='free';
+  if(!isGuest&&MY_PERM.expDur==='locked'&&MY_PERM.expFrom){
+    if(f) f.value=MY_PERM.expFrom;
+    if(t) t.value=MY_PERM.expTo||MY_PERM.expFrom;
+  } else if(!isGuest&&MY_PERM.expDur==='slicer'){
+    if(f) f.value=ST.start;
+    if(t) t.value=ST.end;
+  }
+  if(f) f.disabled=expLocked;
+  if(t) t.disabled=expLocked;
   const note=document.getElementById('expGuestNote');
-  if(note) note.style.display=isGuest?'block':'none';
+  if(note){
+    note.style.display=expLocked?'block':'none';
+    if(!isGuest&&expLocked) note.innerHTML='🔒 Export date range is set by your access permissions.';
+  }
   document.getElementById('exportOptionsModal').classList.add('open');
 }
 function closeExportOptions(){
@@ -7060,10 +7521,17 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
   const showMsg=(txt,ok)=>{if(msg){msg.textContent=txt;msg.className='umg-msg '+(ok?'ok':'err');}};
   if(!XLSX){showMsg('XLSX library not loaded.',false);return{ok:false,error:'XLSX library not loaded.'};}
 
-  const from=fromOverride!=null?fromOverride:document.getElementById('expFrom').value;
-  const to=toOverride!=null?toOverride:document.getElementById('expTo').value;
+  let from=fromOverride!=null?fromOverride:document.getElementById('expFrom').value;
+  let to=toOverride!=null?toOverride:document.getElementById('expTo').value;
+  // Per-user Export Duration enforcement — overrides whatever the caller asked
+  // for (modal inputs are also locked, this covers the QA-chat path too).
+  if(AUTH.currentUser&&!AUTH.currentUser.isGuest){
+    if(MY_PERM.expDur==='locked'&&MY_PERM.expFrom){ from=MY_PERM.expFrom; to=MY_PERM.expTo||MY_PERM.expFrom; }
+    else if(MY_PERM.expDur==='slicer'){ from=ST.start; to=ST.end; }
+  }
   if(!from||!to){showMsg('Please choose both From and To dates.',false);return{ok:false,error:'Both From and To dates are required.'};}
   if(from>to){showMsg('"From" date must be on or before "To" date.',false);return{ok:false,error:'"From" date must be on or before "To" date.'};}
+  const DS=MY_PERM.datasets; // per-user dataset gating (SA: all true)
   const isMolExport=dashOverride?dashOverride==='mol':APP_VIEW==='mol';
   // NCR/SOR detailed record listings + the actual manpower roster are only
   // included for Viewer/Admin/Superadmin exports — guests get summaries only.
@@ -7233,6 +7701,10 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
   const ncrCSt=ncrCRecs.length?mkStatusRows(ncrCRecs,r=>r.againstName):null;
   const sorCSt=sorCRecs.length?mkStatusRows(sorCRecs,r=>r.ic):null;
 
+  const PH=isMolExport
+    ?'MOL 3.3  ·  P30312  ·  CONSTRUCTION QA/QC DASHBOARD'
+    :'WEST TO EAST PIPELINE "WEP" PROJECT  ·  P30312  ·  CONSTRUCTION QA/QC DASHBOARD';
+
   // ── Build one sheet (period or cumulative) ────────────────────────────────
   const buildSheet=(isPeriod)=>{
     const {put,mput,seal}=makeWS();
@@ -7250,9 +7722,6 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
     const rfiTot =rfiData?rfiData.totals:{acc:0,accW:0,can:0,open:0,rej:0,total:1};
 
     // ── Rows 1-2: project + period header (B:O = cols 1-14) ──────────────
-    const PH=isMolExport
-      ?'MOL 3.3  ·  P30312  ·  CONSTRUCTION QA/QC DASHBOARD'
-      :'WEST TO EAST PIPELINE "WEP" PROJECT  ·  P30312  ·  CONSTRUCTION QA/QC DASHBOARD';
     mput(1,1,1,14,PH,S_PHDR);
     const DH=isPeriod
       ?`REPORTING DURATION: FROM ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
@@ -7279,6 +7748,8 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
 
     // Rows 10-11 are left completely unstyled — no fill, no border.
 
+        let rRow=14;
+    if(DS.rfi){
     // ── RFI SECTION (row 12) ───────────────────────────────────────────────
     const rfiTitle=isPeriod
       ?`RFI STATUS — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
@@ -7290,7 +7761,6 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
 
     // Data rows (rows 14+)
     const rfiRows=rfiData?rfiData.rows:[];
-    let rRow=14;
     rfiRows.forEach(row=>{
       mput(rRow,1,rRow,3,row.d,S_DLBL);
       [row.acc,row.accW,row.can,row.open,row.rej,row.total].forEach((v,i)=>put(rRow,4+i,v,S_DNUM));
@@ -7315,16 +7785,18 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
       mput(21,11,22,11,sv(rfiTot.can)/t,S_MV20,'0%');
       mput(21,13,22,13,sv(rfiTot.rej)/t,S_MV20,'0%');
     }
+    }
 
+        const NDT_R=Math.max(28,rRow+2);
+    let nRow=NDT_R+2;
+    if(DS.ndt){
     // ── WELDING / NDT SECTION ─────────────────────────────────────────────
-    const NDT_R=Math.max(28,rRow+2);
     const ndtTitle=isPeriod
       ?`WELDING / NDT — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
       :'WELDING / NDT — CUMULATIVE';
     mput(NDT_R,1,NDT_R,8,ndtTitle,S_STTL);
     mput(NDT_R+1,1,NDT_R+1,3,'SECTION',S_CHDR);
     ['WELDED','EPCM REV','EPCM APPR','REPAIR','BACKLOG'].forEach((h,i)=>put(NDT_R+1,4+i,h,S_CHDR));
-    let nRow=NDT_R+2;
     (ndtRows||[]).forEach(row=>{
       mput(nRow,1,nRow,3,row.s,S_DLBL);
       [row.welded,row.rev,row.appr,row.repair,row.bl].forEach((v,i)=>put(nRow,4+i,v,S_DNUM));
@@ -7334,16 +7806,18 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
     mput(nRow,1,nRow,3,'TOTAL',S_TLBL);
     [ndtT.welded,ndtT.rev,ndtT.appr,ndtT.repair,ndtT.bl].forEach((v,i)=>put(nRow,4+i,v,S_TNUM));
     nRow++;
+    }
 
+        const FJC_R=Math.max(36,nRow+2);
+    let fRow=FJC_R+2;
+    if(DS.fjc){
     // ── FJC SECTION ──────────────────────────────────────────────────────
-    const FJC_R=Math.max(36,nRow+2);
     const fjcTitle=isPeriod
       ?`FJC — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
       :'FJC — CUMULATIVE';
     mput(FJC_R,1,FJC_R,8,fjcTitle,S_STTL);
     mput(FJC_R+1,1,FJC_R+1,3,'SECTION',S_CHDR);
     ['RELEASED','COATED','ACCEPTED','REPAIR','BALANCE'].forEach((h,i)=>put(FJC_R+1,4+i,h,S_CHDR));
-    let fRow=FJC_R+2;
     (fjcRows||[]).forEach(row=>{
       mput(fRow,1,fRow,3,row.s,S_DLBL);
       [row.released,row.total,row.accepted,row.repair,row.balance].forEach((v,i)=>put(fRow,4+i,v,S_DNUM));
@@ -7353,25 +7827,29 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
     mput(fRow,1,fRow,3,'TOTAL',S_TLBL);
     [fjcT.released,fjcT.total,fjcT.accepted,fjcT.repair,fjcT.balance].forEach((v,i)=>put(fRow,4+i,v,S_TNUM));
     fRow++;
+    }
 
+        const NCR_R=Math.max(44,fRow+2);
+    let ncRow=NCR_R+2;
+    if(DS.ncr){
     // ── NCR SECTION ──────────────────────────────────────────────────────
-    const NCR_R=Math.max(44,fRow+2);
     const ncrTitle=isPeriod
       ?`NCR — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
       :'NCR — BY STATUS';
     mput(NCR_R,1,NCR_R,6,ncrTitle,S_STTL);
     mput(NCR_R+1,1,NCR_R+1,3,'IC',S_CHDR);
     ['OPEN','CLOSED','TOTAL'].forEach((h,i)=>put(NCR_R+1,4+i,h,S_CHDR));
-    let ncRow=NCR_R+2;
     (ncrSt||[]).forEach(row=>{
       const isTot=row.k==='TOTAL';
       mput(ncRow,1,ncRow,3,row.k,isTot?S_TLBL:S_DLBL);
       [row.open,row.closed,row.total].forEach((v,i)=>put(ncRow,4+i,v,isTot?S_TNUM:S_DNUM));
       ncRow++;
     });
+    }
 
+        const SOR_R=Math.max(NCR_R+6,ncRow+2);
+    if(DS.sor){
     // ── SOR SECTION ──────────────────────────────────────────────────────
-    const SOR_R=Math.max(NCR_R+6,ncRow+2);
     const sorTitle=isPeriod
       ?`SOR — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
       :'SOR — BY STATUS';
@@ -7385,59 +7863,60 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
       [row.open,row.closed,row.total].forEach((v,i)=>put(srRow,4+i,v,isTot?S_TNUM:S_DNUM));
       srRow++;
     });
+    }
 
-    // ── DETAIL SECTIONS (Viewer/Admin/Superadmin only) ──────────────────────
+    
+    return seal();
+  };
+
+  // ── Standalone detail-list sheet builder (NCR / SOR / Deployment tabs) ───
+  // Same header/title/border conventions as buildSheet, but a single flat
+  // table rather than the KPI+panel dashboard layout.
+  const buildDetailSheet=(subtitle,headers,rows,opts={})=>{
+    const {put,mput,seal}=makeWS();
+    const nCols=headers.length;
+    mput(1,1,1,nCols,PH,S_PHDR);
+    mput(2,1,2,nCols,subtitle,S_DHDR);
+    headers.forEach((h,i)=>put(4,1+i,h,S_CHDR));
+    let r=5;
+    rows.forEach(row=>{
+      row.forEach((v,i)=>put(r,1+i,v,S_DLBL));
+      r++;
+    });
+    if(!rows.length){ put(r,1,opts.emptyMsg||'No records.',S_DLBL); }
+    else if(opts.footer) opts.footer(put,mput,r);
+    return seal();
+  };
+
+  try{
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,buildSheet(true), 'REP_DUR');
+    XLSX.utils.book_append_sheet(wb,buildSheet(false),'CUM');
+
+    // ── NCR / SOR / Deployment — separate tabs (Viewer/Admin/Superadmin only) ─
     if(!isGuestExport){
-      const ncrDetailRecs=isPeriod?ncrPRecs:ncrCRecs;
-      const sorDetailRecs=isPeriod?sorPRecs:sorCRecs;
-
-      // ── NCR — DETAILED LIST ────────────────────────────────────────────
-      const NCRD_R=Math.max(SOR_R+6,srRow+2);
-      const ncrDTitle=isPeriod
-        ?`NCR — DETAILED LIST — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
-        :'NCR — DETAILED LIST (CUMULATIVE)';
-      mput(NCRD_R,1,NCRD_R,9,ncrDTitle,S_STTL);
-      ['NCR NO','DATE','AGAINST','STATUS','RAISED BY','TARGET CLOSE','ACTUAL CLOSE','REPEATED','DESCRIPTION']
-        .forEach((h,i)=>put(NCRD_R+1,1+i,h,S_CHDR));
-      let ndRow=NCRD_R+2;
-      ncrDetailRecs.slice()
+      const ncrHeaders=['NCR NO','DATE','AGAINST','STATUS','RAISED BY','TARGET CLOSE','ACTUAL CLOSE','REPEATED','DESCRIPTION'];
+      const ncrRows=ncrCRecs.slice()
         .sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.ncrNo||'').localeCompare(b.ncrNo||''))
-        .forEach(r=>{
-          [r.ncrNo,isoToDMY(r.date),r.againstName,r.status,r.raisedBy,
-           isoToDMY(r.targetClose),isoToDMY(r.actualClose),r.repeatedNcr||'NO',r.desc||'']
-            .forEach((v,i)=>put(ndRow,1+i,v,S_DLBL));
-          ndRow++;
-        });
-      if(!ncrDetailRecs.length){ put(ndRow,1,'No NCR records in range.',S_DLBL); ndRow++; }
+        .map(r=>[r.ncrNo,isoToDMY(r.date),r.againstName,r.status,r.raisedBy,
+                  isoToDMY(r.targetClose),isoToDMY(r.actualClose),r.repeatedNcr||'NO',r.desc||'']);
+      if(DS.ncr) XLSX.utils.book_append_sheet(wb,
+        buildDetailSheet('NCR — DETAILED LIST (CUMULATIVE)',ncrHeaders,ncrRows,{emptyMsg:'No NCR records.'}),
+        'NCR');
 
-      // ── SOR — DETAILED LIST ─────────────────────────────────────────────
-      const SORD_R=ndRow+2;
-      const sorDTitle=isPeriod
-        ?`SOR — DETAILED LIST — FROM: ${isoToDMY(from)}  TO  ${isoToDMY(to)}`
-        :'SOR — DETAILED LIST (CUMULATIVE)';
-      mput(SORD_R,1,SORD_R,7,sorDTitle,S_STTL);
-      ['SOR NO','SHORT NAME','DATE','IC','STATUS','KM','DESCRIPTION']
-        .forEach((h,i)=>put(SORD_R+1,1+i,h,S_CHDR));
-      let sdRow=SORD_R+2;
-      sorDetailRecs.slice()
+      const sorHeaders=['SOR NO','SHORT NAME','DATE','IC','STATUS','KM','DESCRIPTION'];
+      const sorRows=sorCRecs.slice()
         .sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.sorNo||'').localeCompare(b.sorNo||''))
-        .forEach(r=>{
-          [r.sorNo,r.short,isoToDMY(r.date),r.ic,r.status,r.km,r.desc||'']
-            .forEach((v,i)=>put(sdRow,1+i,v,S_DLBL));
-          sdRow++;
-        });
-      if(!sorDetailRecs.length){ put(sdRow,1,'No SOR records in range.',S_DLBL); sdRow++; }
+        .map(r=>[r.sorNo,r.short,isoToDMY(r.date),r.ic,r.status,r.km,r.desc||'']);
+      if(DS.sor) XLSX.utils.book_append_sheet(wb,
+        buildDetailSheet('SOR — DETAILED LIST (CUMULATIVE)',sorHeaders,sorRows,{emptyMsg:'No SOR records.'}),
+        'SOR');
 
-      // ── MANPOWER DEPLOYMENT — ACTUAL (not plan) ─────────────────────────
       // Deployment data belongs to the MAIN pipeline only — never embed the
       // main roster in a MOL 3.3 report (MOL has no deployment dataset).
-      if(dep&&!isMolExport){
+      if(dep&&!isMolExport&&DS.deployment){
         const monthsCapped=(dep.months||[]).filter(m=>m<='2027-12');
-        const fromYM=from.slice(0,7), toYM=to.slice(0,7);
-        const periodMonths=monthsCapped.filter(m=>m>=fromYM&&m<=toYM);
-        const snapMonth=isPeriod
-          ?(periodMonths.length?periodMonths[periodMonths.length-1]:null)
-          :(monthsCapped.length?monthsCapped[monthsCapped.length-1]:null);
+        const snapMonth=monthsCapped.length?monthsCapped[monthsCapped.length-1]:null;
         if(snapMonth){
           const mi=dep.months.indexOf(snapMonth);
           const roster=dep.actual.filter(r=>(r.vals[mi]||0)>0).sort((a,b)=>{
@@ -7446,33 +7925,19 @@ function generateCustomExport(fromOverride,toOverride,dashOverride){
             if(a.role!==b.role){ const rg=roleGroup(a.role)-roleGroup(b.role); if(rg!==0) return rg; return a.role.localeCompare(b.role); }
             return (a.name||'').localeCompare(b.name||'');
           });
-          const MDP_R=sdRow+2;
-          mput(MDP_R,1,MDP_R,4,`MANPOWER DEPLOYMENT — ACTUAL AS OF: ${fmtDeployMonth(snapMonth)}`,S_STTL);
-          ['LOCATION','ROLE','NAME','STATUS'].forEach((h,i)=>put(MDP_R+1,1+i,h,S_CHDR));
-          let mRow=MDP_R+2;
-          roster.forEach(r=>{
-            put(mRow,1,(r.loc||'').toUpperCase(),S_DLBL);
-            put(mRow,2,r.role,S_DLBL);
-            put(mRow,3,r.name||'—',S_DLBL);
-            put(mRow,4,r.vals[mi],S_DNUM);
-            mRow++;
-          });
-          if(!roster.length){ put(mRow,1,'No actual deployment records for this snapshot.',S_DLBL); mRow++; }
-          else{
-            mput(mRow,1,mRow,3,'TOTAL',S_TLBL);
-            put(mRow,4,roster.reduce((s,r)=>s+(r.vals[mi]||0),0),S_TNUM);
-          }
+          const depHeaders=['LOCATION','ROLE','NAME','STATUS'];
+          const depRows=roster.map(r=>[(r.loc||'').toUpperCase(),r.role,r.name||'—',r.vals[mi]]);
+          const depTotal=roster.reduce((s,r)=>s+(r.vals[mi]||0),0);
+          XLSX.utils.book_append_sheet(wb,
+            buildDetailSheet(`MANPOWER DEPLOYMENT — ACTUAL AS OF: ${fmtDeployMonth(snapMonth)}`,depHeaders,depRows,{
+              emptyMsg:'No actual deployment records for this snapshot.',
+              footer:(put,mput,r)=>{ mput(r,1,r,3,'TOTAL',S_TLBL); put(r,4,depTotal,S_TNUM); }
+            }),
+            'DEPLOYMENT');
         }
       }
     }
 
-    return seal();
-  };
-
-  try{
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,buildSheet(true), 'REP_DUR');
-    XLSX.utils.book_append_sheet(wb,buildSheet(false),'CUM');
     const file=`P30312_${isMolExport?'MOL33':'QAQC'}_${from}_to_${to}.xlsx`;
     XLSX.writeFile(wb,file);
     showMsg('Export generated — check your downloads folder.',true);
@@ -7668,12 +8133,11 @@ let DP_CANVAS_LAYOUT = DEFAULT_DP_LAYOUT.map(p=>({...p}));
 
 // ── Users Management Canvas ──────────────────────────
 const DEFAULT_USERS_LAYOUT_BASE=[
-  {id:'usersLeft',  col:0,  row:0, w:18, h:48},
-  {id:'usersRight', col:18, row:0, w:54, h:48},
+  {id:'usersMain', col:0, row:0, w:72, h:48},
 ];
 const DEFAULT_USERS_LAYOUT=DEFAULT_USERS_LAYOUT_BASE.map(p=>({...p}));
 let USERS_CANVAS_LAYOUT=DEFAULT_USERS_LAYOUT.map(p=>({...p}));
-const USERS_LAYOUT_KEY=`wep_users_canvas_layout_g${GRID_SCALE}_v2`;
+const USERS_LAYOUT_KEY=`wep_users_canvas_layout_g${GRID_SCALE}_v3`; // v3: matrix+drawer redesign (single panel)
 
 // ── MOL 3.3 Dashboard canvas layout (mirrors the main pipeline dashboard) ──
 const DEFAULT_MOL_LAYOUT_BASE=[
@@ -7705,6 +8169,12 @@ const DEFAULT_BC_LAYOUT=DEFAULT_BC_LAYOUT_BASE.map(p=>({...p}));
 let BC_CANVAS_LAYOUT=DEFAULT_BC_LAYOUT.map(p=>({...p}));
 const BC_LAYOUT_KEY=`wep_bc_canvas_layout_g${GRID_SCALE}_v1`;
 
+// ── Evaluations canvas layout (single full-width matrix + editor panel) ──
+const DEFAULT_EVAL_LAYOUT_BASE=[{id:'evalMain',col:0,row:0,w:72,h:48}];
+const DEFAULT_EVAL_LAYOUT=DEFAULT_EVAL_LAYOUT_BASE.map(p=>({...p}));
+let EVAL_CANVAS_LAYOUT=DEFAULT_EVAL_LAYOUT.map(p=>({...p}));
+const EVAL_LAYOUT_KEY=`wep_eval_canvas_layout_g${GRID_SCALE}_v1`;
+
 // Which canvas is currently active ('dashCanvas' | 'dpCanvas' | 'usersCanvas' | 'molCanvas' | 'stCanvas' | 'bcCanvas')
 let ACTIVE_CANVAS_ID = 'dashCanvas';
 function getActiveLayout(){
@@ -7713,6 +8183,7 @@ function getActiveLayout(){
   if(ACTIVE_CANVAS_ID==='molCanvas')    return MOL_CANVAS_LAYOUT;
   if(ACTIVE_CANVAS_ID==='stCanvas')     return ST_CANVAS_LAYOUT;
   if(ACTIVE_CANVAS_ID==='bcCanvas')     return BC_CANVAS_LAYOUT;
+  if(ACTIVE_CANVAS_ID==='evalCanvas')   return EVAL_CANVAS_LAYOUT;
   return CANVAS_LAYOUT;
 }
 function getActiveLayoutKey(){
@@ -7721,6 +8192,7 @@ function getActiveLayoutKey(){
   if(ACTIVE_CANVAS_ID==='molCanvas')    return MOL_LAYOUT_KEY;
   if(ACTIVE_CANVAS_ID==='stCanvas')     return ST_LAYOUT_KEY;
   if(ACTIVE_CANVAS_ID==='bcCanvas')     return BC_LAYOUT_KEY;
+  if(ACTIVE_CANVAS_ID==='evalCanvas')   return EVAL_LAYOUT_KEY;
   return LAYOUT_KEY;
 }
 function setActiveLayout(arr){
@@ -7729,6 +8201,7 @@ function setActiveLayout(arr){
   else if(ACTIVE_CANVAS_ID==='molCanvas')   MOL_CANVAS_LAYOUT=arr;
   else if(ACTIVE_CANVAS_ID==='stCanvas')    ST_CANVAS_LAYOUT=arr;
   else if(ACTIVE_CANVAS_ID==='bcCanvas')    BC_CANVAS_LAYOUT=arr;
+  else if(ACTIVE_CANVAS_ID==='evalCanvas')  EVAL_CANVAS_LAYOUT=arr;
   else                                      CANVAS_LAYOUT=arr;
 }
 
@@ -7739,8 +8212,30 @@ function setActiveLayout(arr){
 // (falling back to DEFAULT_LAYOUT) instead of rendering incorrectly.
 const LAYOUT_KEY    = `wep_canvas_layout_g${GRID_SCALE}_v5`; // v5: neon-reskin default arrangement
 const DP_LAYOUT_KEY = `wep_dp_canvas_layout_g${GRID_SCALE}_v7`;
-function saveLayout(){ try{ localStorage.setItem(getActiveLayoutKey(), JSON.stringify(getActiveLayout())); }catch(e){} pushAppState(getActiveLayoutKey(), getActiveLayout()); }
-function loadLayout(){ try{ const s=localStorage.getItem(getActiveLayoutKey()); if(s) setActiveLayout(JSON.parse(s)); }catch(e){} }
+// ── Desktop size classes — a layout tuned on a laptop shouldn't dictate a 4K
+// monitor. Save Layout writes the class matching the current screen; loading
+// falls back to the nearest saved class, then the legacy (pre-class) key, then
+// the built-in default. Tablet/mobile (≤1024px) never use the absolute layout
+// (CSS reflows the canvas), so classes only span the desktop range.
+function sizeClass(){ const w=window.innerWidth; return w<=1600?'lap':w<=2200?'desk':'wide'; }
+const SIZE_CLASS_ORDER={lap:['lap','desk','wide'],desk:['desk','lap','wide'],wide:['wide','desk','lap']};
+function hasSavedLayout(base){ return SIZE_CLASS_ORDER.lap.some(c=>localStorage.getItem(`${base}_${c}`)) || !!localStorage.getItem(base); }
+function saveLayout(){
+  const key=`${getActiveLayoutKey()}_${sizeClass()}`;
+  try{ localStorage.setItem(key, JSON.stringify(getActiveLayout())); }catch(e){}
+  pushAppState(key, getActiveLayout());
+}
+function loadLayout(){
+  try{
+    const base=getActiveLayoutKey();
+    for(const c of SIZE_CLASS_ORDER[sizeClass()]){
+      const s=localStorage.getItem(`${base}_${c}`);
+      if(s){ setActiveLayout(JSON.parse(s)); return; }
+    }
+    const legacy=localStorage.getItem(base); // pre-size-class save
+    if(legacy) setActiveLayout(JSON.parse(legacy));
+  }catch(e){}
+}
 
 // ── Panel visibility (hide/show in edit mode) ─────────
 const PANEL_NAMES={
@@ -7756,7 +8251,7 @@ const PANEL_NAMES={
   dpChart6m:'6-Month Chart',
   dpHiring:'Hiring Status',
   dpLocRole:'Location & Role',dpPersonnel:'Personnel Table',
-  usersLeft:'User List',usersRight:'User Editor',
+  usersMain:'User Access',
   molKpiStrip:'KPI Strip',
   molRfiPeriod:'RFI Status',molRfiDonut:'RFI Donut',
   molNdtPeriod:'NDT (EPCM)',
@@ -7766,6 +8261,7 @@ const PANEL_NAMES={
   molSorTable:'SOR Table',molSorScatter:'SOR Scatter',
   stMain:'Stations Dashboard',
   bcMain:'MOT BC Projects',
+  evalMain:'Evaluations',
 };
 const HIDDEN_KEY_DASH='wep_hidden_dash';
 const HIDDEN_KEY_DP='wep_hidden_dp';
@@ -7773,12 +8269,14 @@ const HIDDEN_KEY_USERS='wep_hidden_users';
 const HIDDEN_KEY_MOL='wep_hidden_mol';
 const HIDDEN_KEY_ST='wep_hidden_st';
 const HIDDEN_KEY_BC='wep_hidden_bc';
+const HIDDEN_KEY_EVAL='wep_hidden_eval';
 function getHiddenKey(){
   if(ACTIVE_CANVAS_ID==='dpCanvas')     return HIDDEN_KEY_DP;
   if(ACTIVE_CANVAS_ID==='usersCanvas')  return HIDDEN_KEY_USERS;
   if(ACTIVE_CANVAS_ID==='molCanvas')    return HIDDEN_KEY_MOL;
   if(ACTIVE_CANVAS_ID==='stCanvas')     return HIDDEN_KEY_ST;
   if(ACTIVE_CANVAS_ID==='bcCanvas')     return HIDDEN_KEY_BC;
+  if(ACTIVE_CANVAS_ID==='evalCanvas')   return HIDDEN_KEY_EVAL;
   return HIDDEN_KEY_DASH;
 }
 function getHiddenPanels(){ try{return new Set(JSON.parse(localStorage.getItem(getHiddenKey())||'[]'));}catch{return new Set();} }
@@ -7923,6 +8421,7 @@ function doSaveLayout(){
 }
 
 function toggleEditMode(){
+  if(!EDIT_MODE&&!canEditLayout()) return; // per-user permission (exit always allowed)
   EDIT_MODE=!EDIT_MODE;
   _setPanelFocus(null); // clear hover-focus transforms before entering/leaving edit mode
   const btn=document.getElementById('btnEdit');
@@ -8021,6 +8520,7 @@ function resetLayout(){
   else if(ACTIVE_CANVAS_ID==='molCanvas')   setActiveLayout(DEFAULT_MOL_LAYOUT.map(p=>({...p})));
   else if(ACTIVE_CANVAS_ID==='stCanvas')    setActiveLayout(DEFAULT_ST_LAYOUT.map(p=>({...p})));
   else if(ACTIVE_CANVAS_ID==='bcCanvas')    setActiveLayout(DEFAULT_BC_LAYOUT.map(p=>({...p})));
+  else if(ACTIVE_CANVAS_ID==='evalCanvas')  setActiveLayout(DEFAULT_EVAL_LAYOUT.map(p=>({...p})));
   else                                      setActiveLayout(DEFAULT_LAYOUT.map(p=>({...p})));
   doSaveLayout();
   render();
